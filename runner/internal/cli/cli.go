@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/buzzdan/ldd-evals/runner/internal/runner"
+	"github.com/weka/ldd-evals/runner/internal/runner"
 )
 
 // Exit codes.

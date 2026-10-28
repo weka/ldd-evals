@@ -9,7 +9,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/buzzdan/ldd-evals/runner/internal/trace"
+	"github.com/weka/ldd-evals/runner/internal/trace"
 )
 
 // Outcome is one grader's verdict as written to result.json.

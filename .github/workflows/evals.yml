@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       plugin_ref:
-        description: buzzdan/ai-coding-rules ref (branch, tag or sha) to measure
+        description: weka/linter-driven-development ref (branch, tag or sha) to measure
         required: true
         default: main
       language:
@@ -116,7 +116,7 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@v4
         with:
-          repository: buzzdan/ai-coding-rules
+          repository: weka/linter-driven-development
           ref: ${{ inputs.plugin_ref }}
           path: linter-driven-development
           persist-credentials: false

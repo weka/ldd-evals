@@ -7,10 +7,10 @@
 #
 # Usage: bash scripts/check-docs.sh [plugin-dir] [--fix]
 #   plugin-dir: the go-linter-driven-development directory of a plugin checkout
-#               (default: ../ai-coding-rules/go-linter-driven-development)
+#               (default: ../linter-driven-development/go-linter-driven-development)
 set -uo pipefail
 root=$(cd "$(dirname "$0")/.." && pwd)
-plugin="${1:-$root/../ai-coding-rules/go-linter-driven-development}"
+plugin="${1:-$root/../linter-driven-development/go-linter-driven-development}"
 shift $(( $# > 0 ? 1 : 0 ))
 gate="$plugin/scripts/check-repo-brain.sh"
 [[ -f "$gate" ]] || { echo "check-docs: gate not found at $gate (pass the plugin dir)"; exit 2; }

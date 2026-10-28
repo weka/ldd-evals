@@ -10,7 +10,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/buzzdan/ldd-evals/runner/internal/grade"
+	"github.com/weka/ldd-evals/runner/internal/grade"
 )
 
 // SchemaVersion is the aggregate-result.json schema version.

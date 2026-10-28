@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/buzzdan/ldd-evals/runner/internal/grade"
+	"github.com/weka/ldd-evals/runner/internal/grade"
 )
 
 func TestParseTarget_Success(t *testing.T) {

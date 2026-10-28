@@ -1,7 +1,7 @@
 # ldd-evals
 
 Behavioral evals for the linter-driven-development plugins in
-[buzzdan/ai-coding-rules](https://github.com/buzzdan/ai-coding-rules). Each
+[weka/linter-driven-development](https://github.com/weka/linter-driven-development). Each
 case runs an agent with a plugin installed over a deliberately bad fixture
 project and grades what the agent did. Every run spends real money. Nobody
 installs this repository.
@@ -15,9 +15,9 @@ The plugin repository carries only a two-line pointer README under the plugin's
 
 Every baseline records the plugin commit and version it measured. A run names
 its plugin explicitly with `PLUGIN=<path to the plugin directory>`; without it,
-the Go suite measures `../ai-coding-rules/go-linter-driven-development`, the
-Python suite `../ai-coding-rules/python-linter-driven-development` and the
-TypeScript + React suite `../ai-coding-rules/ts-react-linter-driven-development`.
+the Go suite measures `../linter-driven-development/go-linter-driven-development`, the
+Python suite `../linter-driven-development/python-linter-driven-development` and the
+TypeScript + React suite `../linter-driven-development/ts-react-linter-driven-development`.
 
 ## Layout
 
@@ -64,7 +64,7 @@ Scaffolds are not committed, so graders that read the working tree report
 ignored `results/` directory.
 
 How the evals work is documented in the plugin repository, starting at
-[docs/index.md](https://github.com/buzzdan/ai-coding-rules/blob/main/docs/index.md).
+[docs/index.md](https://github.com/weka/linter-driven-development/blob/main/docs/index.md).
 This repository's own docs start at [docs/index.md](docs/index.md).
 
 ## License

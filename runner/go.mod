@@ -1,4 +1,4 @@
-module github.com/buzzdan/ldd-evals/runner
+module github.com/weka/ldd-evals/runner
 
 go 1.24
 

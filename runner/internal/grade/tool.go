@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/buzzdan/ldd-evals/runner/internal/trace"
+	"github.com/weka/ldd-evals/runner/internal/trace"
 )
 
 // ErrEmptyTool is returned when a tool selector has no tool name.

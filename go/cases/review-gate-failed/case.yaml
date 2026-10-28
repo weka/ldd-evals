@@ -15,7 +15,7 @@ notes: |
   docs/retention.md (Q1), `store.Flush` that no code declares (Q2), and a CLAUDE.md that
   does not import docs/index.md (Q3). The postcheck proves that the gate finds
   the three plants when it runs, and that the variable still makes it fail.
-  Calibrated on one run (go-ldd from buzzdan/ai-coding-rules#115,
+  Calibrated on one run (go-ldd from weka/linter-driven-development#115,
   claude-sonnet-5, $0.63, 9 turns): every grader passed on the evidence it
   names. The variable reached the gate through the agent's shell, the header
   carried the failed-gate line verbatim, one documentation hunter ran, and the

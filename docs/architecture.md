@@ -4,7 +4,7 @@ description: the two repositories, the dependency direction, how a run and a bas
 ---
 # Architecture
 
-Two repositories share the work. `buzzdan/ai-coding-rules` holds the plugins
+Two repositories share the work. `weka/linter-driven-development` holds the plugins
 users install and the documentation of how they are measured. This repository
 holds everything that measures: the runner, one suite per language, and the
 recorded baselines. It depends on the plugin repository; the plugin repository
@@ -79,4 +79,4 @@ committed.
 
 The mechanism itself, the fixture, how to write a case and how to compare a
 run against a baseline are documented in the plugin repository under
-[docs/](https://github.com/buzzdan/ai-coding-rules/blob/main/docs/index.md).
+[docs/](https://github.com/weka/linter-driven-development/blob/main/docs/index.md).

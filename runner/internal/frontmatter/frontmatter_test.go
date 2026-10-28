@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/buzzdan/ldd-evals/runner/internal/frontmatter"
+	"github.com/weka/ldd-evals/runner/internal/frontmatter"
 )
 
 type sample struct {

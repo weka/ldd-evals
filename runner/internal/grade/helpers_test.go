@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/buzzdan/ldd-evals/runner/internal/trace"
+	"github.com/weka/ldd-evals/runner/internal/trace"
 )
 
 // parseTrace builds a Trace from inline stream-json lines.
