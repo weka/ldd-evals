@@ -11,10 +11,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/buzzdan/ldd-evals/runner/internal/evalcase"
-	"github.com/buzzdan/ldd-evals/runner/internal/grade"
-	"github.com/buzzdan/ldd-evals/runner/internal/report"
-	"github.com/buzzdan/ldd-evals/runner/internal/trace"
+	"github.com/weka/ldd-evals/runner/internal/evalcase"
+	"github.com/weka/ldd-evals/runner/internal/grade"
+	"github.com/weka/ldd-evals/runner/internal/report"
+	"github.com/weka/ldd-evals/runner/internal/trace"
 )
 
 // ErrNoRuns is returned when the output directory holds no trace for any

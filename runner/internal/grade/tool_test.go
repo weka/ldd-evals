@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/buzzdan/ldd-evals/runner/internal/grade"
-	"github.com/buzzdan/ldd-evals/runner/internal/trace"
+	"github.com/weka/ldd-evals/runner/internal/grade"
+	"github.com/weka/ldd-evals/runner/internal/trace"
 )
 
 func mustSelector(t *testing.T, tool, input string) grade.ToolSelector {

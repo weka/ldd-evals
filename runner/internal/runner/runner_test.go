@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/buzzdan/ldd-evals/runner/internal/report"
-	"github.com/buzzdan/ldd-evals/runner/internal/runner"
+	"github.com/weka/ldd-evals/runner/internal/report"
+	"github.com/weka/ldd-evals/runner/internal/runner"
 )
 
 const regexGrader = "---\ntype: regex\npattern: 'Findings'\n---\n"

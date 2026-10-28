@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/buzzdan/ldd-evals/runner/internal/trace"
+	"github.com/weka/ldd-evals/runner/internal/trace"
 )
 
 const smokeTrace = "../../testdata/trace-smoke.jsonl"

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/buzzdan/ldd-evals/runner/internal/grade"
+	"github.com/weka/ldd-evals/runner/internal/grade"
 )
 
 func TestParseMatch_Success(t *testing.T) {

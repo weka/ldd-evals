@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/buzzdan/ldd-evals/runner/internal/evalcase"
-	"github.com/buzzdan/ldd-evals/runner/internal/grade"
+	"github.com/weka/ldd-evals/runner/internal/evalcase"
+	"github.com/weka/ldd-evals/runner/internal/grade"
 )
 
 const suiteDir = "../../testdata/suite"

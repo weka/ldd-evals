@@ -7,10 +7,10 @@ version: '3'
 
 vars:
   # The plugin directory this run measures: PLUGIN=<dir> on the command line,
-  # else the ts-react plugin in a sibling checkout of buzzdan/ai-coding-rules.
+  # else the ts-react plugin in a sibling checkout of weka/linter-driven-development.
   # The neutral cases (cases/NEUTRAL.md) run the same way against the
   # hand-written 1.x plugin: PLUGIN=<its dir> TIER=neutral.
-  PLUGIN: '{{.PLUGIN | default (printf "%s/../ai-coding-rules/ts-react-linter-driven-development" .ROOT_DIR)}}'
+  PLUGIN: '{{.PLUGIN | default (printf "%s/../linter-driven-development/ts-react-linter-driven-development" .ROOT_DIR)}}'
   TIER: '{{.TIER | default "cheap"}}'
   CAP: '{{.CAP | default "60"}}'
   OUT: '{{.OUT | default (now | date "20060102-150405" | printf "results/ts-react-%s")}}'

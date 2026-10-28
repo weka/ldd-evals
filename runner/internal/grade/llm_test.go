@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/buzzdan/ldd-evals/runner/internal/grade"
+	"github.com/weka/ldd-evals/runner/internal/grade"
 )
 
 func TestFocus(t *testing.T) {

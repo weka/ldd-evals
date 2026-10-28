@@ -9,8 +9,8 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"github.com/buzzdan/ldd-evals/runner/internal/frontmatter"
-	"github.com/buzzdan/ldd-evals/runner/internal/grade"
+	"github.com/weka/ldd-evals/runner/internal/frontmatter"
+	"github.com/weka/ldd-evals/runner/internal/grade"
 )
 
 // ErrBadGraderType is returned for an unknown grader `type:`.

@@ -7,8 +7,8 @@ version: '3'
 
 vars:
   # The plugin directory this run measures: PLUGIN=<dir> on the command line,
-  # else the Python plugin in a sibling checkout of buzzdan/ai-coding-rules.
-  PLUGIN: '{{.PLUGIN | default (printf "%s/../ai-coding-rules/python-linter-driven-development" .ROOT_DIR)}}'
+  # else the Python plugin in a sibling checkout of weka/linter-driven-development.
+  PLUGIN: '{{.PLUGIN | default (printf "%s/../linter-driven-development/python-linter-driven-development" .ROOT_DIR)}}'
   TIER: '{{.TIER | default "cheap"}}'
   CAP: '{{.CAP | default "60"}}'
   OUT: '{{.OUT | default (now | date "20060102-150405" | printf "results/py-%s")}}'

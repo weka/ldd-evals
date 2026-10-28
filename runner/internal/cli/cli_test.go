@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/buzzdan/ldd-evals/runner/internal/cli"
-	"github.com/buzzdan/ldd-evals/runner/internal/report"
+	"github.com/weka/ldd-evals/runner/internal/cli"
+	"github.com/weka/ldd-evals/runner/internal/report"
 )
 
 func abs(t *testing.T, rel string) string {

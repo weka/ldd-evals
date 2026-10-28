@@ -6,7 +6,7 @@ package main
 import (
 	"os"
 
-	"github.com/buzzdan/ldd-evals/runner/internal/cli"
+	"github.com/weka/ldd-evals/runner/internal/cli"
 )
 
 func main() {

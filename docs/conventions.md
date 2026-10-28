@@ -43,7 +43,7 @@ only `okf_version`.
 
 ## Check your work
 Run `task docs:check` from the repo root (or `bash scripts/check-docs.sh <plugin-dir>`;
-the default plugin dir is `../ai-coding-rules/go-linter-driven-development`). It runs
+the default plugin dir is `../linter-driven-development/go-linter-driven-development`). It runs
 the plugin's own conformance gate over this repo and filters out the Go fixture, whose
 documentation violations are planted on purpose; anything left is real. `--fix`
 rewrites drifted index lines from each doc's `description`. Code↔docs checks cover

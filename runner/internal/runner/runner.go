@@ -13,9 +13,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/buzzdan/ldd-evals/runner/internal/evalcase"
-	"github.com/buzzdan/ldd-evals/runner/internal/grade"
-	"github.com/buzzdan/ldd-evals/runner/internal/report"
+	"github.com/weka/ldd-evals/runner/internal/evalcase"
+	"github.com/weka/ldd-evals/runner/internal/grade"
+	"github.com/weka/ldd-evals/runner/internal/report"
 )
 
 const (

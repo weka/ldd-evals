@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/buzzdan/ldd-evals/runner/internal/grade"
+	"github.com/weka/ldd-evals/runner/internal/grade"
 )
 
 // fakeJudgeSequence makes the fake claude answer the given verdicts one call at

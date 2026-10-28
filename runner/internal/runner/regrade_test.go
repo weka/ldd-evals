@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/buzzdan/ldd-evals/runner/internal/report"
-	"github.com/buzzdan/ldd-evals/runner/internal/runner"
+	"github.com/weka/ldd-evals/runner/internal/report"
+	"github.com/weka/ldd-evals/runner/internal/runner"
 )
 
 // A trace whose final message says DONE and reports a cost the regrade must

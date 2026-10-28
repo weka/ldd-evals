@@ -10,11 +10,11 @@ includes:
 
 vars:
   # Path to the plugin directory a run measures. Each suite's Taskfile defaults
-  # its own PLUGIN to the sibling checkout of buzzdan/ai-coding-rules and lets
+  # its own PLUGIN to the sibling checkout of weka/linter-driven-development and lets
   # PLUGIN=<dir> on the command line win. The include must not set PLUGIN: a
   # var passed through an include's vars block shadows the command line for
   # every task in that suite, so PLUGIN=<dir> would be ignored.
-  GO_PLUGIN: '{{.PLUGIN | default (printf "%s/../ai-coding-rules/go-linter-driven-development" .ROOT_DIR)}}'
+  GO_PLUGIN: '{{.PLUGIN | default (printf "%s/../linter-driven-development/go-linter-driven-development" .ROOT_DIR)}}'
   # Agent model. Always pinned on the command line so a baseline names it.
   MODEL: '{{.MODEL | default "claude-sonnet-5"}}'
 

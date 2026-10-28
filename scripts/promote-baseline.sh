@@ -47,14 +47,14 @@ if [[ -n $traces ]]; then
   (cd "$run" && printf '%s\n' "$traces" | tar -cf - -T -) | zstd -q -19 -T0 -o "$dest/traces.tar.zst"
 fi
 jq -n --arg lang "$lang" --arg plugin "$plugin_name" --arg version "$version" --arg sha "$sha" \
-  '{lang: $lang, plugin: $plugin, plugin_repo: "buzzdan/ai-coding-rules", plugin_version: $version, plugin_sha: $sha}' \
+  '{lang: $lang, plugin: $plugin, plugin_repo: "weka/linter-driven-development", plugin_version: $version, plugin_sha: $sha}' \
   > "$dest/plugin.json"
 
 if [[ ! -f $dest/README.md ]]; then
   {
     echo "# Baseline $name"
     echo
-    echo "Plugin \`$plugin_name\` from \`buzzdan/ai-coding-rules\` at $sha (v$version). Unpack the traces before"
+    echo "Plugin \`$plugin_name\` from \`weka/linter-driven-development\` at $sha (v$version). Unpack the traces before"
     echo "regrading: \`zstd -dc traces.tar.zst | tar -xf - -C .\` from this directory. The archive is not committed."
     for agg in "$dest"/*/aggregate-result.json; do
       [[ -f $agg ]] || continue
