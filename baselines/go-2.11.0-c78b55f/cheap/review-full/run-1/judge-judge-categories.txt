@@ -1,0 +1,56 @@
+--- vote 1: PASS ---
+Checking both criteria against the report:
+
+**Question 1: Is the unguarded concurrent map write listed under 🐛 Bugs?**
+
+Yes. In the Bugs section:
+```
+| `internal/services/device_service.go:218,572-576` | R10 Q3: `s.lastSeen` (a plain map) 
+is written unlocked in `ProcessHeartbeat` (one goroutine per HTTP request) and read/deleted 
+unlocked in the concurrent `flushLoop` goroutine — unsynchronized concurrent map access...
+```
+
+This explicitly identifies the `lastSeen` map race condition and files it as a Bug. ✅
+
+**Question 2: Is the production time.Sleep listed under 🔴 Design Debt (not Bugs)?**
+
+Yes. In the Design Debt section under R10 — Concurrency Safety:
+```
+| `internal/services/device_service.go:181` | Q5: `ProcessHeartbeat` (no `ctx`) sleeps 
+up to ~600ms in a down-notification retry...
+| `internal/services/retry.go:40,52` | Q5: `withRetry`/`SendWithRetry` take no `ctx`...
+| `internal/services/sync_service.go:122` | Q5: `Run` receives a `ctx` but never passes 
+it down to `saveWithRetry`'s sleep...
+```
+
+All three time.Sleep instances (retry backoff in ProcessHeartbeat, retry.go, sync_service.go) are filed under Design Debt, not Bugs. They do not appear in the Bugs section. ✅
+
+Both criteria satisfied.
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+Looking at the report against the two criteria:
+
+**Question 1: Is the unguarded concurrent map write listed under 🐛 Bugs?**
+
+Yes. In the Bugs section:
+```
+| `internal/services/device_service.go:218,572-576` | R10 Q3: `s.lastSeen` (a plain map) 
+is written unlocked in `ProcessHeartbeat` (one goroutine per HTTP request) and read/deleted 
+unlocked in the concurrent `flushLoop` goroutine...
+```
+This clearly describes the exact race condition (concurrent unguarded map access) in the Bugs section.
+
+**Question 2: Is the production time.Sleep (retry backoff) listed under 🔴 Design Debt?**
+
+Yes. Under the **Design Debt** section, specifically **R10 — Concurrency Safety**, all three production time.Sleep calls (retry backoff) appear:
+- `internal/services/device_service.go:181` — ProcessHeartbeat retry backoff
+- `internal/services/retry.go:40,52` — withRetry/SendWithRetry  
+- `internal/services/sync_service.go:122` — saveWithRetry's sleep
+
+None of these are listed in the Bugs section—they are properly routed to Design Debt only.
+
+Both criteria are satisfied.
+
+VERDICT: PASS

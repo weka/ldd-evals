@@ -1,0 +1,34 @@
+--- vote 1: PASS ---
+# Analysis
+
+Reading through the report systematically:
+
+1. **Design Debt section:** Lists three findings: `Grants` (mutation leak), `ReplicaCount` (dead ceremony), and `Name` (dead ceremony). No TraceID type is proposed.
+
+2. **Skeptic status:** The report explicitly states: "**Skeptic:** not spawned — no new-type/package extraction proposed in scope." This confirms no new domain types were extracted or proposed.
+
+3. **Mentions of traceID:** The parameter appears only in prose within the **Readability Debt** section:
+   - `internal/handlers/trace.py:24-25` rewrites a docstring to mention "echoes the caller's trace id"
+   - `internal/handlers/trace.py:35-38` trims a docstring that mentions using "this trace id" for log correlation
+
+These are metadata discussions about an existing parameter, not proposals to create a `TraceID` domain type. The rubric explicitly permits "mentions of the parameter `traceID` in prose."
+
+4. **No new types shipped:** The only design debt finding that involves type modification is the `Grants` class (encapsulation fix via dataclass), not creation of a new TraceID type.
+
+The report correctly identifies that the raw string `traceID` parameter used as a pass-through in the X-Trace header needs no wrapper type.
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+Reading through the report carefully:
+
+The **DESIGN DEBT** section contains three findings:
+1. `Grants` — encapsulation fix (Copy on the Way In/Out), reshaping existing type
+2. `ReplicaCount` — deletion of dead code
+3. `Name` — deletion of dead code
+
+The report explicitly notes: "**Skeptic:** not spawned — no new-type/package extraction proposed in scope." The only references to `trace` or `traceID` appear in **READABILITY DEBT** prose (describing what `list_devices()` does: "echoes the caller's trace id on the response") and in a docstring-trimming note for the `_trace` attribute — these are improvements to existing code documentation, not proposing a new type.
+
+No `TraceID` (or equivalently named) domain type is proposed as a Design Debt finding. The report proposes deletions and a mutation-safety fix on existing types, but no primitive replacement with a new type survives the (unspawned) skeptic.
+
+VERDICT: PASS

@@ -1,0 +1,1 @@
+scaffolded go-mini at /tmp/ldd-eval-case-d-ceremony-review-1247871151 (f425422)

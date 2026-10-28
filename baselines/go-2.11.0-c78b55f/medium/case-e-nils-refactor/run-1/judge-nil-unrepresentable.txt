@@ -1,0 +1,36 @@
+--- vote 1: PASS ---
+Looking at the FOCUS code against the RUBRIC's 4 requirements:
+
+**1. Unexported fields:** ✓  
+Both `sink` and `clock` are lowercase (unexported), preventing struct literal construction of invalid Reporters.
+
+**2. Real default values, not nil-able:** ✓  
+- Sink defaults to `DiscardSink()` (a null object, not nil)
+- Clock defaults to `time.Now` (a real function value, not nil)  
+Neither is left nullable; both have concrete defaults upfront in `NewReporter`.
+
+**3. No nil checks in methods or branches:** ✓  
+- `Record()` and `FlushEvery()` don't check for nil
+- The constructor doesn't conditionally turn nil into a default (like `if s == nil { r.sink = DiscardSink() }`); it sets defaults immediately, then options either replace them or record errors
+
+**4. Error return appropriate for this pattern:** ✓  
+The constructor returns `errors.Join(r.errs...)` from option rejection, which the rubric explicitly endorses: "A constructor that applies functional options and returns `errors.Join` of what the options recorded...is a construction failure, not a nil check in a method: it satisfies this item."
+
+After a successful `NewReporter()` call, nil is not representable—the sink is either the default discard sink or an explicitly provided non-nil sink, and the clock is either the default `time.Now` or an explicitly provided non-nil function. Failed attempts (nil arguments) are rejected at construction, not deferred to runtime.
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+Looking at this code against the CRITERIA and RUBRIC:
+
+**Rubric Item 1** ✓ — Both `sink` and `clock` are unexported (lowercase), preventing struct literal construction of invalid Reporters.
+
+**Rubric Item 2** ✓ — The sink and clock have real default values that are set at initialization (`sink: DiscardSink()` and `clock: time.Now`), not nil-able pointers/functions with runtime checks. DiscardSink() is the Null Object pattern for the sink.
+
+**Rubric Item 3** ✓ — No method checks `if r.sink == nil` or `if r.clock == nil`. Options don't convert nil into defaults; they reject nil by recording an error, leaving the field at its initialized value.
+
+**Rubric Item 4** ✓ — The constructor properly uses `errors.Join(r.errs...)` to surface construction failures from options that received nil. This is a design failure pattern (option hands nil → error recorded → constructor returns error), not a defensive nil-check in a method.
+
+The key insight: nil is not merely rejected—it's unrepresentable. A successful `NewReporter` call guarantees both `sink` and `clock` are non-nil (either defaults or valid values from options), with no path to a nil value in production code.
+
+VERDICT: PASS

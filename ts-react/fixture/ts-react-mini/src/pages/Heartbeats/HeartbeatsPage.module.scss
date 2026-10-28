@@ -1,0 +1,33 @@
+.page {
+  max-width: 60rem;
+}
+
+.hint {
+  color: #555;
+}
+
+.form {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.5rem 1rem;
+  align-items: center;
+  max-width: 40rem;
+
+  input[type='text'] {
+    font-family: ui-monospace, monospace;
+  }
+
+  button {
+    justify-self: start;
+    grid-column: 2;
+  }
+}
+
+.check {
+  grid-column: 2;
+}
+
+.stats {
+  color: #777;
+  font-size: 0.9rem;
+}

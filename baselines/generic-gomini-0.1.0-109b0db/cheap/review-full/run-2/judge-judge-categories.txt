@@ -1,0 +1,52 @@
+--- vote 1: FAIL ---
+Looking at the FOCUS text against the CRITERIA:
+
+**Question 1: Is the unguarded concurrent map write listed under 🐛 Bugs?**
+
+Yes. Under the Bugs section:
+```
+- `internal/services/device_service.go:218,463-467,572-574` | R10 Q3/Q4: `s.lastSeen` map is written unguarded from `ProcessHeartbeat` (per-HTTP-request), from `Purge`, and from the `flushLoop` goroutine — 3 of 4 access paths skip `s.mu` entirely while `Flush` takes it...
+```
+This is properly filed under 🐛 Bugs. ✓
+
+**Question 2: Are the production time.Sleep calls filed under Design Debt, not Bugs?**
+
+Partially. Checking the report:
+- `internal/services/device_service.go:175-186` (ProcessHeartbeat retry backoff) → listed under 🔴 Design Debt (R10) ✓
+- `internal/services/retry.go:34-55` (withRetry/SendWithRetry sleeps) → listed under 🔴 Design Debt (R10) ✓
+- `internal/services/sync_service.go:118` (saveWithRetry sleep) → listed under 🐛 Bugs, NOT Design Debt ✗
+
+The sync_service.go sleep issue appears in the Bugs section: "then sleeps with no cancellation check between retries" rather than being categorized with the other production sleep issues in Design Debt.
+
+Since question 2 fails (not all production time.Sleep calls are under Design Debt as required), the report does not satisfy the criteria.
+
+VERDICT: FAIL
+
+--- vote 2: FAIL ---
+Looking at the report against the two specific questions from the rubric:
+
+**Question 1: Is the unguarded concurrent map write listed under 🐛 Bugs?**
+
+Yes. The report contains this entry under the Bugs section:
+```
+- `internal/services/device_service.go:218,463-467,572-574` | R10 Q3/Q4: `s.lastSeen` map 
+is written unguarded from `ProcessHeartbeat` (per-HTTP-request), from `Purge`, and from 
+the `flushLoop` goroutine — 3 of 4 access paths skip `s.mu` entirely...
+```
+
+**Question 2: Is the production `time.Sleep` listed under 🔴 Design Debt rather than under 🐛 Bugs?**
+
+Partially. The report contains R10 Q5 sleep findings in Design Debt for:
+- `internal/services/retry.go:34-55` (listed under R10 Concurrency Safety)
+- `internal/services/device_service.go:175-186` (ProcessHeartbeat, listed under R10)
+
+However, the sync_service.go time.Sleep issue appears under **Bugs**, not Design Debt:
+```
+- `internal/services/sync_service.go:118` | R8 Q3 / R10 Q5: `saveWithRetry` calls 
+`s.repo.Save(context.TODO(), d)`, explicitly discarding `Run`'s real `ctx` one frame up, 
+then sleeps with no cancellation check between retries.
+```
+
+Although marked "R10 Q5", it is categorized under 🐛 Bugs rather than 🔴 Design Debt. This violates the criterion that production time.Sleep calls should be filed under Design Debt.
+
+VERDICT: FAIL

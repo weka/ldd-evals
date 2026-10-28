@@ -1,0 +1,81 @@
+version: '3'
+
+# The TypeScript + React suite. Paths are relative to the repository root,
+# where task runs. OUT names a run directory; each tier writes to OUT/<tier> so
+# one directory can hold a cheap and a medium run side by side, which is how a
+# baseline is laid out.
+
+vars:
+  # The plugin directory this run measures: PLUGIN=<dir> on the command line,
+  # else the ts-react plugin in a sibling checkout of buzzdan/ai-coding-rules.
+  # The neutral cases (cases/NEUTRAL.md) run the same way against the
+  # hand-written 1.x plugin: PLUGIN=<its dir> TIER=neutral.
+  PLUGIN: '{{.PLUGIN | default (printf "%s/../ai-coding-rules/ts-react-linter-driven-development" .ROOT_DIR)}}'
+  TIER: '{{.TIER | default "cheap"}}'
+  CAP: '{{.CAP | default "60"}}'
+  OUT: '{{.OUT | default (now | date "20060102-150405" | printf "results/ts-react-%s")}}'
+  # Optional glob over case names, forwarded as --case.
+  CASE: '{{.CASE | default ""}}'
+  CASE_FLAG: '{{if .CASE}}--case {{.CASE | shellQuote}}{{end}}'
+  # RESUME=1 reuses every run under OUT/<TIER> that already has a result.json.
+  RESUME_FLAG: '{{if .RESUME}}--resume{{end}}'
+  EVALS_DIR: '{{.PLUGIN}}/evals'
+  # The plugin's slash-command prefix (tsr-ldd), written into the copied cases
+  # in place of {{cmd_prefix}}. Read from the plugin's commands directory unless
+  # given, so a run against another plugin built from the same core (the generic
+  # one, prefix ldd) needs only PLUGIN=<dir>; CMD_PREFIX=<prefix> on the command
+  # line wins. A plugin with no commands directory (the 1.x plugin the neutral
+  # cases measure) yields an empty prefix, which set-cmd-prefix.sh rejects, so
+  # pass CMD_PREFIX=ldd for it: the neutral prompts carry no token anyway.
+  CMD_PREFIX:
+    sh: '{{if .CMD_PREFIX}}printf %s {{.CMD_PREFIX | shellQuote}}{{else}}ls {{.PLUGIN | shellQuote}}/commands 2>/dev/null | sed -n "s/-review\\.md$//p"{{end}}'
+
+tasks:
+  cases:
+    desc: Copy the suite into <plugin>/evals (ignored there) so cases sit below the plugin
+    cmds:
+      - mkdir -p {{.EVALS_DIR}}
+      # Clear the copy first: rsync --delete with several sources leaves files the
+      # sources do not name, so a plugin that two suites measure (the generic one)
+      # would keep the other suite's graders beside this one's. The README stays.
+      - find {{.EVALS_DIR}} -mindepth 1 -maxdepth 1 ! -name README.md -exec rm -rf {} +
+      # The fixture's node_modules is never copied: scaffold/default.sh installs it
+      # from the shared npm cache into every scaffold.
+      - rsync -a --delete --exclude=/README.md --exclude=node_modules ts-react/cases/ ts-react/scaffold ts-react/postcheck ts-react/fixture {{.EVALS_DIR}}/
+      - bash scripts/set-cmd-prefix.sh {{.EVALS_DIR}} {{.CMD_PREFIX}}
+
+  manifest:
+    desc: Check violations.yaml against the fixture, and the postcheck's copy of the lint config against the fixture's
+    cmds:
+      - bash ts-react/check-manifest.sh ts-react/violations.yaml ts-react/fixture/ts-react-mini
+      # postcheck/eslint.orig.config.js is the fixture's ESLint config as shipped; the
+      # quickfix and autopilot postchecks compare the agent's tree against it, so the
+      # copy must not drift from the fixture.
+      - cmp ts-react/fixture/ts-react-mini/eslint.config.js ts-react/postcheck/eslint.orig.config.js
+      - bash ts-react/postcheck/gen-assertion-counts.sh --check
+
+  graders:
+    desc: Regenerate the review-full recall, cluster and precision graders from the manifest, and the neutral variant's copy of them
+    cmds:
+      - bash go/gen-review-graders.sh ts-react/violations.yaml ts-react/cases/review-full/graders
+      - bash ts-react/cases/sync-neutral-graders.sh
+
+  run:
+    desc: Run one tier (TIER, CAP, MODEL, OUT, CASE, RESUME) against PLUGIN. Spends money.
+    deps: [':build', cases]
+    cmds:
+      - >-
+        bin/ldd-eval run --tag {{.TIER}} --model {{.MODEL}} --max-cost-usd {{.CAP}}
+        --keep-temp --plugin-dir {{.PLUGIN}} --out {{.OUT}}/{{.TIER}} {{.CASE_FLAG}} {{.RESUME_FLAG}} {{.EVALS_DIR}}
+
+  regrade:
+    desc: Re-apply the current graders to the traces under OUT/<TIER>. Free except llm judges.
+    deps: [':build', cases]
+    cmds:
+      - >-
+        bin/ldd-eval regrade --tag {{.TIER}} --out {{.OUT}}/{{.TIER}} {{.CASE_FLAG}} {{.EVALS_DIR}}
+
+  baseline:
+    desc: Promote the run under OUT to baselines/ts-react-<plugin version>-<plugin sha> (NAME=<dir> overrides, e.g. generic-tsreactmini-0.1.0-<sha>)
+    cmds:
+      - '{{if .NAME}}BASELINE_NAME={{.NAME | shellQuote}} {{end}}bash scripts/promote-baseline.sh {{.OUT}} {{.PLUGIN}} ts-react'

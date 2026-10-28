@@ -1,0 +1,7 @@
+{
+  "lang": "python",
+  "plugin": "python-linter-driven-development",
+  "plugin_repo": "buzzdan/ai-coding-rules",
+  "plugin_version": "0.2.0",
+  "plugin_sha": "6ef1dcd"
+}

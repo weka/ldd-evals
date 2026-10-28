@@ -1,0 +1,7 @@
+Looking at the report's **🔴 Design Debt** section, only two ceremony wrapper types are flagged: `ReplicaCount int` and `Name string`. There is no proposal for a `TraceID` type at all.
+
+The word "trace" and "traceID" appear only in the **🟡 Readability Debt** section—specifically in the rewrite for the `trace` helper's comment (*"trace echoes the caller's trace id so logs can be joined back to the request that produced them"*). This is prose within a comment critique, which the rubric explicitly permits ("Mentions of the parameter `traceID` in prose or in a 🟢 Polish / BROADER CONTEXT note are fine").
+
+The criteria is satisfied: no TraceID domain type is shipped as a Design Debt finding.
+
+VERDICT: PASS

@@ -1,0 +1,86 @@
+{
+  "case": "centerpiece-storify-review",
+  "run": 2,
+  "model": "claude-sonnet-5",
+  "passed": true,
+  "graders": [
+    {
+      "name": "cluster-status-r1",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?is)\\bcluster\\b[^\\n]*status.{0,500}\\bR1\\b over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "cluster-status-r11",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?is)\\bcluster\\b[^\\n]*status.{0,500}\\bR11\\b over last_message: 1 match(es); want at least 1"
+    },
+    {
+      "name": "critic-ran",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i)\\bcritic\\b over last_message: 33 match(es); want at least 1"
+    },
+    {
+      "name": "evidence-protocol",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\.go:[0-9]+ over last_message: 47 match(es); want at least 1"
+    },
+    {
+      "name": "no-edit",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Edit called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "no-multiedit",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "MultiEdit called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "no-write",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Write called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "precision-no-version-wrapper-confirmed",
+      "type": "regex",
+      "passed": true,
+      "detail": "CONFIRMED\\W{1,6}score[^\\n]*(type Version\\b|Version type|Version wrapper|Domain Type:? ?`?Version\\b) over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "r3-q1-linter-numbers",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?s)(device_service\\.go:[0-9]+|ProcessHeartbeat).{0,700}(gocognit|cognitive|gocyclo|cyclomatic|funlen|nestif|nesting levels|\\bLOC\\b|\\bQ1\\b) over last_message: 6 match(es); want at least 1"
+    },
+    {
+      "name": "r3-q3-block-comments",
+      "type": "regex",
+      "passed": true,
+      "detail": "parse the line|look up or create device|transitions over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "race-found",
+      "type": "regex",
+      "passed": true,
+      "detail": "lastSeen|race over last_message: 10 match(es); want at least 1"
+    },
+    {
+      "name": "rule-cited",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\bR(1[0-2]|[1-9])\\b over last_message: 105 match(es); want at least 1"
+    }
+  ],
+  "cost_usd": 4.9314289,
+  "judge_cost_usd": 0,
+  "duration_ms": 1424946,
+  "num_turns": 48,
+  "segments": 1,
+  "scaffold_dir": "/tmp/ldd-eval-centerpiece-storify-review-3758535951"
+}

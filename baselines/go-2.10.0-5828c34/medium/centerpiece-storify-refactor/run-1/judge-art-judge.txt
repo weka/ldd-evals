@@ -1,0 +1,24 @@
+# Analysis
+
+Looking at `ProcessHeartbeat` and the surrounding service code, I'll evaluate against the five RUBRIC criteria:
+
+1. **The story** - ProcessHeartbeat does read as distinct chapters: parse → load/create → apply → persist. However, the chapters are incomplete. The persist step includes cache management (lines with `s.mu.Lock()`, `s.cache[...] = d`, `s.mu.Unlock()`) which is mechanical boilerplate, not a named domain concept. Similarly, `s.lastSeen[hb.id] = d.LastSeen` is left inline rather than boxed.
+
+2. **Concepts have boxes** - Most are well-boxed:
+   - Heartbeat parsing: `parsedHeartbeat` struct ✓
+   - Device loading: `loadOrCreateDevice()` ✓  
+   - Status transition: `applyHeartbeat()` with `resolveFlapping()` ✓
+   - Notification: `notifyDown()` with retry ✓
+   - **BUT** cache persistence is not boxed — the mutex lock/unlock and map update sit exposed in ProcessHeartbeat itself (lines within the `if changed || force` block). The "cache" concept doesn't have its own box.
+
+3. **Names are domain words** - Excellent. `parseHeartbeat`, `loadOrCreateDevice`, `applyHeartbeat`, `notifyDown`, `resolveFlapping` all read as domain operations a fleet operator would recognize. ✓
+
+4. **Comments earned their place** - The PR reference in the method docstring ("added in PR #87 after the outage") is historical noise rather than a why. The `// bounds-checked` comment justifies an invariant. Mostly acceptable but the PR reference is weak.
+
+5. **Nothing ugly hid elsewhere** - `notifyDown` properly encapsulates retry with backoff and audit logging rather than just moving old code. However, this doesn't excuse ProcessHeartbeat itself: the mutex choreography and cache assignment are mechanical details that didn't migrate to a helper.
+
+**Critical observation:** Lines like `s.mu.Lock(); s.cache[cacheKey(tenant, hb.id)] = d; s.mu.Unlock();` are the exact kind of mechanical boilerplate the rubric expects to be boxed. A reviewer would say: "You extracted parsing and loading, but left me maintaining locks in the main flow. Extract `s.persistToCache(tenant, hb.id, d)` and the story becomes clean."
+
+The code is close—most helpers are well-named and the flow is readable—but the cache management violates criteria 1 (each chapter should be a named abstraction) and 2 (the cache concept should have a box, not leak its implementation).
+
+VERDICT: FAIL

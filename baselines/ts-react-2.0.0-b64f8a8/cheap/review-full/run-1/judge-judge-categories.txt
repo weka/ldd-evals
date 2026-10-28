@@ -1,0 +1,47 @@
+--- vote 1: PASS ---
+Looking at the report structure:
+
+**Question 1: Concurrency bugs under 🐛 Bugs?**
+
+In the 🐛 BUGS section, I find:
+- `src/hooks/useDeviceFeed.ts:13-22` | R10 Q1: **`setInterval` inside `useEffect` returns no cleanup function** ✓
+- `src/hooks/useDeviceSearch.ts:13-30` (within the CustomerContext/AlertsTab entry) | R10 Q2/Q3: **floating `.then()` fetches, no `AbortController`/ignore flag — results can be overwritten by a slower, stale response** ✓
+
+Both real concurrency bugs are correctly filed under 🐛 Bugs, not Design Debt.
+
+**Question 2: Production sleeps under 🔴 Design Debt (not Bugs)?**
+
+In the 🔴 DESIGN DEBT section:
+- `src/pages/Heartbeats/heartbeatFeed.ts:667` | R10 Q5: fixed `setTimeout` backoff in a retry loop ✓
+- `src/services/retry.ts:49,64` | R10 Q5: `withRetry`/`sendWithRetry` sleep on fixed `setTimeout` ✓
+- `src/services/syncService.ts:144` | R10 Q5: `saveWithRetry` sleeps on fixed `setTimeout` ✓
+
+All three production sleeps (in services/ and heartbeat feed) are correctly listed under Design Debt, not Bugs.
+
+Both criteria are satisfied.
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+Looking at the report against the RUBRIC criteria:
+
+**Question 1: Real concurrency bugs under 🐛 Bugs?**
+
+The 🐛 BUGS section includes:
+- `src/hooks/useDeviceFeed.ts:13-22` — the unowned `setInterval` with no cleanup function ✓
+- `src/hooks/useDeviceSearch.ts:13-30` — the floating `.then()` fetches without AbortController/ignore flag causing out-of-order responses ✓
+
+Both real concurrency bugs are correctly filed under 🐛 Bugs, not under Design Debt or other categories.
+
+**Question 2: Production sleeps under 🔴 Design Debt, not Bugs?**
+
+The 🔴 DESIGN DEBT section includes:
+- `src/services/retry.ts:49,64` — "sleep on a fixed `setTimeout`, no cancellation" | Replace Sleep with Cancellable Wait
+- `src/services/syncService.ts:144` — "sleeps on a fixed `setTimeout`, no signal" | Replace Sleep with Cancellable Wait  
+- `src/pages/Heartbeats/heartbeatFeed.ts:667` — "fixed `setTimeout` backoff in a retry loop, no signal" | Replace Sleep with Cancellable Wait
+
+These production sleeps are correctly filed under 🔴 Design Debt, not under 🐛 Bugs.
+
+Both questions are answered yes.
+
+VERDICT: PASS

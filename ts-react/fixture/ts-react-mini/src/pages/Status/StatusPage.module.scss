@@ -1,0 +1,19 @@
+.page {
+  max-width: 60rem;
+}
+
+.line {
+  font-family: ui-monospace, monospace;
+}
+
+.widgets {
+  display: flex;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.sync {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}

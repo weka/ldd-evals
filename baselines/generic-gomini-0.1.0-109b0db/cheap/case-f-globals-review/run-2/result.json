@@ -1,0 +1,99 @@
+{
+  "case": "case-f-globals-review",
+  "run": 2,
+  "model": "claude-sonnet-5",
+  "passed": false,
+  "graders": [
+    {
+      "name": "anchor-env-global",
+      "type": "regex",
+      "passed": true,
+      "detail": "env\\.go:[0-9]+ over last_message: 6 match(es); want at least 1"
+    },
+    {
+      "name": "evidence-protocol",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\.go:[0-9]+ over last_message: 39 match(es); want at least 1"
+    },
+    {
+      "name": "fix-clean-island",
+      "type": "regex",
+      "passed": true,
+      "detail": "Extract Clean Island|Push the Global Up over last_message: 1 match(es); want at least 1"
+    },
+    {
+      "name": "no-edit",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Edit called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "no-multiedit",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "MultiEdit called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "no-write",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Write called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "nolint-is-a-finding",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i)nolint over last_message: 11 match(es); want at least 1"
+    },
+    {
+      "name": "precision-drain-clean",
+      "type": "regex",
+      "passed": false,
+      "detail": "\\bdrain\\(\\) over last_message: 1 match(es); want 0"
+    },
+    {
+      "name": "r8-q2-init",
+      "type": "regex",
+      "passed": true,
+      "detail": "init\\(\\) over last_message: 6 match(es); want at least 1"
+    },
+    {
+      "name": "r8-q5-jobs-read",
+      "type": "regex",
+      "passed": true,
+      "detail": "scheduler\\.go:[0-9]+ over last_message: 12 match(es); want at least 1"
+    },
+    {
+      "name": "r8-q5-pool-read",
+      "type": "regex",
+      "passed": true,
+      "detail": "workers\\.go:[0-9]+ over last_message: 5 match(es); want at least 1"
+    },
+    {
+      "name": "r8-q6-test-mutates-global",
+      "type": "regex",
+      "passed": true,
+      "detail": "workers_test\\.go:[0-9]+ over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "refuted-carries-alternative",
+      "type": "llm",
+      "passed": true,
+      "detail": "judge claude-haiku-4-5 (PASS,PASS): --- vote 1: PASS ---\nReading through the report to identify any proposed wrapper types for worker count (WorkerCount, NumWorkers, etc.):\n\n**Wrapper types actually proposed and their skeptic verdicts:**\n1. **`Pool` type** (for managing goroutine lifecycle) — **REFUTED (score 0)** with cheaper alternative: \"return the stdlib handle directly\" / `func Start(numWorkers int, jobs \u003c-chan Job) *sync.WaitGroup` ✓\n2. **`NewRegistry()` type** (for job handler dispatch) — **REFUTED (score 0)** with cheaper alternative: \"fold `handlers` into `Scheduler` as an unexported field built from a map literal in `NewScheduler()`\" ✓\n\n**Regarding worker count itself:**\nThe report addresses `env.Config.NumWorkers` not as a wrapper type proposal, but as a global-to-parameter refactoring. The fixes proposed are:\n- `Start(numWorkers int, ...)` — passing an `int` directly\n- `NewScheduler(batchSize int)` — passing an `int` directly\n\nNo one proposes a wrapper type like `type WorkerCount int` or `type NumWorkers struct{...}`.\n\n**Verdict under the rubric:**\nThe rubric states: \"If the report proposes NO wrapper type for the worker count / batch size, PASS.\"\n\nSince no wrapper type for worker count was proposed (only int parameters), and the two wrapper types that *were* proposed (`Pool` and `Registry`) each have clear REFUTED verdicts with concrete cheaper alternatives, the report honestly handles any abstraction proposals.\n\nVERDICT: PASS\n\n--- vote 2: PASS ---\nLooking at the report systematically for wrapper types related to worker count:\n\n**Searching for worker-count wrapper proposals:**\n\nThe report proposes extracting configuration into parameters:\n- `func Start(numWorkers int, jobs \u003c-chan Job)` — worker count as `int`, not a wrapper type\n- `NewScheduler(batchSize int)` — batch size as `int`, not a wrapper type\n\n**The only wrapper type that was proposed and handled:**\n\nIn the pool.Start cluster, a `Pool` type was proposed (wrapping `sync.WaitGroup…(truncated)",
+      "cost_usd": 0.0402043
+    },
+    {
+      "name": "rule-cited",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\bR(1[0-2]|[1-9])\\b over last_message: 57 match(es); want at least 1"
+    }
+  ],
+  "cost_usd": 3.748459,
+  "judge_cost_usd": 0.0402043,
+  "duration_ms": 1048921,
+  "num_turns": 42,
+  "segments": 1,
+  "scaffold_dir": "/tmp/ldd-eval-case-f-globals-review-2816969608"
+}

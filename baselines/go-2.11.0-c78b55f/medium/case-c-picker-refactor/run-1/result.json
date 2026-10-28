@@ -1,0 +1,64 @@
+{
+  "case": "case-c-picker-refactor",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": false,
+  "graders": [
+    {
+      "name": "art-judge",
+      "type": "llm",
+      "passed": false,
+      "detail": "judge claude-haiku-4-5 (FAIL,FAIL): --- vote 1: FAIL ---\nLooking at the code against the RUBRIC:\n\n**Criterion 1 (Collection has a name): FAIL**  \nNo named collection type exists. The code still uses `[]Node` directly and a standalone `firstUsable()` function that ranges over the slice, rather than methods on a collection type like `Nodes` with `InZone()`, `OutsideZone()`, `First()`.\n\n**Criterion 2 (Node knows its own health): PASS**  \n`Node.usable()` method exists and properly encapsulates: `n.Zone != \"\" \u0026\u0026 n.Capacity \u003e 0`.\n\n**Criterion 3 (Pick tells the story): FAIL**  \nThe `ok` pattern persists throughout—`primary, ok := firstUsable(...)` and `secondary, ok := firstUsable(...)`. The RUBRIC explicitly states \"No `primaryFound` style booleans anywhere in the file\"; while these aren't named that way, the boolean flag pattern remains. Also, `Pick` is just a thin wrapper around `pickReplicas`; the actual story logic is still in a helper method.\n\n**Criterion 4 (Names and comments): PARTIAL FAIL**  \nThe package comment says the code \"picks\" but doesn't explain *why* placement spreads replicas across zones (the failure-domain reasoning). Method names are reasonable but `pickReplicas` and `firstUsable` are generic helpers, not domain words.\n\n**Additional FAIL clause triggered:**  \nThe RUBRIC explicitly states FAIL if \"pickReplicas still ranges over the slice with nested if\" — the `firstUsable` function does exactly this: `for _, n := range nodes { if n.usable() \u0026\u0026 matches(n)`. This entire loop-and-flag pattern should move into methods on a named collection type.\n\nVERDICT: FAIL\n\n--- vote 2: FAIL ---\nLooking at this code against the rubric:\n\n**Requirement 1 (Collection type exists):** FAIL — There is no `Nodes` or similar collection type. The code still works directly with `[]Node` slices and delegates to a `firstUsable()` helper. The required methods like `InZone(zone)`, `OutsideZone(zone)`, `First()` returning `(Node, bool)` do not exist on any collection type.\n\n**Re…(truncated)",
+      "cost_usd": 0.035463900000000007
+    },
+    {
+      "name": "collection-type-exists",
+      "type": "regex",
+      "passed": false,
+      "detail": "^type \\w+ \\[\\]Node over files: 0 match(es); want at least 1"
+    },
+    {
+      "name": "comma-ok-query",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\) \\(Node, bool\\) over files: 1 match(es); want at least 1"
+    },
+    {
+      "name": "gone-found-flags",
+      "type": "regex",
+      "passed": true,
+      "detail": "Found\\s*:?=\\s*(true|false) over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-inline-capacity-check",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\.Capacity \u003c= 0 over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-inline-zone-check",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\.Zone == \"\" over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "single-altitude",
+      "type": "llm",
+      "passed": false,
+      "detail": "judge claude-haiku-4-5 (FAIL,FAIL): --- vote 1: FAIL ---\nLooking at the code structure:\n\n**Pick's body** reads cleanly: it delegates to `pickReplicas` and handles the error guard clause. ✓\n\n**pickReplicas's body** delegates all work to `firstUsable` calls... but this is where the problem appears. The statements are:\n- `primary, ok := firstUsable(nodes, func(n Node) bool { return n.Zone == zone })`\n- Guard clause\n- `secondary, ok := firstUsable(nodes, func(n Node) bool { return n.Zone != zone })`\n- Guard clause\n- Return\n\nWhile each statement is technically an assignment or guard, the lambda functions passed to `firstUsable` contain field comparisons (`.Zone == zone` and `.Zone != zone`). The rubric explicitly forbids \"NO field comparisons such as `.Zone ==`\" in the orchestrator bodies. \n\nEven though the field access is syntactically embedded in lambda arguments rather than direct statements, these lambdas are part of the orchestrator's control flow and the comparisons execute within that context. The rubric's intent—evident from the distinction that \"loops and field access are allowed inside methods of a collection type... [but] are not allowed in the orchestrator\"—is to enforce delegation to purpose-built helpers. Using lambdas keeps the orchestrator entangled with field comparison logic rather than fully delegating it.\n\nThe proper pattern would use named methods like `firstInZone(nodes, zone)` and `firstNotInZone(nodes, zone)` (either on `Placer` or a collection type), eliminating field access from the orchestrator.\n\n**VERDICT: FAIL**\n\n--- vote 2: FAIL ---\nLooking at the `Pick` and `pickReplicas` methods:\n\nThe structure is clean at first glance—both methods contain only named function calls and guard clauses. However, the RUBRIC explicitly prohibits \"NO field comparisons such as `.Zone ==`\" in the orchestrator.\n\nIn `pickReplicas`, the field comparisons appear here:\n```go\nprimary, ok := firstUsable(nodes, func(n Node) bool { return n.Zone == zone })\nsecondar…(truncated)",
+      "cost_usd": 0.0858198
+    },
+    {
+      "name": "postcheck",
+      "type": "postcheck",
+      "passed": true,
+      "detail": "task test: ok\nPASS  task test green\ntask lint: ok\nPASS  task lint green\nPASS  Placer.Pick still exists in internal/placement\n  gocognit(pickReplicas) = 2\nPASS  gocognit of Pick and every receiver method it calls (2 \u003c= 5)\nPASS  no //nolint in internal/placement production code (0)\n== shipped ==\nPASS  at least one commit after the scaffold base (the green tree is committed) (1 \u003e= 1)\nPASS  working tree clean at the end (nothing left uncommitted) (0)\n== black-box suite: builds cmd/svc, replays the recorded heartbeats ==\n--- PASS: TestHeartbeatContract (1.07s)\n--- PASS: TestExpectedTSVMatchesTable (0.00s)\nok  \texample.com/heartbeat-blackbox\t1.071s\nblack-box: PASS\nPASS  black-box heartbeat suite\npostcheck: all checks passed"
+    }
+  ],
+  "cost_usd": 1.0831243,
+  "judge_cost_usd": 0.12128370000000001,
+  "duration_ms": 356968,
+  "num_turns": 42,
+  "segments": 1,
+  "scaffold_dir": "/tmp/ldd-eval-case-c-picker-refactor-4108004225"
+}

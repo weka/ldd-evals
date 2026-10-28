@@ -1,0 +1,37 @@
+--- vote 1: FAIL ---
+Reading through the rubric against the FOCUS code:
+
+**1. Collection has a name:** ✗ No top-level collection type exists. Only `replicaSlots` (private, internal). The code should have a public `Nodes` or similar type with methods like `InZone(zone)`, `OutsideZone(zone)`, `First()`. The walking still happens inside the loop in `pickReplicas`.
+
+**2. Node knows its health:** ✗ Health check is a standalone function `usable(n Node)`, not a method on `Node`. Should be `n.Usable()` or `n.Healthy()`.
+
+**3. Pick tells the story:** ✗ Pick calls `pickReplicas`, which still loops: `for _, n := range nodes { slots.offer(n, zone) }`. Inside `offer`, nested `if` statements check zone and set flags. The pattern is unchanged — loop plus conditionals, not a named sequence of steps.
+
+**4. Names and comments:** Partial. Comments are reasonable; no tautologies like "Placer is a placer." But the package comment doesn't explain *why* replicas spread across zones (the business logic).
+
+**Fail conditions hit:**
+- `hasPrimary` and `hasSecondary` are `primaryFound`/`secondaryFound` style flags. Rubric says this is an outright fail.
+- `pickReplicas` ranges over the slice with nested `if` statements inside `offer`. Rubric says this is an outright fail.
+
+The refactoring is incomplete. The flags and loop pattern remain unchanged, just wrapped in a `replicaSlots` struct instead of eliminated.
+
+VERDICT: FAIL
+
+--- vote 2: FAIL ---
+**Analysis against RUBRIC:**
+
+1. **Collection has a name:** No. Code still takes `nodes []Node` as a bare slice parameter. No `Nodes` type with methods like `InZone()`, `OutsideZone()`, `First()` exists. ✗
+
+2. **Node knows its health:** No. `usable(n Node)` remains a standalone function, not a method. The predicate is still inline in the picker logic (inside `replicaSlots.offer()`). ✗
+
+3. **Pick tells the story:** No. `Pick()` delegates to `pickReplicas()`, which loops over the slice and calls `slots.offer(n, zone)`. Inside `offer()`, nested `if` statements check zone membership and usability. More critically, `replicaSlots` has `hasPrimary` and `hasSecondary` flags — these are exactly the "found" flag pattern the rubric says to fail outright. ✗ **OUTRIGHT FAIL**
+
+4. **Names and comments:** The package comment explains *why* (spreading replicas across zones), which is good. But `offer()` and `filled()` are abstract; `pickReplicas` still ranges over the slice with nested logic. ✗
+
+**Core problems:**
+- `hasPrimary` / `hasSecondary` flags trigger the explicit FAIL condition ("any `found` flag survives")
+- `pickReplicas` still does `for _, n := range nodes { slots.offer(...) }` with nested if logic inside `offer()`
+- No collection type owns the walking; picker still receives a bare slice
+- Health check not on `Node`
+
+VERDICT: FAIL

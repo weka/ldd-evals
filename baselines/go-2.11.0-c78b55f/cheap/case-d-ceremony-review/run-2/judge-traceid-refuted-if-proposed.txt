@@ -1,0 +1,23 @@
+--- vote 1: PASS ---
+Reading through the Design Debt section (🔴), the type proposals that survived are:
+
+1. **Drop** `ReplicaCount int` — unused ceremony wrapper (Score 0)
+2. **Drop** `Name string` — unused ceremony wrapper (Score 0)
+3. Two data structure fixes to `Grants` (`All()` reference leak, `NewGrants` copy issue) — not new types
+
+The report makes no proposal to ship a `TraceID` domain type. While `internal/handlers/trace.go` is in scope and the parameter `traceID` appears in context (e.g., the criteria text itself mentions it being copied into X-Trace headers), there is no hunter finding or skeptic verdict proposing a domain type wrapper for it.
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+Reading through the report systematically:
+
+**Design Debt section:** Lists findings for `ReplicaCount`, `Name`, package layering (R5 advisory), and two `Grants` encapsulation issues. No mention of a `TraceID` type anywhere.
+
+**Readability Debt section:** Comment quality issues across both files (`handlers` and `grants`), but no domain type proposals.
+
+**Not flagged section:** Confirms `Permission`/`PermRead`/`PermWrite`/`PermAdmin` passed as legitimate; no other primitive-wrapping types mentioned.
+
+The report correctly avoids proposing a `TraceID` domain type. The only ceremony types flagged—`ReplicaCount` and `Name`—are marked for *dropping* as unused wrappers, which is the right call per the criteria. The `traceID` parameter mentioned in the file scope (`internal/handlers/trace.go`) is not reified into a typed proposal.
+
+VERDICT: PASS

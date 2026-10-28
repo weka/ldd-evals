@@ -1,0 +1,38 @@
+{
+  "case": "mutation-leaf-kill",
+  "run": 2,
+  "model": "claude-sonnet-5",
+  "passed": false,
+  "graders": [
+    {
+      "name": "committed",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Bash(git commit) called 1 time(s); want \u003e= 1"
+    },
+    {
+      "name": "no-module-wide-run",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Bash(gremlins unleash (\\./\\.\\.\\.|\\.\\s*$)) called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "ran-the-mutation-tool",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Bash(gremlins unleash \\./internal/) called 1 time(s); want \u003e= 1"
+    },
+    {
+      "name": "postcheck",
+      "type": "postcheck",
+      "passed": false,
+      "detail": "exit status 1\ntask test: ok\nPASS  task test green\ntask lint: ok\nPASS  task lint green\nPASS  deviceid: no surviving mutant (0)\nFAIL  models: no surviving mutant (got '999', want '0')\nPASS  utils: at most the two recorded equivalent mutants live (1 \u003c= 2)\nPASS  production file untouched: internal/pkg/deviceid/deviceid.go\nPASS  production file untouched: internal/models/tenant.go\nPASS  production file untouched: internal/utils/strings.go\nPASS  no module-wide mutation run (gremlins unleash ./... in the trace) (0)\nFAIL  no //nolint added to the three packages (got '2', want '       2')\nPASS  at least one commit after the scaffold (1 \u003e= 1)\nPASS  clean tree at the end\n== black-box suite: builds cmd/svc, replays the recorded heartbeats ==\n--- PASS: TestHeartbeatContract (1.69s)\n--- PASS: TestExpectedTSVMatchesTable (0.00s)\nok  \texample.com/heartbeat-blackbox\t2.231s\nblack-box: PASS\nPASS  black-box heartbeat suite\npostcheck: 2 check(s) failed"
+    }
+  ],
+  "cost_usd": 1.3237050000000001,
+  "judge_cost_usd": 0,
+  "duration_ms": 479784,
+  "num_turns": 63,
+  "segments": 1,
+  "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-mutation-leaf-kill-1740616295"
+}

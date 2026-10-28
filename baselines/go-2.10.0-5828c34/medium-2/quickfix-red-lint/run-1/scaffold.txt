@@ -1,0 +1,1 @@
+scaffolded go-mini (red-lint) at /tmp/ldd-eval-quickfix-red-lint-2652675852 (ee03e2f); nolint directives remaining: 0

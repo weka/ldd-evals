@@ -1,0 +1,13 @@
+Looking at the report against the RUBRIC questions:
+
+**Question 1:** Is the unguarded concurrent map write listed under 🐛 Bugs?
+
+Yes. In the 🐛 BUGS section, item 3 explicitly describes the `flushLoop` unguarded concurrent-map-access hazard: "a goroutine spawned in `NewDeviceService`... with no lock while deleting from `s.lastSeen` — a map written elsewhere (line 218, `ProcessHeartbeat`) with no lock..." This is clearly the concurrent map write issue, correctly filed under Bugs, not Design Debt.
+
+**Question 2:** Is the production `time.Sleep` (retry backoff) listed under 🔴 Design Debt rather than 🐛 Bugs?
+
+Yes. Under 🔴 DESIGN DEBT, the R10 — Concurrency Safety section lists "five separate `time.Sleep` retry/backoff sites (`retry.go:40,52`, `device_service.go:181`, `sync_service.go:122`)" as ignoring caller cancellation. These production sleeps are filed under Design Debt, not Bugs. The `time.Sleep(50ms)` mentioned incidentally in the flushLoop bug description is not treated as a separate design-debt issue—it's incidental to the primary concurrent-map-access bug.
+
+Both criteria are satisfied.
+
+VERDICT: PASS

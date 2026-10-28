@@ -1,0 +1,14 @@
+Looking at the code against the rubric:
+
+**`Pick` method (lines 23-30):** Clean. Every statement is either an assignment of a named call (`p.pickReplicas(nodes, zone)`), a guard clause (`if err != nil`), or a return. ✓
+
+**`pickReplicas` method (lines 32-41):** Violates the rubric.
+- Line 34 contains `for _, n := range nodes` — a direct loop over the node slice in the orchestrator
+- The rubric explicitly states: "NO loop over the node slice" and "Loops... are not allowed in the orchestrator"
+- While the field access and flag logic is correctly moved into the `replicaSelection` helper type, the orchestrator itself is still performing the iteration and inspection
+
+The code pushes some complexity into the helper, but the core orchestration logic (`pickReplicas`) still owns the loop over nodes. The rubric requires that all looping and field access move entirely into collection methods so the orchestrator reads as pure named calls and assignments.
+
+The fix would be to abstract the loop into a method on a collection type (e.g., `type Nodes []Node` with a method that processes all nodes), leaving `pickReplicas` to only call named operations.
+
+VERDICT: FAIL

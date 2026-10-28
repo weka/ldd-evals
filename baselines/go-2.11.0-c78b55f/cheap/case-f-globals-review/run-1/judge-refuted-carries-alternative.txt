@@ -1,0 +1,29 @@
+--- vote 1: PASS ---
+# Analysis
+
+The report addresses worker count and batch size handling at multiple points (R8 findings on `pool.Start` and `Scheduler.Run`, plus test injection at `workers_test.go:11`). 
+
+The skeptic's recommendations in all cases are to **reject the dependency upward by passing the values as plain `int` parameters**: 
+- `Start(numWorkers int, jobs <-chan Job)` 
+- `NewScheduler(batchSize int, ...)`
+
+No wrapper type such as `WorkerCount`, `NumWorkers`, `BatchSize`, or similar is proposed anywhere in the report. The remedy is parameter injection of the primitive `int` type, not a new nominal type.
+
+The RUBRIC explicitly states: "If the report proposes NO wrapper type for the worker count / batch size, PASS."
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+Looking for wrapper type proposals (WorkerCount, NumWorkers, etc.) in the report:
+
+The report does **not** propose any wrapper type for worker count or batch size. 
+
+Under **DESIGN DEBT**, the findings are explicit:
+- `internal/pool/workers.go:18` (R8 Q5): proposes `Start(numWorkers int, ...)` — a primitive `int` parameter, not a wrapper type
+- `internal/jobs/scheduler.go:44` (R8 Q5): proposes `NewScheduler(batchSize int, ...)` — again, primitive `int`, not a wrapper
+
+The only type-wrapper finding in the report is about `JobKind` (a discriminator for job kinds), which is unrelated to worker count. That finding is properly handled: the skeptic CONFIRMED it with a score (2) and offered a cheaper alternative (skip the type, fix literal drift with constants + linter).
+
+Per the RUBRIC: "If the report proposes NO wrapper type for the worker count / batch size, PASS."
+
+VERDICT: PASS

@@ -1,0 +1,44 @@
+--- vote 1: FAIL ---
+Looking at the two key functions:
+
+**`Pick` method:** Clean orchestration—assignment of named call, guard clause, return. ✓
+
+**`pickReplicas` method:** Contains a direct violation:
+```go
+for _, n := range nodes {
+	slots.offer(n, zone)
+}
+```
+
+The RUBRIC explicitly states "NO loop over the node slice" in the orchestrator, and "Loops and field access are allowed inside methods of a collection type... they are not allowed in the orchestrator."
+
+The `pickReplicas` function ranges directly over the input node slice. This breaks R3 Q2—the orchestration should delegate the loop logic to a collection method (e.g., something like `slots.fillFrom(nodes, zone)` where the loop lives inside `replicaSlots`'s methods), not loop itself.
+
+The boolean flags (`hasPrimary`, `hasSecondary`) are correctly confined inside `replicaSlots` methods, so that part is fine.
+
+VERDICT: FAIL
+
+--- vote 2: FAIL ---
+Looking at the code structure:
+
+**Pick method:** Clean. Each statement is either a named call (`p.pickReplicas(...)`) or a guard clause returning an error. ✓
+
+**pickReplicas method (the delegated helper):**
+```go
+func (p *Placer) pickReplicas(nodes []Node, zone string) (Node, Node, error) {
+	slots := newReplicaSlots()
+	for _, n := range nodes {              // ← LOOP OVER NODE SLICE
+		slots.offer(n, zone)
+	}
+	if !slots.filled() {
+		return Node{}, Node{}, fmt.Errorf("no placement for zone %q", zone)
+	}
+	return slots.primary, slots.secondary, nil
+}
+```
+
+The rubric explicitly forbids "NO loop over the node slice" in orchestrator code. The loop `for _, n := range nodes` violates this. The rubric states loops are allowed only inside collection-type methods (like `replicaSlots`), not in the orchestrator itself.
+
+The code should push the loop down—something like `slots.offerAll(nodes, zone)` as a method on the collection—to keep `pickReplicas` at single altitude (named calls only).
+
+VERDICT: FAIL

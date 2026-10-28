@@ -1,0 +1,21 @@
+Looking at this code against the rubric:
+
+**Criterion 1 (Root as wiring diagram):** `main` loads `cfg` once and passes specific values (`cfg.BatchSize`, `cfg.NumWorkers`, `cfg.FlapWindowSec`, `cfg.Region`) to collaborators. This part is sound.
+
+**Criterion 2 (Islands clean):** 
+- `pool` is clean: `Start(jobs <-chan Job, numWorkers int)` has explicit, named parameters. ✓
+- `jobs` is **not clean**: `registry.go` has three package-level mutable globals (`handlers`, `store`, `storeOnce`) hidden from callers. The `dispatch` function looks up `handlers["snapshot"]` and `handlers["sync"]` — these dependencies are initialized in `init()` and invisible to whoever calls `Scheduler`. The `GetStore()` singleton is lazily initialized; main never passes the store to jobs, so jobs still reaches for a hidden global.
+
+**Criterion 3 (env only loads):**
+- `env.go` contains `func init()` (line initializing `region = os.Getenv("REGION")`). ✗
+- `env.go` contains package-level mutable `var region string`. ✗
+
+**Criterion 4 (Names carry meaning):** Parameter names are good (`numWorkers`, `batchSize`), but the underlying problem is they're not the core issue here.
+
+**Explicit FAIL conditions met:**
+- `env.go` still contains `func init()`. 
+- `env.go` contains package-level mutable config (`region`).
+
+The globals haven't moved to the root; they've been rearranged. The jobs package still has hidden initialization via `init()`, package-level handler registration, and a lazy-singleton store pattern. Main never explicitly wires the store or handlers — they're sprung by the jobs package itself.
+
+VERDICT: FAIL

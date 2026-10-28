@@ -1,0 +1,19 @@
+--- vote 1: PASS ---
+Looking through the review report for any TraceID type proposal in the Design Debt section:
+
+The 🔴 **DESIGN DEBT** findings focus on:
+1. Grants constructor validation and array encapsulation (existing type)
+2. ReplicaCount and Name wrapper classes as over-abstractions (removal, not extraction)
+3. Export visibility of test-only functions (removal)
+4. Architecture documentation (no type involved)
+
+The report explicitly states: "**Skeptic:** not spawned — no finding proposed a new type/package (all fixes are removal, construction mechanics, or comment/doc edits)"
+
+The `traceId` parameter is mentioned only in prose (the comment on `traceFromSearch`, the JSDoc trim for `withTrace`) and in the 🟡 **READABILITY DEBT** discussion of that comment — but nowhere is a `TraceID` domain type proposed as a replacement for the raw string primitive.
+
+**VERDICT: PASS**
+
+--- vote 2: PASS ---
+The report correctly avoids proposing a `TraceID` domain type. While it mentions the `traceId` parameter in prose (the JSDoc comment on `traceFromSearch` and the BROADER CONTEXT note on `withTrace`), the rubric explicitly permits this. The Design Debt section contains seven findings about `Grants`, `ReplicaCount`, `Name`, and function visibility—none proposing a TraceID type. The skeptic wasn't even spawned, which confirms no new types were proposed. The report's judgment is sound: a raw string passed through once to an HTTP header needs no wrapper type.
+
+VERDICT: PASS

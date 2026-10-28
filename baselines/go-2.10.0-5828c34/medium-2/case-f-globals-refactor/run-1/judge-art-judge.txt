@@ -1,0 +1,31 @@
+# Analysis
+
+Looking at the code against the criteria and rubric:
+
+**Requirement 1 (Root reads like wiring diagram):** ✓ Main loads config once via `cfg := env.Load()`, extracts specific values (`cfg.FlapWindowSec`, `cfg.BatchSize`, `cfg.NumWorkers`), and passes them individually to collaborators. No scattered `env.Config` reads outside main.
+
+**Requirement 2 (Islands are clean):** ✗ Critical issue here. The `jobs` package has package-level mutable state:
+- `var handlers`, `var store`, `var storeOnce` initialized in `init()`
+- `GetStore()` provides lazy access to a hidden global store
+
+More problematically: **the store/repo dependency is not declared in any signature**. In `main.go`, a repository is created based on flags:
+```go
+if *dryRun {
+    mem := repository.NewMemStore()
+    store, repo = mem, mem
+} else {
+    fileRepo := mustOpenFileRepo(*storePath)
+    store, repo = fileRepo, fileRepo
+}
+```
+This repo is passed to `services.NewDeviceService(repo, ...)`, but when `NewScheduler(cfg.BatchSize, cfg.NumWorkers)` is called, the repo is not passed. Later, when job handlers run, they call `GetStore()` which creates a *separate, independent* `MemStore`, completely ignoring the repo main decided to use. This means the DeviceService and Sync jobs operate on different stores.
+
+The rubric requires: "constructors or `Start` functions name the dependency in the signature." `NewScheduler` should take a repository parameter: `NewScheduler(batchSize, numWorkers int, repo repository.DeviceRepository)`, but it doesn't.
+
+**Requirement 3 (Env only loads):** ✓ No `init()`, no mutable package state, `Load()` returns a value, defaults colocated.
+
+**Requirement 4 (Names carry meaning):** ✓ Parameters are specific (`batchSize`, `numWorkers`, `flapWindow`), not generic.
+
+The criteria states "every layer below it now states, in its signature, exactly what it depends on." The Scheduler depends on a repository (via dispatch → handlers → Sync → GetStore), but this dependency is hidden, not declared in the signature.
+
+VERDICT: FAIL

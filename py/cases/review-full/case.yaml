@@ -1,0 +1,12 @@
+schema_version: "1.1"
+context:
+  scaffold_script: ../scaffold/default.sh
+tier: cheap
+notes: |
+  Read-only review of the whole py-mini fixture, asked for explicitly with --all:
+  the command's scope ladder never widens to the repository on its own, and the
+  bare command on this clean single-commit fixture must answer "nothing to
+  review" (see review-clean-tree). recall-*/cluster-*/precision-*
+  graders are GENERATED from violations.yaml by gen-review-graders.sh —
+  edit the manifest, re-run the generator; never hand-edit those files. The
+  remaining graders are hand-written protocol assertions.

@@ -1,0 +1,64 @@
+{
+  "case": "case-c-picker-refactor",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": false,
+  "graders": [
+    {
+      "name": "art-judge",
+      "type": "llm",
+      "passed": false,
+      "detail": "judge claude-haiku-4-5: Reading through the code against the rubric:\n\n**Criterion 1 (collection type):** FAILS. There is no `Nodes` type or equivalent collection. The loop still lives directly in `pickReplicas` as a plain `for _, n := range nodes` iteration. The walking isn't owned by a collection type with methods like `InZone()`, `First()`, etc.\n\n**Criterion 2 (node knows its health):** FAILS. `usable()` is a package-level function, not a method on `Node`. The rubric requires \"as a method on `Node` (`Usable()`, `Healthy()`).\"\n\n**Criterion 3 (Pick tells the story):** FAILS. The logic is delegated to `pickReplicas`, and crucially, the code retains `havePrimary` and `haveSecondary` booleans—renamed flags that still track \"found\" state. The rubric explicitly says: \"FAIL outright if `primaryFound`, `secondaryFound` or any `found` flag survives.\" These are that same pattern.\n\n**Criterion 4 (names and comments):** FAILS. `// Placer is a placer.` is exactly the restatement the rubric forbids.\n\n**FAIL OUTRIGHT condition:** `pickReplicas` still ranges over the slice with an `if` conditional inside (`if !usable(n)`). The rubric demands: \"FAIL outright if `pickReplicas` still ranges over the slice with nested `if`.\"\n\nThe code hasn't been refactored into the desired shape—it's still structured as a loop with flag state, just wrapped through a couple of helper methods.\n\nVERDICT: FAIL",
+      "cost_usd": 0.022433
+    },
+    {
+      "name": "collection-type-exists",
+      "type": "regex",
+      "passed": false,
+      "detail": "^type \\w+ \\[\\]Node over files: 0 match(es); want at least 1"
+    },
+    {
+      "name": "comma-ok-query",
+      "type": "regex",
+      "passed": false,
+      "detail": "\\) \\(Node, bool\\) over files: 0 match(es); want at least 1"
+    },
+    {
+      "name": "gone-found-flags",
+      "type": "regex",
+      "passed": true,
+      "detail": "Found\\s*:?=\\s*(true|false) over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-inline-capacity-check",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\.Capacity \u003c= 0 over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-inline-zone-check",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\.Zone == \"\" over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "single-altitude",
+      "type": "llm",
+      "passed": false,
+      "detail": "judge claude-haiku-4-5: Looking at the code structure:\n\nThe `Pick` method is clean—it's a single delegated call to `pickReplicas` with error handling.\n\nHowever, `pickReplicas` contains a direct `for _, n := range nodes` loop that iterates over the node slice (lines 35-40). The rubric explicitly forbids this: \"NO loop over the node slice\" and \"Loops... are not allowed in the orchestrator.\"\n\nWhile `pickReplicas` delegates the decision-making to `sel.offer()` and `usable()`, the loop itself remains in the orchestrator method. The rubric expects this loop to be encapsulated inside a method on a collection type (like `type Nodes []Node` with a method that performs the iteration and delegation), not exposed in the orchestrator itself.\n\nThe refactored pattern would move the loop into a `Nodes` collection method, leaving `pickReplicas` with only named calls: something like `primary, secondary, err := nodes.selectReplicas(zone)`.\n\nVERDICT: FAIL",
+      "cost_usd": 0.019401
+    },
+    {
+      "name": "postcheck",
+      "type": "postcheck",
+      "passed": true,
+      "detail": "task test: ok\nPASS  task test green\ntask lint: ok\nPASS  task lint green\nPASS  Placer.Pick still exists in internal/placement\n  gocognit(pickReplicas) = 4\nPASS  gocognit of Pick and every receiver method it calls (4 \u003c= 5)\nPASS  no //nolint in internal/placement production code (0)\n== black-box suite: builds cmd/svc, replays the recorded heartbeats ==\n--- PASS: TestHeartbeatContract (1.18s)\n--- PASS: TestExpectedTSVMatchesTable (0.00s)\nok  \texample.com/heartbeat-blackbox\t1.185s\nblack-box: PASS\nPASS  black-box heartbeat suite\npostcheck: all checks passed"
+    }
+  ],
+  "cost_usd": 0.5614660000000001,
+  "judge_cost_usd": 0.041834,
+  "duration_ms": 155875,
+  "num_turns": 27,
+  "segments": 1,
+  "scaffold_dir": "/tmp/ldd-eval-case-c-picker-refactor-3583333173"
+}

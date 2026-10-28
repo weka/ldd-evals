@@ -1,0 +1,14 @@
+.identity {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.25rem 1rem;
+
+  dt {
+    color: #777;
+  }
+
+  dd {
+    margin: 0;
+    font-family: ui-monospace, monospace;
+  }
+}

@@ -1,0 +1,50 @@
+--- vote 1: PASS ---
+Looking at the report against the two criteria:
+
+**Question 1: Unguarded concurrent dict access under 🐛 Bugs?**
+
+Yes. Under the 🐛 Bugs section, the report lists:
+> `internal/services/device_service.py:194,383-385,458-460` (vs. the guarded access at 436-438) | R10 Q3/Q4: `self.last_seen` is written unguarded from the per-request heartbeat handler (194), from `purge()` outside its own lock's scope (383-385), and from the background `_flush_loop` thread (458-460, including a `del` during dict iteration) — while `flush()` correctly takes `self.mu` first.
+
+This correctly identifies the concurrent dict race condition and places it under Bugs.
+
+**Question 2: Production `time.sleep` calls under 🔴 Design Debt (not Bugs)?**
+
+Yes. Under the 🔴 Design Debt section (R10 — Concurrency), the report lists:
+> `internal/services/device_service.py:164`, `internal/services/retry.py:43,57`, `internal/services/sync_service.py:99` | Q5: 4 bare `time.sleep` calls in cancellable retry/backoff paths (one directly inside the per-request heartbeat handler).
+
+The `time.sleep` calls in `retry.py` and `sync_service.py` are correctly categorized as Design Debt, not Bugs.
+
+Both requirements are satisfied.
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+Looking at the report against the two criteria:
+
+**Question 1: Is the unguarded concurrent dict access listed under 🐛 Bugs?**
+
+Yes. In the Bugs section, I find:
+```
+`internal/services/device_service.py:194,383-385,458-460` | R10 Q3/Q4: `self.last_seen` is written unguarded 
+from the per-request heartbeat handler (194), from `purge()` outside its own lock's scope (383-385), and from 
+the background `_flush_loop` thread (458-460, including a `del` during dict iteration)
+```
+
+This is clearly filed under 🐛 Bugs and describes the exact data race condition: concurrent writes and dict iteration without locking.
+
+**Question 2: Is the production `time.sleep` listed under 🔴 Design Debt (not Bugs)?**
+
+Yes. Under the 🔴 Design Debt section, I find:
+```
+**R10 — Concurrency (non-crash)**
+
+`internal/services/device_service.py:164`, `internal/services/retry.py:43,57`, `internal/services/sync_service.py:99` 
+| Q5: 4 bare `time.sleep` calls in cancellable retry/backoff paths
+```
+
+This is filed under Design Debt (not Bugs), covering the production `time.sleep` calls for retry backoff in `retry.py` and `sync_service.py`.
+
+Both conditions are satisfied: the concurrent dict race is in Bugs, and the production sleep calls are in Design Debt.
+
+VERDICT: PASS

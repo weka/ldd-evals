@@ -1,0 +1,17 @@
+--- vote 1: PASS ---
+The report scans `src/types/grants.ts` and `src/pages/Devices/trace.ts` for violations. The 🔴 DESIGN DEBT section proposes five findings, none of which involve a `TraceID` domain type. No hunter or skeptic finding names, extracts, or proposes a TraceID type — the only mention of `traceId` appears in the criteria itself as a parameter example. The critic also cleared the JSDoc blocks in `trace.ts` as boundary contracts (KEEP), not as primitive-to-type extractions.
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+Reading the report for a TraceID domain type proposal in the 🔴 Design Debt section:
+
+The report covers two files: `src/types/grants.ts` and `src/pages/Devices/trace.ts`. The Design Debt findings are:
+1. ReplicaCount — collapse to bare `number`
+2. Name — collapse to bare `string`  
+3. Grants aliasing — copy on construction/return
+4. Architecture doc migration — not a type
+
+`trace.ts` is listed in scope and two JSDoc blocks there were reviewed (marked KEEP), but **no TraceID type extraction is proposed anywhere**. The skeptic was not spawned because "0 findings propose a new type or package." The file `trace.ts` contains `traceId` but it remains a pass-through string parameter with no domain type wrapper recommended.
+
+VERDICT: PASS

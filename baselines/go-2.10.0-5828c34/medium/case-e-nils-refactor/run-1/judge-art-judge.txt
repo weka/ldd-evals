@@ -1,0 +1,25 @@
+Looking at the code against each rubric condition:
+
+**1. Absence has a name:** ✓
+- `Find` returns `(Device, bool)`, not nil
+- "No sink" is explicitly `DiscardSink()` or `NopSink{}`
+- `Record` has no nil checks
+- Default clock set in constructor (`clock: time.Now`), never re-defaulted in methods
+
+**2. Constructor owns invariants:** ✓
+- `Reporter.sink` and `Reporter.clock` are unexported
+- `NewReporter(sink Sink, opts ...Option)` takes what it needs; no positional nils
+- `wire.go` reads as `NewReporter(NewSink(w))` — clean
+
+**3. Methods read as sentences:** ✓
+- `Record` is one line: `r.sink.Write(ev.At(r.clock()))`
+- `Announce` uses comma-ok pattern: `if d, ok := catalog.Find(name); ok {`
+
+**4. Comments earn their place:** ✗
+- `// Sink is where events are written.` — This comment is explicitly listed in the rubric as something that should be gone. The name `Sink` already conveys this; the comment adds no contract.
+- `// Record records the event.` — Follows the same self-referential pattern as `// Reporter is a reporter.`, which the rubric forbids.
+- `// Event is a reported event.` — Also somewhat self-evident.
+
+The rubric states "PASS only if all four hold" and explicitly calls out `// Sink is where events are written.` as something that must not survive.
+
+VERDICT: FAIL

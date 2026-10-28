@@ -1,0 +1,70 @@
+--- vote 1: PASS ---
+Looking at the `ProcessHeartbeat` method (lines 84-120), I need to verify it follows a clean, high-level pattern with only named calls and assignments.
+
+**Method structure analysis:**
+1. `parseHeartbeatFields(raw, force)` — named call ✓
+2. Early error return ✓
+3. `id, tags = fields.id, fields.tags` — assignment ✓
+4. `s.getOrCreateHeartbeatDevice(...)` — named call ✓
+5. Early error return ✓
+6. `changed = s.applyStatusTransition(...)` — assignment of named call ✓
+7. Conditional version update (simple if, one level) ✓
+8. Conditional tags update (simple if, one level) ✓
+9. `n = heartbeatScore(...)` — assignment of named call ✓
+10. `d.LastSeen = time.Now()` — assignment ✓
+11. Persistence block (max 2-level nesting at lines 109-111) ✓
+12. `s.lastSeen[id] = d.LastSeen` — map assignment ✓
+
+**Checking for forbidden constructs:**
+- No `strings.` calls in the body (string manipulation is in `parseHeartbeatFields`, a helper)
+- No slice indexing like `parts[0]`
+- No string comparisons against status literals
+- No `labeled continue`, `goto`, `time.Sleep`, or retry loops
+- Nesting depth is at most 2 levels (lines 109-110), which is acceptable
+
+Every statement is either a named call, an assignment of one, or an early error return. The method delegates low-level work to helpers (`parseHeartbeatFields`, `getOrCreateHeartbeatDevice`, `applyStatusTransition`, `heartbeatScore`) and reads like a clean workflow at a single altitude.
+
+VERDICT: PASS
+
+--- vote 2: FAIL ---
+Looking at the `ProcessHeartbeat` method in the provided file, I need to check if its body follows the "single altitude" principle where every statement is a named call or an assignment.
+
+**Issues found:**
+
+1. **Conditional logic without early returns**: Lines like `if d.Version != fields.version && fields.version != "" { d.Version = fields.version; changed = true }` and `if len(tags) > 0 { d.Tags = tags; changed = true }` are conditionals that don't guard error returns. Per the rubric, only conditionals wrapping early error returns should appear in the body.
+
+2. **Complex update logic**: The method interleaves status transition logic with version and tag updates, then conditionally persists. This violates the "short story" principle of: parse → lookup → transition → score → persist, with each as a single call.
+
+3. **Nested conditionals**: The outer `if changed || force` with an inner `if err = s.repo.Save(...)` creates two levels of nesting. While technically allowed ("more than two levels" would fail), the outer conditional doesn't guard an early return, which is outside the allowed pattern.
+
+4. **Index manipulation**: `s.cache[cacheKey(tenant, id)] = d` and `s.lastSeen[id] = d.LastSeen` involve indexed access/assignment, which the criteria explicitly excludes.
+
+The body should be flattened: helper functions should handle version/tag updates and conditional persistence, leaving ProcessHeartbeat as purely a sequence of named calls.
+
+VERDICT: FAIL
+
+--- vote 3: PASS ---
+Looking at the `ProcessHeartbeat` method on `DeviceService` (lines 67-101), I'll check against the rubric.
+
+**Method location**: ✓ Defined in the file at the correct location.
+
+**Body structure - "short story" check**:
+1. Parse line: `parseHeartbeatFields(raw, force)` ✓
+2. Look up/create device: `s.getOrCreateHeartbeatDevice(tenant, id, tags)` ✓
+3. Apply status transition: `s.applyStatusTransition(&d, fields.status, force)` ✓ (notification delegated to helper)
+4. Score: `heartbeatScore(d.Status, tags)` ✓
+5. Persist: `s.repo.Save(context.Background(), d)` ✓
+
+**Statement analysis**: Every statement in the body is either a named call, an assignment of one, or an early error return. Map accesses like `s.cache[cacheKey(...)] = d` and `s.lastSeen[id] = d.LastSeen` are direct assignments, not slice manipulation.
+
+**Forbidden patterns check**:
+- No `strings.` calls in the body ✓ (parsing delegated to helper)
+- No slice indexing ✓
+- No string comparisons against status literals (comparisons like `d.Version != ""` are against empty string, not status constants) ✓
+- No labeled `continue`, `goto`, `time.Sleep` ✓
+- No hand-rolled retry loops ✓
+- Nesting depth: Maximum 2 levels (outer `if changed || force`, inner `if err = s.repo.Save()`) ✓
+
+The body is clean, delegating all low-level work to well-named helpers (`parseHeartbeatFields`, `getOrCreateHeartbeatDevice`, `applyStatusTransition`, `heartbeatScore`) as intended.
+
+VERDICT: PASS

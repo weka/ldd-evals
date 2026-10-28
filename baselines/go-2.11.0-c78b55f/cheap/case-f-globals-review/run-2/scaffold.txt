@@ -1,0 +1,1 @@
+scaffolded go-mini at /tmp/ldd-eval-case-f-globals-review-909150678 (c38e6de)

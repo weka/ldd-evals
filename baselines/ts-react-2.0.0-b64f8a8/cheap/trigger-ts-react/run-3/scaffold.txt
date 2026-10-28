@@ -1,0 +1,1 @@
+scaffolded ts-react-mini at /tmp/ldd-eval-trigger-ts-react-1788161667 (6984a3b; node_modules from /tmp/ts-react-mini-npm-cache)

@@ -1,0 +1,783 @@
+{
+  "case": "review-full",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": false,
+  "graders": [
+    {
+      "name": "bugs-section",
+      "type": "regex",
+      "passed": true,
+      "detail": "🐛 over last_message: 1 match(es); want at least 1"
+    },
+    {
+      "name": "cluster-alert-channel",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i:\\bcluster\\b)[^\\n]*\\b(?i:(Alert\\.channel|channel))\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*•]|[0-9]+[.)])[ \\t]*\\**\\x60?(?i:(Alert\\.channel|channel))\\b over last_message: 4 match(es); want at least 1"
+    },
+    {
+      "name": "cluster-device-status",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i:\\bcluster\\b)[^\\n]*\\b(?i:(Device\\.status|status))\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*•]|[0-9]+[.)])[ \\t]*\\**\\x60?(?i:(Device\\.status|status))\\b over last_message: 4 match(es); want at least 1"
+    },
+    {
+      "name": "cluster-device",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i:\\bcluster\\b)[^\\n]*\\b(?i:Device)\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*•]|[0-9]+[.)])[ \\t]*\\**\\x60?(?i:Device)\\b over last_message: 6 match(es); want at least 1"
+    },
+    {
+      "name": "cluster-job-kind",
+      "type": "regex",
+      "passed": false,
+      "detail": "(?i:\\bcluster\\b)[^\\n]*\\b(?i:(Job\\.kind|kind))\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*•]|[0-9]+[.)])[ \\t]*\\**\\x60?(?i:(Job\\.kind|kind))\\b over last_message: 0 match(es); want at least 1"
+    },
+    {
+      "name": "cluster-processheartbeat",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i:\\bcluster\\b)[^\\n]*\\b(?i:processHeartbeat)\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*•]|[0-9]+[.)])[ \\t]*\\**\\x60?(?i:processHeartbeat)\\b over last_message: 6 match(es); want at least 1"
+    },
+    {
+      "name": "cluster-reporter",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i:\\bcluster\\b)[^\\n]*\\b(?i:Reporter)\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*•]|[0-9]+[.)])[ \\t]*\\**\\x60?(?i:Reporter)\\b over last_message: 7 match(es); want at least 1"
+    },
+    {
+      "name": "cluster-retention",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i:\\bcluster\\b)[^\\n]*\\b(?i:retention)\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*•]|[0-9]+[.)])[ \\t]*\\**\\x60?(?i:retention)\\b over last_message: 1 match(es); want at least 1"
+    },
+    {
+      "name": "cluster-role-packages",
+      "type": "regex",
+      "passed": true,
+      "detail": "CLUSTER[^\\n]*(role packages|common\\b[^\\n]*utils|utils\\b[^\\n]*common) over last_message: 1 match(es); want at least 1"
+    },
+    {
+      "name": "evidence-protocol",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\.tsx?:[0-9]+ over last_message: 207 match(es); want at least 1"
+    },
+    {
+      "name": "hunters-spawned",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Agent(rule-hunter) called 4 time(s); want \u003e= 3"
+    },
+    {
+      "name": "judge-categories",
+      "type": "llm",
+      "passed": true,
+      "detail": "judge claude-haiku-4-5 (PASS,PASS): --- vote 1: PASS ---\nLooking at the report structure:\n\n**Question 1: Concurrency bugs under 🐛 Bugs?**\n\nIn the 🐛 BUGS section, I find:\n- `src/hooks/useDeviceFeed.ts:13-22` | R10 Q1: **`setInterval` inside `useEffect` returns no cleanup function** ✓\n- `src/hooks/useDeviceSearch.ts:13-30` (within the CustomerContext/AlertsTab entry) | R10 Q2/Q3: **floating `.then()` fetches, no `AbortController`/ignore flag — results can be overwritten by a slower, stale response** ✓\n\nBoth real concurrency bugs are correctly filed under 🐛 Bugs, not Design Debt.\n\n**Question 2: Production sleeps under 🔴 Design Debt (not Bugs)?**\n\nIn the 🔴 DESIGN DEBT section:\n- `src/pages/Heartbeats/heartbeatFeed.ts:667` | R10 Q5: fixed `setTimeout` backoff in a retry loop ✓\n- `src/services/retry.ts:49,64` | R10 Q5: `withRetry`/`sendWithRetry` sleep on fixed `setTimeout` ✓\n- `src/services/syncService.ts:144` | R10 Q5: `saveWithRetry` sleeps on fixed `setTimeout` ✓\n\nAll three production sleeps (in services/ and heartbeat feed) are correctly listed under Design Debt, not Bugs.\n\nBoth criteria are satisfied.\n\nVERDICT: PASS\n\n--- vote 2: PASS ---\nLooking at the report against the RUBRIC criteria:\n\n**Question 1: Real concurrency bugs under 🐛 Bugs?**\n\nThe 🐛 BUGS section includes:\n- `src/hooks/useDeviceFeed.ts:13-22` — the unowned `setInterval` with no cleanup function ✓\n- `src/hooks/useDeviceSearch.ts:13-30` — the floating `.then()` fetches without AbortController/ignore flag causing out-of-order responses ✓\n\nBoth real concurrency bugs are correctly filed under 🐛 Bugs, not under Design Debt or other categories.\n\n**Question 2: Production sleeps under 🔴 Design Debt, not Bugs?**\n\nThe 🔴 DESIGN DEBT section includes:\n- `src/services/retry.ts:49,64` — \"sleep on a fixed `setTimeout`, no cancellation\" | Replace Sleep with Cancellable Wait\n- `src/services/syncService.ts:144` — \"sleeps on a fixed `setTimeout`, no signal\" | Replace Sl…(truncated)",
+      "cost_usd": 0.0837586
+    },
+    {
+      "name": "no-edit",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Edit called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "no-write",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Write called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "nolint-finding",
+      "type": "regex",
+      "passed": true,
+      "detail": "eslint-disable|ts-expect-error|ts-ignore over last_message: 3 match(es); want at least 1"
+    },
+    {
+      "name": "precision-CTRL.R1.error-payload-map",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i)\\b(error ?(payload|body|response|message)) (type|class|interface)\\b|Name the Container[^\\n]{0,80}\"error\" over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R1.named-const",
+      "type": "regex",
+      "passed": true,
+      "detail": "MAX_LEN|MINUTES_PER_DAY over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R1.tenant-type",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?:^|[^A-Za-z0-9_])(?:tenant\\.ts):[0-9][^\\n|]*\\|[^\\n|]*\\bR1\\b over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R1.trace-id-string",
+      "type": "regex",
+      "passed": true,
+      "detail": "TraceI[Dd]\\b over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R10.main-jitter-sleep",
+      "type": "regex",
+      "passed": true,
+      "detail": "JITTER_MAX_MS|Math\\.random over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R10.repo-mutex",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?:^|[^A-Za-z0-9_])(?:useAlerts\\.ts):[0-9][^\\n|]*\\|[^\\n|]*\\bR10\\b over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R10.worker-range",
+      "type": "regex",
+      "passed": true,
+      "detail": "Promise\\.all\\(workers\\) over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R11.region-zone-switch",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?:^|[^A-Za-z0-9_])(?:region\\.ts):[0-9][^\\n|]*\\|[^\\n|]*\\bR11\\b over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R11.value-conditional",
+      "type": "regex",
+      "passed": true,
+      "detail": "this\\.start \u003c this\\.end over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R12.honest-mutator",
+      "type": "regex",
+      "passed": true,
+      "detail": "drainPending\\(\\) over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R2.snapshot-repository",
+      "type": "regex",
+      "passed": true,
+      "detail": "if \\(!now\\) over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R2.window-plan",
+      "type": "regex",
+      "passed": true,
+      "detail": "Window\\.parse over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R3.guard-clauses",
+      "type": "regex",
+      "passed": true,
+      "detail": "(names\\.length|this\\.devices\\.size) === 0 over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R3.orchestrator",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\bprune\\( over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R4.private-helper",
+      "type": "regex",
+      "passed": true,
+      "detail": "parseClock over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R6.store-interface",
+      "type": "regex",
+      "passed": true,
+      "detail": "PreferencesStore\\b over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R7.no-survivors-placement",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?:^|[^A-Za-z0-9_])(?:picker\\.ts):[0-9][^\\n|]*\\|[^\\n|]*\\bR7\\b over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R7.split-tables",
+      "type": "regex",
+      "passed": true,
+      "detail": "(success|error): % over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R8.compile-time-check",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\bROUTES\\b over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R9.why-comments",
+      "type": "regex",
+      "passed": true,
+      "detail": "refuses storage|joined later|races a manual cleanup over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "recall-CASE-A.defensive-recheck",
+      "type": "regex",
+      "passed": true,
+      "detail": "policy\\.ts over last_message: 4 match(es); want at least 1"
+    },
+    {
+      "name": "recall-CASE-A.retention-range-twice",
+      "type": "regex",
+      "passed": true,
+      "detail": "(policy\\.ts|config\\.ts) over last_message: 7 match(es); want at least 1"
+    },
+    {
+      "name": "recall-CASE-A.zero-sentinel",
+      "type": "regex",
+      "passed": true,
+      "detail": "config\\.ts over last_message: 3 match(es); want at least 1"
+    },
+    {
+      "name": "recall-CASE-B.host-port-tls-clump",
+      "type": "regex",
+      "passed": true,
+      "detail": "client\\.ts over last_message: 4 match(es); want at least 1"
+    },
+    {
+      "name": "recall-CASE-C.flag-loop",
+      "type": "regex",
+      "passed": true,
+      "detail": "picker\\.ts over last_message: 3 match(es); want at least 1"
+    },
+    {
+      "name": "recall-CASE-D.replica-count",
+      "type": "regex",
+      "passed": true,
+      "detail": "grants\\.ts over last_message: 6 match(es); want at least 1"
+    },
+    {
+      "name": "recall-CASE-E.nil-field-rechecked",
+      "type": "regex",
+      "passed": true,
+      "detail": "reporter\\.ts over last_message: 6 match(es); want at least 1"
+    },
+    {
+      "name": "recall-CASE-E.nil-parameters",
+      "type": "regex",
+      "passed": true,
+      "detail": "(wire\\.ts|reporter\\.ts) over last_message: 8 match(es); want at least 1"
+    },
+    {
+      "name": "recall-CASE-E.nil-return",
+      "type": "regex",
+      "passed": false,
+      "detail": "parseDevice|catalog\\.ts:(4[8-9]|5[0-9]|6[0-2])\\b over last_message: 0 match(es); want at least 1"
+    },
+    {
+      "name": "recall-CASE-F.deep-reads",
+      "type": "regex",
+      "passed": true,
+      "detail": "(workers\\.ts|useSnapshotScheduler\\.ts) over last_message: 4 match(es); want at least 1"
+    },
+    {
+      "name": "recall-CASE-F.env-config-global",
+      "type": "regex",
+      "passed": true,
+      "detail": "env\\.ts|\\bCONFIG\\b over last_message: 7 match(es); want at least 1"
+    },
+    {
+      "name": "recall-CASE-F.test-mutates-global",
+      "type": "regex",
+      "passed": false,
+      "detail": "workers\\.test\\.ts over last_message: 0 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R1.Q1.handler-inline-checks",
+      "type": "regex",
+      "passed": true,
+      "detail": "DeviceForm\\.tsx over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R1.Q1.settings-blob",
+      "type": "regex",
+      "passed": true,
+      "detail": "(job\\.ts|heartbeatFeed\\.ts) over last_message: 45 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R1.Q2.email-contains-twice",
+      "type": "regex",
+      "passed": true,
+      "detail": "(DeviceForm\\.tsx|validate\\.ts) over last_message: 5 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R1.Q3.raw-channel-string",
+      "type": "regex",
+      "passed": true,
+      "detail": "(alert\\.ts|channel\\.ts) over last_message: 3 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R1.Q3.region-byte-slices",
+      "type": "regex",
+      "passed": true,
+      "detail": "(heartbeatFeed\\.ts|tags\\.ts) over last_message: 44 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R1.Q3.status-enum-goconst",
+      "type": "regex",
+      "passed": true,
+      "detail": "(alertService\\.ts|heartbeatFeed\\.ts|StatusPage\\.tsx) over last_message: 50 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R1.Q3.tags-loop",
+      "type": "regex",
+      "passed": true,
+      "detail": "(heartbeatFeed\\.ts|tags\\.ts|syncService\\.ts) over last_message: 52 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R1.Q5.heartbeat-clump",
+      "type": "regex",
+      "passed": true,
+      "detail": "(heartbeatFeed\\.ts|simulateRequest\\.ts) over last_message: 42 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R1.Q5.new-sync-service-six-params",
+      "type": "regex",
+      "passed": true,
+      "detail": "syncService\\.ts over last_message: 8 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R1.Q5.tenant-id-clump",
+      "type": "regex",
+      "passed": true,
+      "detail": "(heartbeatFeed\\.ts|deviceRepository\\.ts|devicesApi\\.ts|deviceApiMock\\.ts) over last_message: 48 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R1.Q7.catalog-models-nested",
+      "type": "regex",
+      "passed": true,
+      "detail": "(catalog\\.ts|wire\\.ts) over last_message: 4 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R1.Q8.retention-raw-map",
+      "type": "regex",
+      "passed": true,
+      "detail": "(config\\.ts|policy\\.ts|scheduler\\.ts) over last_message: 7 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R1.lint.run-loop-dupl",
+      "type": "regex",
+      "passed": true,
+      "detail": "(snapshotService\\.ts|syncService\\.ts) over last_message: 18 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R10.Q1.unowned-loop",
+      "type": "regex",
+      "passed": true,
+      "detail": "(heartbeatFeed\\.ts|useDeviceFeed\\.ts) over last_message: 45 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R10.Q2.goroutine-in-constructor",
+      "type": "regex",
+      "passed": true,
+      "detail": "(heartbeatFeed\\.ts|CustomerContext\\.tsx) over last_message: 47 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R10.Q3.last-seen-race",
+      "type": "regex",
+      "passed": true,
+      "detail": "useDeviceSearch\\.ts over last_message: 3 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R10.Q4.split-guard",
+      "type": "regex",
+      "passed": true,
+      "detail": "cache\\.ts over last_message: 5 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R10.Q5.production-sleep",
+      "type": "regex",
+      "passed": true,
+      "detail": "setTimeout\\(resolve, \\(?(attempt|retryDelay|\\(attempt)|Replace Sleep with Cancellable Wait|awaited \\x60?setTimeout\\x60?[^\\n]{0,60}(retry|backoff) over last_message: 3 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R10.react.exhaustive-deps-disabled",
+      "type": "regex",
+      "passed": true,
+      "detail": "useDeviceFeed\\.ts over last_message: 3 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R10.react.fetch-in-effect-no-abort",
+      "type": "regex",
+      "passed": true,
+      "detail": "AlertsTab\\.tsx over last_message: 4 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R11.Q1.channel-switch",
+      "type": "regex",
+      "passed": true,
+      "detail": "(notify\\.ts|validate\\.ts|retry\\.ts) over last_message: 16 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R11.Q1.job-kind-if",
+      "type": "regex",
+      "passed": true,
+      "detail": "(snapshotService\\.ts|job\\.ts) over last_message: 13 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R11.Q1.priority-switch-not-exhaustive",
+      "type": "regex",
+      "passed": true,
+      "detail": "retry\\.ts over last_message: 5 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R11.Q1.status-switch",
+      "type": "regex",
+      "passed": true,
+      "detail": "(StatusPage\\.tsx|alertService\\.ts|heartbeatFeed\\.ts) over last_message: 50 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R11.Q3.default-unknown-channel",
+      "type": "regex",
+      "passed": true,
+      "detail": "(notify\\.ts|StatusBadge\\.tsx) over last_message: 9 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R11.Q4.flag-arguments",
+      "type": "regex",
+      "passed": true,
+      "detail": "(heartbeatFeed\\.ts|syncService\\.ts|DeviceTable\\.tsx) over last_message: 53 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R12.Q1.leaked-internals",
+      "type": "regex",
+      "passed": true,
+      "detail": "(cache\\.ts|grants\\.ts|schedule\\.ts|snapshotService\\.ts) over last_message: 26 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R12.Q2.stored-parameter",
+      "type": "regex",
+      "passed": true,
+      "detail": "(schedule\\.ts|grants\\.ts) over last_message: 11 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R12.Q3.query-that-mutates",
+      "type": "regex",
+      "passed": true,
+      "detail": "(cache\\.ts|useDevices\\.ts) over last_message: 7 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R12.Q4.setter",
+      "type": "regex",
+      "passed": true,
+      "detail": "OverviewTab\\.tsx over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R12.Q5.n-reused",
+      "type": "regex",
+      "passed": true,
+      "detail": "(heartbeatFeed\\.ts|cache\\.ts) over last_message: 47 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R12.react.sort-in-render",
+      "type": "regex",
+      "passed": true,
+      "detail": "useDevices\\.ts over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R2.Q1.alert-exported-fields",
+      "type": "regex",
+      "passed": true,
+      "detail": "(alert\\.ts|alertService\\.ts) over last_message: 6 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R2.Q1.device-exported-fields",
+      "type": "regex",
+      "passed": true,
+      "detail": "device\\.ts over last_message: 4 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R2.Q1.device-literal-in-service",
+      "type": "regex",
+      "passed": true,
+      "detail": "(heartbeatFeed\\.ts|DeviceForm\\.tsx) over last_message: 44 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R2.Q2.method-nil-checks",
+      "type": "regex",
+      "passed": true,
+      "detail": "(heartbeatFeed\\.ts|notify\\.ts) over last_message: 50 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R3.Q1.process-heartbeat",
+      "type": "regex",
+      "passed": true,
+      "detail": "heartbeatFeed\\.ts over last_message: 42 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R3.react.unstable-nested-component",
+      "type": "regex",
+      "passed": true,
+      "detail": "DeviceView\\.tsx over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R4.Q1.exported-for-tests",
+      "type": "regex",
+      "passed": true,
+      "detail": "(heartbeatFeed\\.ts|heartbeatFeed\\.test\\.ts|deviceService\\.test\\.ts) over last_message: 47 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R4.Q2.private-tested-directly",
+      "type": "regex",
+      "passed": true,
+      "detail": "(heartbeatFeed\\.ts|heartbeatFeed\\.test\\.ts) over last_message: 43 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R4.Q3.role-named-packages",
+      "type": "regex",
+      "passed": true,
+      "detail": "(strings\\.ts|time\\.ts|constants\\.ts) over last_message: 9 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R4.Q4.single-noun-package",
+      "type": "regex",
+      "passed": true,
+      "detail": "deviceId(\\.test)?\\.ts over last_message: 1 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R4.Q5.feature-literal-in-common",
+      "type": "regex",
+      "passed": true,
+      "detail": "constants\\.ts over last_message: 3 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R5.Q1.models-red-zone",
+      "type": "regex",
+      "passed": true,
+      "detail": "(device\\.ts|alert\\.ts|job\\.ts) over last_message: 8 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R5.Q1.role-layers",
+      "type": "regex",
+      "passed": true,
+      "detail": "(Layout\\.tsx|useDevices\\.ts|devicesApi\\.ts|device\\.ts) over last_message: 7 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R5.Q2.snapshot-spread",
+      "type": "regex",
+      "passed": true,
+      "detail": "(snapshotsApi\\.ts|snapshot\\.ts|useSnapshots\\.ts) over last_message: 4 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R5.Q4.two-snapshot-homes",
+      "type": "regex",
+      "passed": true,
+      "detail": "(useSnapshots\\.ts|index\\.ts) over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R5.Q5.no-migration-doc",
+      "type": "regex",
+      "passed": true,
+      "detail": "(index\\.ts|README\\.md) over last_message: 1 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R5.react.prop-drilling",
+      "type": "regex",
+      "passed": true,
+      "detail": "(DeviceView\\.tsx|DeviceTabs\\.tsx|OverviewTab\\.tsx) over last_message: 5 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R6.Q1.device-repository",
+      "type": "regex",
+      "passed": true,
+      "detail": "deviceRepository\\.ts over last_message: 3 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R6.Q1.formatter-ireturn",
+      "type": "regex",
+      "passed": true,
+      "detail": "alertService\\.ts over last_message: 5 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R6.Q2.mock-repo-double",
+      "type": "regex",
+      "passed": true,
+      "detail": "deviceApiMock\\.ts over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R6.Q3.import-cycle-claim",
+      "type": "regex",
+      "passed": true,
+      "detail": "(notifierMock\\.ts|deviceRepository\\.ts) over last_message: 5 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R6.Q4.sync-service-takes-interface",
+      "type": "regex",
+      "passed": true,
+      "detail": "(syncService\\.ts|snapshotService\\.ts) over last_message: 18 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R6.Q5.notifier-api",
+      "type": "regex",
+      "passed": true,
+      "detail": "notifierMock\\.ts over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R6.react.vi-mock-internal-hook",
+      "type": "regex",
+      "passed": true,
+      "detail": "DevicesPage\\.test\\.tsx over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R7.Q1.wanterr-tables",
+      "type": "regex",
+      "passed": true,
+      "detail": "(deviceService\\.test\\.ts|picker\\.test\\.ts) over last_message: 6 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R7.Q2.internal-test-package",
+      "type": "regex",
+      "passed": true,
+      "detail": "(deviceService\\.test\\.ts|retry\\.ts) over last_message: 9 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R7.Q3.big-object-leaf-test",
+      "type": "regex",
+      "passed": true,
+      "detail": "HeartbeatsPage\\.test\\.tsx over last_message: 1 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R7.Q5.call-count-assertions",
+      "type": "regex",
+      "passed": true,
+      "detail": "(heartbeatFeed\\.test\\.ts|useSnapshotScheduler\\.test\\.tsx|deviceService\\.test\\.ts) over last_message: 7 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R7.Q6.sleep-then-assert",
+      "type": "regex",
+      "passed": true,
+      "detail": "(HeartbeatsPage\\.test\\.tsx|ExportPanel\\.test\\.tsx|deviceService\\.test\\.ts) over last_message: 6 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R7.Q7.slugify-leading-separator",
+      "type": "regex",
+      "passed": true,
+      "detail": "strings(\\.test)?\\.ts over last_message: 4 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R7.Q7.tenant-rune-boundary",
+      "type": "regex",
+      "passed": true,
+      "detail": "tenant(\\.test)?\\.ts over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R7.react.testid-over-role",
+      "type": "regex",
+      "passed": false,
+      "detail": "DeviceForm\\.test\\.tsx over last_message: 0 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R8.Q1.registry-globals",
+      "type": "regex",
+      "passed": true,
+      "detail": "(registry\\.ts|apiQueryClient\\.ts|apiClient\\.ts) over last_message: 5 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R8.Q2.init-registration",
+      "type": "regex",
+      "passed": true,
+      "detail": "(index\\.ts|env\\.ts) over last_message: 5 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R8.Q3.context-background-in-service",
+      "type": "regex",
+      "passed": true,
+      "detail": "(syncService\\.ts|notify\\.ts|apiQueryClient\\.ts) over last_message: 18 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R8.Q4.sync-once-store",
+      "type": "regex",
+      "passed": true,
+      "detail": "apiQueryClient\\.ts over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R8.Q5.flap-window-from-service",
+      "type": "regex",
+      "passed": true,
+      "detail": "(heartbeatFeed\\.ts|snapshotService\\.ts) over last_message: 52 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R8.Q5.getenv-in-method",
+      "type": "regex",
+      "passed": true,
+      "detail": "(syncService\\.ts|notify\\.ts) over last_message: 16 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R9.Q1.orphan-doc",
+      "type": "regex",
+      "passed": true,
+      "detail": "heartbeat-protocol\\.md over last_message: 6 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R9.Q2.missing-doc-edge",
+      "type": "regex",
+      "passed": true,
+      "detail": "heartbeat\\.ts over last_message: 4 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R9.Q3.unwired-root",
+      "type": "regex",
+      "passed": true,
+      "detail": "CLAUDE\\.md over last_message: 3 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R9.Q4.creates-a-new",
+      "type": "regex",
+      "passed": true,
+      "detail": "(heartbeatFeed\\.ts|notify\\.ts|alertService\\.ts|snapshotService\\.ts|syncService\\.ts|client\\.ts|reporter\\.ts) over last_message: 83 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R9.Q4.what-comments",
+      "type": "regex",
+      "passed": true,
+      "detail": "(device\\.ts|heartbeat\\.ts|schedule\\.ts|heartbeatFeed\\.ts|notify\\.ts|cache\\.ts|reporter\\.ts|env\\.ts|alertService\\.ts|snapshotService\\.ts|syncService\\.ts) over last_message: 101 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R9.Q5.naked-exports",
+      "type": "regex",
+      "passed": true,
+      "detail": "(alert\\.ts|job\\.ts|snapshot\\.ts|tags\\.ts|jobKind\\.ts|validate\\.ts) over last_message: 11 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R9.critic.caller-must",
+      "type": "regex",
+      "passed": true,
+      "detail": "(heartbeat\\.ts|heartbeatFeed\\.ts) over last_message: 46 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R9.critic.restated-idiom",
+      "type": "regex",
+      "passed": true,
+      "detail": "(heartbeatFeed\\.ts|snapshotService\\.ts|syncService\\.ts) over last_message: 60 match(es); want at least 1"
+    },
+    {
+      "name": "report-header",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i)CODE REVIEW REPORT|Commit Readiness Report over last_message: 1 match(es); want at least 1"
+    },
+    {
+      "name": "rule-cited",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\bR(1[0-2]|[1-9])\\b over last_message: 136 match(es); want at least 1"
+    },
+    {
+      "name": "skeptic-refuted",
+      "type": "regex",
+      "passed": true,
+      "detail": "REFUTED over last_message: 4 match(es); want at least 1"
+    }
+  ],
+  "cost_usd": 6.5833227,
+  "judge_cost_usd": 0.0837586,
+  "duration_ms": 2305513,
+  "num_turns": 17,
+  "segments": 1,
+  "scaffold_dir": "/tmp/ldd-eval-review-full-193265866"
+}

@@ -1,0 +1,39 @@
+{
+  "case": "case-d-ceremony-refactor",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": false,
+  "graders": [
+    {
+      "name": "art-judge",
+      "type": "llm",
+      "passed": false,
+      "detail": "judge claude-haiku-4-5: Looking at the FOCUS files against the RUBRIC's four criteria:\n\n**Criterion 1 - No new indirection:**\nSeveral types introduce accessors that add a layer over direct field access:\n- `Heartbeat` has `// Line returns the line. func (h Heartbeat) Line() string { return h.Raw }` — wraps the public `Raw` field unnecessarily. Quote: `func (h Heartbeat) Line() string { return h.Raw }`\n- `Device` has `func (d *Device) SetStatus(s string) { d.Status = s }` — setter for a public field. The comment `// SetStatus sets the status.` restates the obvious without explaining why this indirection exists.\n- `Schedule` has `func (s Schedule) Days() []Weekday { return s.days }` — accessor for a private field, which is reasonable, but the comment `// Days returns the days.` adds length without WHY.\n\nThese setters and getters add structure (indirection) that the plain fields and direct access did not need, violating the principle. ✗\n\n**Criterion 2 - Deletion allowed, growth not:**\n`grants.go` is absent from FOCUS (deleted if unreferenced, which passes). However, visible code includes methods on structs — without the before state, unclear if grown. The pattern of accessor methods suggests growth. ✗\n\n**Criterion 3 - Trace reason survives:**\nQuote from `trace.go`: `// List returns the device listing handler. It echoes the caller's X-Trace header so a device's log lines and the request that produced them can be joined later.` ✓\n\n**Criterion 4 - Names kept, sharpened:**\nIdentifiers `List`, `Routes`, `Status`, `IsOnline`, `Outranks` are sharp, no renames adding words. ✓\n\n**Additional violation:**\nThe non-informative comments (`SetStatus sets the status`, `Line returns the line`, `Days returns the days`, `IsOnline returns whether the device is online`) make code longer to read without adding information about WHY, violating the rubric's principle: \"Anything that made a reader's glance longer than before is FAIL.\"\n\nSetters like `SetStatus` and accessors like…(truncated)",
+      "cost_usd": 0.07872900000000001
+    },
+    {
+      "name": "no-traceid-type",
+      "type": "regex",
+      "passed": true,
+      "detail": "type TraceID over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "trace-header-still-set",
+      "type": "regex",
+      "passed": true,
+      "detail": "Header\\(\\)\\.Set\\(\"X-Trace\" over files: 1 match(es); want at least 1"
+    },
+    {
+      "name": "postcheck",
+      "type": "postcheck",
+      "passed": true,
+      "detail": "task test: ok\nPASS  task test green\ntask lint: ok\nPASS  task lint green\nPASS  ReplicaCount has at most its original single method (deleted or untouched, never grown) (0 \u003c= 1)\nPASS  ReplicaCount is declared at most once (0 \u003c= 1)\nPASS  no TraceID-like wrapper appeared anywhere (0)\n== black-box suite: builds cmd/svc, replays the recorded heartbeats ==\n--- PASS: TestHeartbeatContract (1.21s)\n--- PASS: TestExpectedTSVMatchesTable (0.00s)\nok  \texample.com/heartbeat-blackbox\t1.215s\nblack-box: PASS\nPASS  black-box heartbeat suite\npostcheck: all checks passed"
+    }
+  ],
+  "cost_usd": 0.3171314,
+  "judge_cost_usd": 0.07872900000000001,
+  "duration_ms": 96453,
+  "num_turns": 22,
+  "segments": 1,
+  "scaffold_dir": "/tmp/ldd-eval-case-d-ceremony-refactor-167591424"
+}

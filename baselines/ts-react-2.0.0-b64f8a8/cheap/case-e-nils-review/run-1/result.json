@@ -1,0 +1,98 @@
+{
+  "case": "case-e-nils-review",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": true,
+  "graders": [
+    {
+      "name": "anchor-report",
+      "type": "regex",
+      "passed": true,
+      "detail": "(reporter|catalog|wire)\\.ts:[0-9]+ over last_message: 28 match(es); want at least 1"
+    },
+    {
+      "name": "cluster-reporter",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i)\\bcluster\\b[^\\n]*Reporter over last_message: 5 match(es); want at least 1"
+    },
+    {
+      "name": "evidence-protocol",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\.tsx?:[0-9]+ over last_message: 31 match(es); want at least 1"
+    },
+    {
+      "name": "fix-comma-ok",
+      "type": "regex",
+      "passed": true,
+      "detail": "Separate Failure from Absence|throw new \\w*Error|\\bthrows?\\b[^\\n]{0,60}\\b(malformed|invalid)|(malformed|invalid)[^\\n]{0,60}\\bthrows?\\b over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "fix-constructor",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i)validating constructor|hoist[^\\n]{0,40}(check|default)|null[- ]?object|privati[sz]e|private (readonly )?(the |field|sink|clock|#)|fields private|#sink|readonly|parameter default|default parameter|options object over last_message: 10 match(es); want at least 1"
+    },
+    {
+      "name": "fix-null-object",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i)null[- ]?object over last_message: 4 match(es); want at least 1"
+    },
+    {
+      "name": "no-edit",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Edit called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "no-multiedit",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "MultiEdit called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "no-write",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Write called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "precision-newcatalog-clean",
+      "type": "regex",
+      "passed": true,
+      "detail": "catalog\\.ts:[0-9]+[^\\n]*\\bR12\\b over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "r2-q2-field-recheck",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?s)(reporter|catalog|wire)\\.ts:[0-9]+.{0,500}\\bQ2\\b over last_message: 1 match(es); want at least 1"
+    },
+    {
+      "name": "r2-q5-nil-return",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?s)(reporter|catalog|wire)\\.ts:[0-9]+.{0,500}\\bQ5\\b over last_message: 3 match(es); want at least 1"
+    },
+    {
+      "name": "r2-q6-nil-args",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?s)(reporter|catalog|wire)\\.ts:[0-9]+.{0,500}\\bQ6\\b over last_message: 1 match(es); want at least 1"
+    },
+    {
+      "name": "rule-cited",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\bR(1[0-2]|[1-9])\\b over last_message: 46 match(es); want at least 1"
+    }
+  ],
+  "cost_usd": 2.3743062,
+  "judge_cost_usd": 0,
+  "duration_ms": 835804,
+  "num_turns": 23,
+  "segments": 1,
+  "scaffold_dir": "/tmp/ldd-eval-case-e-nils-review-1837469686"
+}

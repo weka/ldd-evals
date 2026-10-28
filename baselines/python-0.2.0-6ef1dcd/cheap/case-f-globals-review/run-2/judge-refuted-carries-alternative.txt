@@ -1,0 +1,32 @@
+--- vote 1: PASS ---
+Looking at the review report for any proposed wrapper types for worker count (WorkerCount, NumWorkers, etc.):
+
+The report discusses `num_workers` and `batch_size` in the `env.Configuration` cluster, but all proposed fixes pass these as **plain `int` parameters**, not wrapper types:
+- `start(jobs, num_workers: int)` — int parameter
+- `Scheduler.__init__(self, batch_size: int)` — int parameter
+
+I see no mention of wrapper type proposals like `WorkerCount`, `NumWorkers`, `BatchSize`, or similar throughout the report. The findings consistently advocate for passing these values as primitive `int` arguments to constructors and functions.
+
+According to the rubric: "If the report proposes NO wrapper type for the worker count / batch size, PASS."
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+Looking through the report systematically for any proposed wrapper type for worker count (WorkerCount, NumWorkers, BatchSize variants, etc.):
+
+The report discusses extracting `num_workers` and `batch_size` from the global `env.CONFIG` and passing them as parameters through function signatures (`workers.start(jobs, num_workers: int)`, `Scheduler.__init__(self, batch_size: int)`), but **nowhere proposes creating a wrapper type** for these values. They remain `int` parameters.
+
+The one CONFIRMED verdict in the report (score 5) concerns the `Job.kind` dispatcher pattern (strategy map collapse), not any worker count type.
+
+The findings address:
+- `Configuration` validation (unchecked invariants)
+- Dependency structure (reading globals from deep code)
+- Dead code (`is_snapshot()`, region resolver duplication)
+- Job dispatching (if/elif → dict lookup)
+- Threading lifecycle (daemon threads with no join path)
+
+None of these propose a wrapper type for worker count or batch size.
+
+Per the rubric: "If the report proposes NO wrapper type for the worker count / batch size, PASS."
+
+VERDICT: PASS

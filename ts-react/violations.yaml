@@ -1,0 +1,1719 @@
+# violations.yaml — every plant and every control in fixture/ts-react-mini,
+# anchored by file + a stable ERE. check-manifest.sh asserts each anchor matches
+# at least one line in EACH listed file (paths relative to fixture/ts-react-mini).
+#
+# ts-react-mini is go-mini seen from the React frontend that talks to the same
+# fleet service: the same 156 ids as go/violations.yaml in the same order, so the
+# parity report reads one rule at a time across three fixtures, plus a block of
+# React-only ids at the end. Where a Go idiom has no TypeScript twin, the plant
+# is the nearest disease the same rule catches, and a comment on the entry says
+# so.
+#
+# Id scheme
+#   <Rule>.<Question>.<slug>   a plant; the question is the rule's falsifying
+#                              question it trips (Qn), `critic` for comment-critic
+#                              plants, `lint` for mechanical lint-fixer plants
+#                              (FIX class — carried by a rule for counting only),
+#                              `react` for the ids only this fixture has.
+#   CTRL.<Rule>.<slug>         a control: healthy code that must yield 0 findings.
+#   CASE-<A..F>.<slug>         a logic-hunter case member; `rule:` is the primary
+#                              rule the case grades, `case:` names the case.
+#
+# expect.review   category (🐛 Bugs · 🔴 Design Debt · 🟡 Readability Debt ·
+#                 🟢 Polish) + the fix move named in the rule's Fix pattern.
+# expect.refactor `gone` regex with count_max over the tree after the fix,
+#                 `present` regex that must appear; `scope` narrows the grep.
+# expect.lint     the ESLint rule id that fires in the red-lint scaffold and the
+#                 rule the lint-fixer must route it to (`action: FIX` =
+#                 mechanical). `linter: "-"` records that no configured ESLint
+#                 rule fires for this plant; the review hunters own it alone.
+# expect.prepare  the PREPARE gate this plant trips for the named spec.
+#
+# Controls carry two extra line-oriented keys read by
+# gen-review-graders.sh (the review-full precision graders):
+#   symbol: '<ERE>'     the control's distinguishing symbol; a Review report
+#                       that mentions it has flagged the control (false positive)
+#   mention_ok: true    a correct report legitimately names this symbol (as the
+#                       reuse target or the fix), so no precision grader is
+#                       generated; default: not mentioned.
+#   precision: finding  keeps the grader but moves the line: the report may name
+#                       the symbol (an existing type to wire in, say) and fails
+#                       only when one of the control's files is cited as a
+#                       finding location, tenant.ts:NN with a line number. For a
+#                       control that a correct report cites as the fix route
+#                       while a wrong one re-proposes it.
+# A plant with a review cluster may carry one more:
+#   cluster_match: '<ERE>'  replaces the generated cluster grader's default
+#                       pattern (the word "cluster", then the anchor or its
+#                       last dotted segment on the same line) when reports
+#                       spell the cluster in more than one way.
+# A plant with expect.review may carry:
+#   scoped_review: {…}  in place of review: the plant is judged only by a scoped
+#                       review (a per-leaf question that a whole-repository
+#                       review routes on), so the review-full graders leave it out.
+#   recall_match: '<ERE>'   replaces the generated recall grader's basename
+#                       pattern for the plant's file set when reports name
+#                       the plant another way (CONFIG for env.ts).
+#   recall_own: '<ERE>'     takes the plant out of its file set's recall grader
+#                       and gives it a grader of its own with this pattern,
+#                       for a plant its file name alone cannot prove found (a
+#                       god file is named in every report for other reasons).
+#
+# Line-oriented on purpose: `files:` is a one-line flow list, `anchor:` is one
+# single-quoted line, and the parsers only read id / rule / control / files /
+# anchor (+ symbol / mention_ok / precision on controls, cluster_match on
+# clustered plants). Keep it that way.
+#
+# Lint in TypeScript is two tools. `task lint` is `tsc -b` + `eslint .` +
+# `prettier --check .`; every plant is silenced with
+# `// eslint-disable-next-line <rule> -- TODO` (or the `-line` form) for ESLint
+# and `// @ts-expect-error TODO` for tsc, and scaffold/red-lint.sh strips both.
+# One plant cannot be silenced that way: sonarjs/max-lines reports at line 0,
+# before any directive, so heartbeatFeed.ts carries a file-level configuration
+# comment (`/* eslint sonarjs/max-lines: "off" -- TODO */`) that red-lint.sh
+# strips as well. ESLint has no duplicate-code rule across files, no positional
+# boolean rule, no import-time side-effect rule, no exhaustiveness rule unless
+# switch-exhaustiveness-check is configured (it is not), and no race detector:
+# those plants say `linter: "-"` and are review-only.
+
+# ─── The centerpiece: processHeartbeat ───────────────────────────────────────
+
+- id: R3.Q1.process-heartbeat
+  rule: R3
+  questions: [Q1, Q3, Q5]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts]
+  anchor: '^export async function processHeartbeat\('
+  expect:
+    review:   { category: "🟡", cluster: "processHeartbeat", fix: "Extract Function named after the comment" }
+    refactor: { gone: 'attempt < NOTIFY_ATTEMPTS', count_max: 0, present: 'function parse\w*(Heartbeat|Line)\w*\(|static (parse|fromLine)\(' }
+    lint:     { linter: sonarjs/cognitive-complexity, route: R3, also: [sonarjs/cyclomatic-complexity, sonarjs/nested-control-flow] }
+    postcheck: { cognitive_max: 15, cyclomatic_max: 10 }
+
+# The parser twin (parseLine + normalizeTags) lives in the same file as the
+# inline parse, so one file carries both copies.
+- id: R3.Q2.parse-beside-decision
+  rule: R3
+  questions: [Q2]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts]
+  anchor: 't\.slice\(7\)'
+  expect:
+    review:   { category: "🟡", cluster: "processHeartbeat", fix: "Split Phase" }
+    refactor: { gone: 't\.slice\(7\)', count_max: 0 }
+
+- id: R3.Q3.block-comments
+  rule: R3
+  questions: [Q3, critic]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts]
+  anchor: '// (parse the line|look up or create device|transitions)$'
+  expect:
+    review:   { category: "🟡", cluster: "processHeartbeat", fix: "Extract Function named after the comment", critic: "DELETE → route R3" }
+    refactor: { gone: '// (parse the line|look up or create device|transitions)$', count_max: 0 }
+
+# Go deduped with a labeled `continue outer`; TypeScript has labels but nobody
+# uses them, so the same dedupe is a nested for with a `dup` flag and a break.
+# Same disease (a loop the collection type should own), R3 Q4.
+- id: R3.Q4.labeled-continue-dedupe
+  rule: R3
+  questions: [Q4]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts]
+  anchor: 'break // already added\. skip'
+  expect:
+    review:   { category: "🟡", fix: "Extract Leaf Type" }
+    refactor: { gone: 'break // already added\. skip', count_max: 0, present: '^(export )?(class|type|interface) Tags\b' }
+
+- id: R3.Q1.nested-blocks
+  rule: R3
+  questions: [Q1]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts]
+  anchor: 'if \(parts\.length > 3\) \{'
+  expect:
+    review: { category: "🟡", fix: "Replace Nesting with Early Returns" }
+    lint:   { linter: sonarjs/nested-control-flow, route: R3 }
+
+# Go's bare `return` of named results has no TypeScript twin; the mechanical
+# plant at the same spot is the `else` after a `return` (no-else-return).
+- id: R3.lint.bare-return
+  rule: R3
+  questions: [lint]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts]
+  anchor: 'eslint-disable-next-line no-else-return'
+  expect:
+    lint: { linter: no-else-return, action: FIX }
+
+- id: R3.lint.early-return
+  rule: R3
+  questions: [lint]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts]
+  anchor: 'eslint-disable-next-line sonarjs/elseif-without-else'
+  expect:
+    lint: { linter: sonarjs/elseif-without-else, action: FIX }
+
+- id: R1.Q1.inline-id-check
+  rule: R1
+  questions: [Q1]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts]
+  anchor: '!deviceId \|\| deviceId\.length > 64'
+  expect:
+    review:   { category: "🔴", cluster: "processHeartbeat", fix: "Replace Primitive with Domain Type" }
+    refactor: { gone: 'deviceId\.length > 64', count_max: 1 }
+    lint:     { linter: no-magic-numbers, route: R1 }
+
+# The status set is compared lowercase and upper-cased back for the message, so
+# the enum-shaped literals are the lowercase ones.
+- id: R1.Q3.status-string-compare
+  rule: R1
+  questions: [Q3]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts]
+  anchor: 's !== ''ready'' && s !== ''degraded'''
+  expect:
+    review:   { category: "🔴", cluster: "Device.status", fix: "Name enum strings" }
+    refactor: { gone: '=== ''READY''', count_max: 1, scope: 'src/pages/Heartbeats/', present: '^export (type|const) Status\b' }
+
+- id: R1.Q3.region-byte-slices
+  rule: R1
+  questions: [Q3]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts, src/types/tags.ts]
+  anchor: '=== ''eu'' \|\| .*=== ''us'''
+  expect:
+    review:   { category: "🔴", fix: "Replace Primitive with Domain Type", note: "parseRegion already exists and is not used here" }
+    refactor: { gone: '=== ''eu'' \|\|', count_max: 1 }
+    lint:     { linter: no-magic-numbers, route: R1, note: "the 7 is the length of the region: prefix; a named constant is not the fix" }
+
+- id: R1.Q4.minus-one-sentinel
+  rule: R1
+  questions: [Q4]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts]
+  anchor: 'return \[(deviceId|''''), -1, false'
+  expect:
+    review:   { category: "🔴", cluster: "processHeartbeat", fix: "Replace Sentinel with Declared Absence" }
+    refactor: { gone: ', -1, false', count_max: 0 }
+
+# Go returned five values; TypeScript returns a five-tuple with the error as
+# its last member, the ported shape of `[id, n, changed, tags, err]`. No ESLint
+# rule counts tuple members.
+- id: R1.Q5.five-results
+  rule: R1
+  questions: [Q5]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts]
+  anchor: '^export type (HeartbeatOutcome|ParsedLine) = \[string, '
+  expect:
+    review:   { category: "🔴", cluster: "processHeartbeat", fix: "Introduce Parameter Object" }
+    refactor: { gone: 'string\[\] \| undefined, string \| undefined\]', count_max: 0 }
+    lint:     { linter: "-", route: "@code-designing", note: "no result-count rule in ESLint" }
+
+- id: R1.Q5.heartbeat-clump
+  rule: R1
+  questions: [Q5]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts, src/pages/Heartbeats/simulateRequest.ts]
+  anchor: '^\s+raw: string,$|req\.line, tenant, req\.force\)'
+  expect:
+    review: { category: "🔴", cluster: "processHeartbeat", fix: "Introduce Parameter Object" }
+
+- id: R2.Q1.device-literal-in-service
+  rule: R2
+  questions: [Q1]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts, src/pages/Devices/DeviceForm.tsx]
+  anchor: 'd = \{ id: deviceId, tenant, status: ''BOOTING''|const d: Device = \{'
+  expect:
+    review:   { category: "🔴", cluster: "Device", fix: "Add validating constructor" }
+    refactor: { gone: 'status: ''BOOTING'', version: ''''', count_max: 0, present: '(newDevice|createDevice|Device\.(parse|create|new|from\w*))\(' }
+
+- id: R2.Q5.tags-nil-or-slice
+  rule: R2
+  questions: [Q5]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts]
+  anchor: 'return \['''', -1, false, undefined, '
+  expect:
+    review: { category: "🔴", cluster: "processHeartbeat", fix: "Separate Failure from Absence" }
+
+# Go manufactured `context.Background()` in library code. TypeScript has no ctx
+# to thread, so the disease changes: a service conjures its own QueryClient (an
+# invalidation root nothing above it owns) and its own AbortController (a
+# cancellation root that severs the caller's). Same rule (R8), question Q3.
+- id: R8.Q3.context-background-in-service
+  rule: R8
+  questions: [Q3]
+  files: [src/services/syncService.ts, src/services/notify.ts, src/utils/apiQueryClient.ts]
+  anchor: 'new QueryClient\(\)|new AbortController\(\)'
+  expect:
+    review:   { category: "🔴", fix: "Push the Global Up One Level" }
+    refactor: { gone: 'new QueryClient\(\)', count_max: 0, scope: 'src/(services|utils)/' }
+
+- id: R8.Q5.flap-window-from-service
+  rule: R8
+  questions: [Q5]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts, src/services/snapshotService.ts]
+  anchor: 'CONFIG\.(flapWindowSec|batchSize)'
+  expect:
+    review:   { category: "🔴", fix: "Push the Global Up One Level" }
+    refactor: { gone: 'CONFIG\.', count_max: 0, scope: 'src/(services|pages/Heartbeats)/' }
+
+# No race detector and no threads: the race is the out-of-order response. Two
+# searches in flight, the older one resolving last and winning, no ignore flag
+# set in the cleanup and no abort.
+- id: R10.Q3.last-seen-race
+  rule: R10
+  questions: [Q3]
+  files: [src/hooks/useDeviceSearch.ts]
+  anchor: 'setResults\(devices\.filter'
+  expect:
+    review:   { category: "🐛", fix: "Extract Synchronized Owner", evidence: "the effect re-runs per keystroke; nothing ignores or aborts the previous request" }
+    refactor: { guarded: true }
+    lint:     { linter: "-", route: R10, note: "no race detector for TypeScript" }
+
+# `goto retry` became a `for (;;)` retry with a counter and `continue`; the
+# awaited setTimeout between attempts is the same Q5 disease. Kept inside
+# processHeartbeat (not notify.ts) so the oracle's retries stay on the
+# centerpiece path, as they are in go-mini and py-mini.
+- id: R10.Q5.goto-sleep-backoff
+  rule: R10
+  questions: [Q5]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts]
+  anchor: 'setTimeout\(resolve, attempt \* BACKOFF_STEP_MS\)'
+  expect:
+    review:   { category: "🔴", cluster: "processHeartbeat", fix: "Replace Sleep with Cancellable Wait" }
+    refactor: { gone: 'setTimeout\(resolve, attempt \* BACKOFF_STEP_MS\)', count_max: 0 }
+
+- id: R11.Q4.force-flag-in-body
+  rule: R11
+  questions: [Q4]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts]
+  anchor: 'if \(!force\) \{|!force &&|changed \|\| force'
+  expect:
+    review:   { category: "🔴", cluster: "processHeartbeat", fix: "Split Flag Argument" }
+    refactor: { gone: 'changed \|\| force', count_max: 0 }
+    lint:     { linter: "-", route: R11, note: "no positional-boolean rule in ESLint" }
+
+- id: R12.Q5.n-reused
+  rule: R12
+  questions: [Q5]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts, src/services/cache.ts]
+  anchor: '(n = n|size = size) \* (SCORE_WEIGHT|OVERHEAD_FACTOR)'
+  expect:
+    review:   { category: "🔴", fix: "Split Variable" }
+    refactor: { gone: 'n = n \* ', count_max: 0 }
+
+- id: R7.Q3.big-object-leaf-test
+  rule: R7
+  questions: [Q3]
+  files: [src/pages/Heartbeats/HeartbeatsPage.test.tsx]
+  anchor: '''x''\.repeat\(65\)'
+  expect:
+    review:   { category: "🔴", fix: "Move the behavior down a rung" }
+    refactor: { present: '(parseLine|parseHeartbeat\w*)\(''', scope: '\.test\.tsx?$' }
+
+- id: R7.Q4.covered-only-through-handler
+  rule: R7
+  questions: [Q4]
+  files: [src/pages/Heartbeats/HeartbeatsPage.test.tsx]
+  anchor: 'renderWithProviders\(<HeartbeatsPage />\)'
+  expect:
+    review:  { category: "🔴", fix: "Move the behavior down a rung" }
+    prepare: { gate: SAFE, spec: sms-channel, note: "characterization tests before any move" }
+
+- id: R9.Q4.what-comment-process-heartbeat
+  rule: R9
+  questions: [Q4]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts]
+  anchor: '^\s*\* Processes a heartbeat\.$'
+  expect:
+    review: { category: "🟡", fix: "Convert WHAT to WHY or delete" }
+
+# ─── Comment-critic plants (R9 rung 1) ──────────────────────────────────────
+
+- id: R9.critic.provenance-tail
+  rule: R9
+  questions: [critic]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts]
+  anchor: 'added in PR #87'
+  expect:
+    review: { category: "🟡", verdict: TRIM, fix: "Convert WHAT to WHY or delete" }
+
+- id: R9.critic.decoder-ring
+  rule: R9
+  questions: [critic]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts]
+  anchor: 'see T-04-02|see spec §4\.2'
+  expect:
+    review: { category: "🟡", verdict: REWRITE, fix: "Convert WHAT to WHY or delete" }
+
+- id: R9.critic.review-defense
+  rule: R9
+  questions: [critic]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts]
+  anchor: 'bounds-checked'
+  expect:
+    review: { category: "🟡", verdict: DELETE, fix: "Convert WHAT to WHY or delete" }
+
+- id: R9.critic.restated-idiom
+  rule: R9
+  questions: [critic]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts, src/services/snapshotService.ts, src/services/syncService.ts]
+  anchor: 'undefined so we can tell unset from zero'
+  expect:
+    review: { category: "🟡", verdict: DELETE, fix: "Convert WHAT to WHY or delete" }
+
+- id: R9.critic.extraction-order
+  rule: R9
+  questions: [critic]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts]
+  anchor: 'already added\. skip'
+  expect:
+    review: { category: "🟡", verdict: "DELETE → route R3", fix: "Push the fact down a rung" }
+
+- id: R9.critic.long-private-comment
+  rule: R9
+  questions: [critic]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts]
+  anchor: 'The key is the tenant followed by a slash'
+  expect:
+    review: { category: "🟡", verdict: "TRIM or DELETE", fix: "Push the fact down a rung" }
+
+- id: R9.critic.caller-must
+  rule: R9
+  questions: [critic]
+  files: [src/types/heartbeat.ts, src/pages/Heartbeats/heartbeatFeed.ts]
+  anchor: 'caller must ensure|assumes valid'
+  expect:
+    review: { category: "🟡", verdict: "DELETE → route R2", fix: "Push the fact down a rung" }
+
+# ─── R1 primitive obsession ─────────────────────────────────────────────────
+
+- id: R1.Q1.handler-inline-checks
+  rule: R1
+  questions: [Q1]
+  files: [src/pages/Devices/DeviceForm.tsx]
+  anchor: 'if \(!id \|\| !/|!email\.includes\(''@''\)'
+  expect:
+    review: { category: "🔴", fix: "Replace Primitive with Domain Type" }
+
+- id: R1.Q2.email-contains-twice
+  rule: R1
+  questions: [Q2]
+  files: [src/pages/Devices/DeviceForm.tsx, src/services/validate.ts]
+  anchor: '\.includes\(''@''\)'
+  expect:
+    review:   { category: "🔴", fix: "Replace Primitive with Domain Type" }
+    refactor: { gone: '\.includes\(''@''\)', count_max: 1 }
+    lint:     { linter: "-", route: R1, note: "the literal is the predicate's whole vocabulary; no ESLint rule fires on a one-character string" }
+
+- id: R1.Q3.tags-loop
+  rule: R1
+  questions: [Q3]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts, src/types/tags.ts, src/services/syncService.ts]
+  anchor: 't\.startsWith\(''region:''\)|for \(const t of d\.tags\)'
+  expect:
+    review:   { category: "🔴", fix: "Extract Collection Type" }
+    refactor: { present: '^(export )?(class|type|interface) Tags\b' }
+    lint:     { linter: "-", route: R1, note: "no loop-to-some rewrite rule is configured; the missing collection type is the finding" }
+
+- id: R1.Q3.raw-channel-string
+  rule: R1
+  questions: [Q3]
+  files: [src/types/alert.ts, src/types/channel.ts]
+  anchor: '^\s+channel: string$|CHANNEL_EMAIL = ''email'''
+  cluster_match: '(?i:\bcluster\b)[^\n]*\b(?i:(Alert\.channel|channel|alert))\b|(?i:\bclusters?\b)[^\n]*(?:\n[^\n]*){0,8}?\n[ \t]*(?:[-*•]|[0-9]+[.)])[ \t]*\**\x60?(?i:(Alert\.channel|channel|alert))\b'
+  expect:
+    review:   { category: "🔴", cluster: "Alert.channel", fix: "Name enum strings" }
+    refactor: { present: 'parse\w*[Cc]hannel\w*\(|^export type Channel = |^export const Channel\b', gone: '^\s+channel: string$', count_max: 0 }
+    prepare:  { gate: MULTIPLY, spec: sms-channel }
+
+# sonarjs/no-duplicate-string ignores literals shorter than ten characters, so
+# the repeated status strings never fire a rule; the switch arms are review-only.
+- id: R1.Q3.status-enum-goconst
+  rule: R1
+  questions: [Q3]
+  files: [src/services/alertService.ts, src/pages/Heartbeats/heartbeatFeed.ts, src/pages/Status/StatusPage.tsx]
+  anchor: 'case ''READY'':'
+  expect:
+    review:   { category: "🔴", cluster: "Device.status", fix: "Name enum strings" }
+    refactor: { gone: '^export const \[STATUS_READY', count_max: 0 }
+    lint:     { linter: "-", route: R1, note: "enum-shaped: escalate, never a bare module constant; no-duplicate-string skips short literals" }
+
+- id: R1.Q4.contact-domain-sentinel
+  rule: R1
+  questions: [Q4]
+  files: [src/pages/Devices/DeviceForm.tsx]
+  anchor: 'return ''''$'
+  expect:
+    review:   { category: "🔴", fix: "Replace Sentinel with Declared Absence" }
+    refactor: { gone: 'return ''''$', count_max: 0, scope: 'src/pages/Devices/' }
+
+- id: R1.Q5.tenant-id-clump
+  rule: R1
+  questions: [Q5]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts, src/services/deviceRepository.ts, src/services/devicesApi.ts, src/mocks/deviceApiMock.ts]
+  anchor: 'tenant: string, (deviceId|id): string|^\s+tenant: string,$'
+  expect:
+    review: { category: "🔴", fix: "Introduce Parameter Object", skeptic: "either verdict; REFUTED must carry the cheaper alternative" }
+
+# Prettier breaks the six-parameter constructor over several lines; the anchor
+# is the one parameter no other constructor in the fixture takes.
+- id: R1.Q5.new-sync-service-six-params
+  rule: R1
+  questions: [Q5]
+  files: [src/services/syncService.ts]
+  anchor: '^\s+retries: number,$'
+  expect:
+    review: { category: "🔴", fix: "Introduce Parameter Object" }
+    lint:   { linter: max-params, route: "@code-designing" }
+
+- id: R1.Q7.catalog-models-nested
+  rule: R1
+  questions: [Q7]
+  files: [src/features/report/catalog.ts, src/features/report/wire.ts]
+  anchor: 'Record<string, string\[\]>|\.models\(\)'
+  expect:
+    review: { category: "🔴", fix: "Name the Container" }
+
+- id: R1.Q8.retention-raw-map
+  rule: R1
+  questions: [Q8]
+  files: [src/features/snapshot/config.ts, src/features/snapshot/policy.ts, src/features/snapshot/scheduler.ts]
+  anchor: 'raw: Record<string, string>'
+  expect:
+    review: { category: "🔴", fix: "Name the Container", skeptic: "either verdict; REFUTED must carry the cheaper alternative" }
+
+- id: R1.Q1.settings-blob
+  rule: R1
+  questions: [Q1]
+  files: [src/types/job.ts, src/pages/Heartbeats/heartbeatFeed.ts]
+  anchor: 'settings: Record<string, unknown>|job\.settings\[''region''\]'
+  expect:
+    review: { category: "🔴", fix: "Replace Primitive with Domain Type" }
+
+# sonarjs/no-identical-functions sees the copy inside one file (run/resync in
+# syncService.ts); the third copy in snapshotService.ts is a review finding only.
+- id: R1.lint.run-loop-dupl
+  rule: R1
+  questions: [lint]
+  files: [src/services/snapshotService.ts, src/services/syncService.ts]
+  anchor: 'for \(let start = 0; start < devices\.length; start \+= batch\)'
+  expect:
+    review: { category: "🔴", fix: "Extract Collection Type" }
+    lint:   { linter: sonarjs/no-identical-functions, route: R1, note: "fires on the in-file copy only; no cross-file duplicate-code rule in ESLint" }
+
+# sonarjs/no-duplicate-string ignores 'application/json' by default, so the
+# repeated content type has no ESLint twin either.
+- id: R1.lint.content-type-goconst
+  rule: R1
+  questions: [lint]
+  files: [src/services/notify.ts, src/services/alertService.ts, src/services/snapshotService.ts, src/pages/Heartbeats/heartbeatFeed.ts]
+  anchor: '''application/json'''
+  expect:
+    lint: { linter: "-", action: FIX, note: "not enum-shaped: a plain module constant is the right fix; no-duplicate-string ignores this literal" }
+
+- id: CTRL.R1.error-payload-map
+  rule: R1
+  control: true
+  files: [src/pages/Heartbeats/simulateRequest.ts]
+  anchor: '\{ error: '
+  # A flat object literal built and serialized at one call site is data egress
+  # at the boundary, not a hidden type: a telling shape in one function needs no
+  # name.
+  symbol: '(?i)\b(error ?(payload|body|response|message)) (type|class|interface)\b|Name the Container[^\n]{0,80}"error"'
+  expect: { review: { findings: 0, note: "the one-shot error payload must not get a type" } }
+
+- id: CTRL.R1.tenant-type
+  rule: R1
+  control: true
+  files: [src/types/tenant.ts]
+  anchor: '^export function parseTenant\(raw: string\): Tenant \{'
+  symbol: 'parseTenant'
+  precision: finding   # reports cite parseTenant as the existing type to wire in; re-proposing it is the false positive
+  expect: { review: { findings: 0, note: "must not be re-proposed" } }
+
+- id: CTRL.R1.region-type
+  rule: R1
+  control: true
+  files: [src/types/region.ts]
+  anchor: '^export function parseRegion\(raw: string\): Region \{'
+  symbol: 'parseRegion'
+  mention_ok: true
+  expect: { review: { findings: 0 } }
+
+- id: CTRL.R1.named-const
+  rule: R1
+  control: true
+  files: [src/deviceid/deviceId.ts, src/features/snapshot/schedule.ts, src/services/transport/client.ts]
+  anchor: '^const (MAX_LEN = 64|MINUTES_PER_DAY = HOURS_PER_DAY \* MINUTES_PER_HOUR|DEFAULT_PORT = 8080)$'
+  symbol: 'MAX_LEN|MINUTES_PER_DAY'
+  expect: { review: { findings: 0 } }
+
+- id: CTRL.R1.trace-id-string
+  rule: R1
+  control: true
+  case: D
+  files: [src/pages/Devices/trace.ts]
+  anchor: '^\s+traceId: string$'
+  symbol: 'TraceI[Dd]\b'
+  expect: { review: { findings: 0, not_contains: 'TraceId' } }
+
+- id: CTRL.R1.grants-type
+  rule: R1
+  control: true
+  case: D
+  files: [src/types/grants.ts, src/components/RequireWrite/RequireWrite.tsx]
+  anchor: 'has\(p: Permission\): boolean \{|grants\.has\(Permission\.Write\)'
+  mention_ok: true
+  expect: { review: { findings: 0, note: "an earned type with a production caller: never re-proposed, never removed as dead code" } }
+
+# ─── R2 self-validating types ───────────────────────────────────────────────
+
+# A plain interface with mutable fields and no factory: every object literal
+# can build an invalid Device, and the type is erased at run time.
+- id: R2.Q1.device-exported-fields
+  rule: R2
+  questions: [Q1]
+  files: [src/types/device.ts]
+  anchor: '^export interface Device \{'
+  expect:
+    review:   { category: "🔴", cluster: "Device", fix: "Add validating constructor" }
+    refactor: { present: 'readonly (id|status): string', scope: 'src/types/device\.ts' }
+
+- id: R2.Q1.alert-exported-fields
+  rule: R2
+  questions: [Q1]
+  files: [src/types/alert.ts, src/services/alertService.ts]
+  anchor: '^export interface Alert \{|a = \{ channel: '''
+  expect:
+    review: { category: "🔴", cluster: "Alert.channel", fix: "Add validating constructor" }
+
+- id: R2.Q2.method-nil-checks
+  rule: R2
+  questions: [Q2]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts, src/services/notify.ts]
+  anchor: 'if \(!this\.(sink|repo)\) \{|if \(!this\.webhookUrl\) \{'
+  expect:
+    review: { category: "🔴", fix: "Hoist method checks into the constructor" }
+
+- id: R2.Q2.validate-device-in-method
+  rule: R2
+  questions: [Q2]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts]
+  anchor: '^function validateDevice\(feed: FeedStore, d: Device\)'
+  expect:
+    review:   { category: "🔴", cluster: "Device", fix: "Hoist method checks into the constructor" }
+    refactor: { gone: 'validateDevice\(', count_max: 0 }
+
+- id: R2.Q4.caller-must-comments
+  rule: R2
+  questions: [Q4]
+  files: [src/types/heartbeat.ts, src/pages/Heartbeats/heartbeatFeed.ts]
+  anchor: 'caller must ensure|assumes valid'
+  expect:
+    review:   { category: "🔴", fix: "Add validating constructor" }
+    refactor: { gone: 'caller must ensure|assumes valid', count_max: 0 }
+
+- id: CTRL.R2.window-plan
+  rule: R2
+  control: true
+  files: [src/features/snapshot/schedule.ts]
+  anchor: 'static parse\(start: string, end: string\): Window \{'
+  symbol: 'Window\.parse'
+  expect: { review: { findings: 0 } }
+
+- id: CTRL.R2.snapshot-repository
+  rule: R2
+  control: true
+  files: [src/features/snapshot/repository.ts, src/features/snapshot/scheduler.ts]
+  anchor: 'if \(!prefix\) \{|if \(!now\) \{'
+  symbol: 'if \(!now\)'
+  expect: { review: { findings: 0, note: "constructor-time checks are the healthy place" } }
+
+# ─── R3 storifying (beyond the centerpiece) ─────────────────────────────────
+
+- id: R3.Q5.dishonest-names
+  rule: R3
+  questions: [Q5]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts]
+  anchor: '^function (validateDevice|isReady|getOrCreate)\(feed'
+  expect:
+    review: { category: "🟡", fix: "Honest Rename" }
+
+# Over the ESLint thresholds (cognitive 24, cyclomatic 11), unlike the Python
+# twin, which sat under ruff's.
+- id: R3.Q1.normalize-tags
+  rule: R3
+  questions: [Q1]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts]
+  anchor: '^function normalizeTags\('
+  expect:
+    review: { category: "🟡", fix: "Extract Leaf Type" }
+    lint:   { linter: sonarjs/cognitive-complexity, route: R3, also: [sonarjs/cyclomatic-complexity, sonarjs/nested-control-flow] }
+
+- id: CTRL.R3.orchestrator
+  rule: R3
+  control: true
+  files: [src/features/snapshot/scheduler.ts]
+  anchor: 'prune\(raw: Record<string, string>, deviceId: string\): Snapshot\[\]'
+  symbol: '\bprune\('
+  expect: { review: { findings: 0 } }
+
+# Go's guard was `ctx.Err()`; TypeScript has no ctx, so the healthy guard
+# clause is the early return on an empty store.
+- id: CTRL.R3.guard-clauses
+  rule: R3
+  control: true
+  files: [src/pages/Heartbeats/heartbeatFeed.ts, src/features/snapshot/repository.ts]
+  anchor: '^\s+if \((this\.devices\.size|names\.length) === 0\) \{$'
+  symbol: '(names\.length|this\.devices\.size) === 0'
+  expect: { review: { findings: 0 } }
+
+# ─── R4 helper placement ────────────────────────────────────────────────────
+
+- id: R4.Q1.exported-for-tests
+  rule: R4
+  questions: [Q1]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts, src/pages/Heartbeats/heartbeatFeed.test.ts, src/services/deviceService.test.ts]
+  anchor: 'parseLine\('
+  expect:
+    review:   { category: "🔴", fix: "Demote (rung 1)" }
+    refactor: { gone: '^export function parseLine\(', count_max: 0 }
+
+# The private helper is reached through an aliased re-export at the bottom of
+# the module, the TypeScript spelling of testing a private name.
+- id: R4.Q2.private-tested-directly
+  rule: R4
+  questions: [Q2]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts, src/pages/Heartbeats/heartbeatFeed.test.ts]
+  anchor: '_normalizeTags'
+  expect:
+    review: { category: "🔴", fix: "Promote to feature sub-package (rung 2)" }
+
+# Go had `internal/common` and `internal/utils` packages; the TypeScript shape
+# of the same smell is a `utils/` directory and a `common/constants.ts`.
+- id: R4.Q3.role-named-packages
+  rule: R4
+  questions: [Q3]
+  files: [src/utils/strings.ts, src/utils/time.ts, src/common/constants.ts]
+  anchor: '^/\*\* Shared '
+  expect:
+    review: { category: "🔴", cluster: "role packages", fix: "Split a generic package by owner", route: R5 }
+  # Reports name this cluster after the directories as often as after the smell.
+    lint:   { linter: "-", route: R5, note: "no role-name rule in ESLint" }
+  cluster_match: 'CLUSTER[^\n]*(role packages|common\b[^\n]*utils|utils\b[^\n]*common)'
+
+- id: R4.Q4.single-noun-package
+  rule: R4
+  questions: [Q4]
+  files: [src/deviceid/deviceId.ts]
+  anchor: '^export type DeviceId = string & \{'
+  expect:
+    review: { category: "🔴", fix: "Promote to domain package (rung 3)", note: "one type, no siblings: fold into a vocabulary module or demote" }
+
+- id: R4.Q5.feature-literal-in-common
+  rule: R4
+  questions: [Q5]
+  files: [src/common/constants.ts]
+  anchor: 'HEARTBEAT_HEADER = ''x-hb-v2'''
+  expect:
+    review:   { category: "🔴", fix: "Split policy from vocabulary during promotion" }
+    refactor: { gone: 'HEARTBEAT_HEADER', count_max: 0, scope: 'src/common/constants\.ts' }
+
+- id: R4.Q6.feature-envy
+  rule: R4
+  questions: [Q6]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts]
+  anchor: '^\s+(summarize|exportDevice|score)\(d: Device\)'
+  expect:
+    review: { category: "🔴", fix: "Move Method to the Envied Type" }
+
+- id: CTRL.R4.private-helper
+  rule: R4
+  control: true
+  files: [src/features/snapshot/schedule.ts, src/features/snapshot/scheduler.ts]
+  anchor: '^function (parseClock\(v: string\): number|clockOf\(t: Date\): string) \{'
+  symbol: 'parseClock'
+  expect: { review: { findings: 0, note: "the promotion signal must not fire" } }
+
+# ─── R5 vertical slice ──────────────────────────────────────────────────────
+
+# TypeScript has no package line; the layer directories announce themselves by
+# their names, which R5's Detect-path finds.
+- id: R5.Q1.role-layers
+  rule: R5
+  questions: [Q1]
+  files: [src/components/Layout/Layout.tsx, src/hooks/useDevices.ts, src/services/devicesApi.ts, src/types/device.ts]
+  anchor: '^export '
+  expect:
+    review: { category: "🔴", fix: "Slice out a feature", advisory: true }
+
+- id: R5.Q2.snapshot-spread
+  rule: R5
+  questions: [Q2]
+  files: [src/services/snapshotsApi.ts, src/types/snapshot.ts, src/hooks/useSnapshots.ts]
+  anchor: 'Snapshot'
+  expect:
+    review: { category: "🔴", fix: "Slice out a feature", advisory: true }
+
+- id: R5.Q4.two-snapshot-homes
+  rule: R5
+  questions: [Q4]
+  files: [src/hooks/useSnapshots.ts, src/features/snapshot/index.ts]
+  anchor: '[Ss]napshot'
+  expect:
+    review: { category: "🔴", fix: "Slice out a feature", note: "hooks/useSnapshots.ts + services/snapshotsApi.ts and features/snapshot/ coexist" }
+
+- id: R5.Q5.no-migration-doc
+  rule: R5
+  questions: [Q5]
+  files: [src/features/snapshot/index.ts, README.md]
+  anchor: '[Ss]napshot'
+  expect:
+    review:   { category: "🔴", fix: "Slice out a feature", note: "mixed shape; docs/architecture/vertical-slice-migration.md missing" }
+    refactor: { present_file: 'docs/architecture/vertical-slice-migration.md' }
+
+# sonarjs/max-lines reports at line 0, so the only in-file silence is a
+# configuration comment on line 1, which red-lint.sh strips like a directive.
+- id: R5.Q1.god-file
+  rule: R5
+  questions: [Q1]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts]
+  anchor: '^export class FeedStore \{'
+  recall_own: 'heartbeatFeed\.ts[^\n]*(?i:[78][0-9]{2}[ -]?(lines?|loc)\b|max-lines|god[ -]file)'
+  expect:
+    review: { category: "🔴", fix: "Rename layer files by role during the move", note: "the longest module in the tree: the store, the pipeline, two parsers and the audit log" }
+    lint:   { linter: sonarjs/max-lines, route: R5, note: "silenced by `/* eslint sonarjs/max-lines: \"off\" -- TODO */` on line 1" }
+    prepare: { gate: BOUNDED, spec: sms-channel, verdict: PREP-DEFERRED }
+
+- id: R5.Q1.models-red-zone
+  rule: R5
+  questions: [Q1]
+  files: [src/types/device.ts, src/types/alert.ts, src/types/job.ts]
+  anchor: '^export interface (Device|Alert|Job) \{'
+  expect:
+    review: { category: "🔴", fix: "Slice out a feature", hook: "src/types/ holds one page's shapes beside the shared ones" }
+
+- id: CTRL.R5.snapshot-slice
+  rule: R5
+  control: true
+  files: [src/features/snapshot/index.ts, src/features/snapshot/repository.ts, src/features/snapshot/scheduler.ts]
+  anchor: '[Ss]napshot'
+  symbol: 'features/snapshot/'
+  mention_ok: true
+  expect: { review: { findings: 0 } }
+
+# ─── R6 test-only interfaces ────────────────────────────────────────────────
+
+# Go interfaces become TypeScript interfaces: structural, like Go's, so a class
+# satisfies one without naming it; the hand double does name it.
+- id: R6.Q1.device-repository
+  rule: R6
+  questions: [Q1, Q2]
+  files: [src/services/deviceRepository.ts]
+  anchor: '^export interface DeviceRepository \{'
+  expect:
+    review:   { category: "🔴", fix: "Delete the Test Seam" }
+    refactor: { gone: '^export interface DeviceRepository \{', count_max: 0 }
+
+- id: R6.Q2.mock-repo-double
+  rule: R6
+  questions: [Q2]
+  files: [src/mocks/deviceApiMock.ts]
+  anchor: '^export class DeviceApiMock implements DeviceRepository \{'
+  expect:
+    review:   { category: "🔴", fix: "Delete the double" }
+    refactor: { gone: '^export class (DeviceApiMock|NotifierMock)', count_max: 0, scope: 'src/mocks/' }
+
+- id: R6.Q3.import-cycle-claim
+  rule: R6
+  questions: [Q3, critic]
+  files: [src/mocks/notifierMock.ts, src/services/deviceRepository.ts]
+  anchor: 'avoids an import cycle'
+  expect:
+    review: { category: "🔴", fix: "Delete the Test Seam", note: "no back-import exists; the claim is false" }
+
+- id: R6.Q4.sync-service-takes-interface
+  rule: R6
+  questions: [Q4]
+  files: [src/services/syncService.ts, src/services/snapshotService.ts]
+  anchor: 'repo: DeviceRepository'
+  expect:
+    review: { category: "🔴", fix: "Delete the Test Seam" }
+
+- id: R6.Q5.for-testing
+  rule: R6
+  questions: [Q5, critic]
+  files: [src/mocks/deviceApiMock.ts]
+  anchor: '^// for testing$'
+  expect:
+    review: { category: "🔴", fix: "Delete the double" }
+
+- id: R6.Q5.notifier-api
+  rule: R6
+  questions: [Q5]
+  files: [src/mocks/notifierMock.ts]
+  anchor: '^export interface NotifierAPI \{'
+  expect:
+    review: { category: "🔴", fix: "Delete the double" }
+
+# golangci's ireturn has no ESLint twin; a factory typed to return the
+# interface with one production body behind it is the same disease, review-only.
+- id: R6.Q1.formatter-ireturn
+  rule: R6
+  questions: [Q1]
+  files: [src/services/alertService.ts]
+  anchor: '^function newFormatter\(kind: string\): AlertFormatter \{'
+  expect:
+    review: { category: "🔴", fix: "Delete the Test Seam" }
+    lint:   { linter: "-", route: R6, note: "no interface-return rule in ESLint" }
+
+- id: CTRL.R6.store-interface
+  rule: R6
+  control: true
+  files: [src/services/preferencesStore.ts]
+  anchor: '^export interface PreferencesStore \{'
+  symbol: 'PreferencesStore\b'
+  expect: { review: { findings: 0, note: "two production implementers: LocalStoragePreferences and MemoryPreferences" } }
+
+- id: CTRL.R6.mem-store-in-production
+  rule: R6
+  control: true
+  files: [src/main.tsx, src/services/preferencesStore.ts]
+  anchor: 'MemoryPreferences'
+  symbol: 'MemoryPreferences'
+  mention_ok: true
+  expect: { review: { findings: 0 } }
+
+# ─── R7 test placement ──────────────────────────────────────────────────────
+
+# `wantErr` tables become an it.each table whose rows mix success and error
+# and branch on `if (expectError)`.
+- id: R7.Q1.wanterr-tables
+  rule: R7
+  questions: [Q1]
+  files: [src/services/deviceService.test.ts, src/pages/Devices/placement/picker.test.ts]
+  anchor: 'if \(expectError\) \{'
+  expect:
+    review:   { category: "🔴", fix: "Split Success and Error Tables" }
+    refactor: { gone: 'expectError', count_max: 0 }
+    lint:     { linter: "-", route: R7, note: "the @ts-expect-error on the optional result is the tsc trace of the fused table" }
+
+# Go's internal test package is a test importing an underscore-aliased
+# re-export, plus a spy on a sibling module's export to intercept an internal call.
+- id: R7.Q2.internal-test-package
+  rule: R7
+  questions: [Q2]
+  files: [src/services/deviceService.test.ts, src/services/retry.ts]
+  anchor: '_priorityAttempts|vi\.spyOn\(notify, ''sendAlert''\)'
+  expect:
+    review:   { category: "🔴", fix: "Delete private-function tests" }
+    refactor: { gone: '^export \{[^}]*\b_[a-z]', count_max: 0, scope: 'src/' }
+
+- id: R7.Q5.call-count-assertions
+  rule: R7
+  questions: [Q5]
+  files: [src/pages/Heartbeats/heartbeatFeed.test.ts, src/hooks/useSnapshotScheduler.test.tsx, src/services/deviceService.test.ts]
+  anchor: 'toHaveBeenCalledTimes\('
+  expect:
+    review:   { category: "🔴", fix: "Replace doubles with real collaborators" }
+    refactor: { gone: 'expect\((send|list|sendAlert)\)\.toHaveBeenCalledTimes', count_max: 0 }
+
+- id: R7.Q6.sleep-then-assert
+  rule: R7
+  questions: [Q6]
+  files: [src/pages/Heartbeats/HeartbeatsPage.test.tsx, src/pages/Settings/ExportPanel.test.tsx, src/services/deviceService.test.ts]
+  anchor: 'await new Promise\(\(resolve\) => setTimeout\(resolve, (20|50|60)\)\)'
+  expect:
+    review:   { category: "🔴", fix: "Replace sleep with synchronization" }
+    refactor: { gone: 'setTimeout\(resolve', count_max: 0, scope: '\.test\.tsx?$' }
+
+# Q7 plants are the survivors of the hand check over the fixture's leaf
+# modules as the tree stands: no code was planted, the comparison's boundary row
+# was never written. recall_match spans the source and its test file, since a
+# report may anchor either. Stryker is not installed, so the hand check is the
+# measure; each entry names its own missing row.
+- id: R7.Q7.deviceid-maxlen-boundary
+  rule: R7
+  questions: [Q7]
+  files: [src/deviceid/deviceId.ts]
+  anchor: 'trimmed\.length > MAX_LEN'
+  recall_match: 'deviceId(\.test)?\.ts'
+  expect:
+    scoped_review: { category: "🔴", fix: "Kill the surviving mutant" }
+    # The table has a 65-char row and no 64-char row; the hand check names the missing one.
+
+- id: R7.Q7.tenant-rune-boundary
+  rule: R7
+  questions: [Q7]
+  files: [src/types/tenant.ts]
+  anchor: 'throw new Error\(''tenant: empty''\)'
+  recall_match: 'tenant(\.test)?\.ts'
+  expect:
+    scoped_review: { category: "🔴", fix: "Kill the surviving mutant" }
+    postcheck: { lived_max: 0, package: src/types, note: "the only survivor is the empty-tenant message: `toThrow('tenant')` accepts any message that contains the word, so a `toThrow('tenant: empty')` row kills it" }
+
+- id: R7.Q7.slugify-leading-separator
+  rule: R7
+  questions: [Q7]
+  files: [src/utils/strings.ts]
+  anchor: 'return out\.join\(''''\)\.replace\(/-\$/, ''''\)'
+  recall_match: 'strings(\.test)?\.ts'
+  expect:
+    scoped_review: { category: "🔴", fix: "Kill the surviving mutant" }
+    postcheck: { lived_max: 5, package: src/utils/strings.ts, note: "a trailing-separator row (slugify('eu ') === 'eu') kills the replace mutant; truncate('hb', 1) === 'h' and truncate('hb', 0) === '' kill two more; the rest (n < 0, the three dash-flag literals) are equivalent and may live only if recorded beside the tests" }
+
+- id: CTRL.R7.no-survivors-placement
+  rule: R7
+  control: true
+  files: [src/pages/Devices/placement/picker.ts]
+  anchor: '^\s+pick\(nodes: Node\[\], zone: string\)'
+  symbol: 'Placer\.pick|pickReplicas'
+  precision: finding
+  expect: { review: { findings: 0 } }
+  # The picker table holds a node at each boundary of `capacity <= 0`: 0 and 1.
+  # Without the capacity-1 row the hand check would name it and the control
+  # would punish a correct report.
+
+- id: CTRL.R7.split-tables
+  rule: R7
+  control: true
+  files: [src/features/snapshot/schedule.test.ts, src/types/region.test.ts]
+  anchor: '\(''(success|error): '
+  symbol: '(success|error): %'
+  expect: { review: { findings: 0 } }
+
+- id: CTRL.R7.real-collaborators
+  rule: R7
+  control: true
+  files: [src/features/snapshot/scheduler.test.ts]
+  anchor: 'window\.localStorage'
+  symbol: 'localStorage'
+  mention_ok: true
+  expect: { review: { findings: 0 } }
+
+# ─── R8 no globals ──────────────────────────────────────────────────────────
+
+# Go's package-level vars become module-level state: a Map filled at import, a
+# `let` behind a getter, a client built at import. No configured ESLint rule
+# names a module-level Map or `new` expression; import/no-mutable-exports sees
+# only the exported `let` (CASE-F).
+- id: R8.Q1.registry-globals
+  rule: R8
+  questions: [Q1]
+  files: [src/hooks/registry.ts, src/utils/apiQueryClient.ts, src/services/apiClient.ts]
+  anchor: '^const HANDLERS = new Map|^let queryClient: QueryClient|^export const apiClient = new ApiClient\(\)'
+  expect:
+    review:   { category: "🔴", fix: "Replace Import-Time Initialization with a Constructor" }
+    refactor: { gone: '^(const HANDLERS = new Map|let queryClient|export const apiClient = new)', count_max: 0 }
+    lint:     { linter: "-", route: R8, note: "no module-state rule in ESLint" }
+
+# `init()` is import time: the registry is filled and the region is read when
+# the module loads. No ESLint rule sees an import-time side effect.
+- id: R8.Q2.init-registration
+  rule: R8
+  questions: [Q2]
+  files: [src/components/widgets/index.ts, src/config/env.ts]
+  anchor: '^widgets\.register\(''fleet'', FleetWidget\)|^const region = import\.meta\.env\.VITE_REGION'
+  expect:
+    review:   { category: "🔴", fix: "Replace Import-Time Initialization with a Constructor" }
+    refactor: { gone: '^widgets\.register\(|^const region = import\.meta\.env', count_max: 0 }
+    lint:     { linter: "-", route: R8, note: "no import-time side-effect rule in ESLint" }
+
+# `sync.Once` is a memoized zero-argument getter over a module-level `let`.
+- id: R8.Q4.sync-once-store
+  rule: R8
+  questions: [Q4]
+  files: [src/utils/apiQueryClient.ts]
+  anchor: '^export function getQueryClient\(\): QueryClient \{'
+  expect:
+    review:   { category: "🔴", fix: "Push the Global Up One Level" }
+    refactor: { gone: 'getQueryClient\(', count_max: 0 }
+
+- id: R8.Q5.getenv-in-method
+  rule: R8
+  questions: [Q5]
+  files: [src/services/syncService.ts, src/services/notify.ts]
+  anchor: 'import\.meta\.env\.VITE_[A-Z_]+'
+  expect:
+    review:   { category: "🔴", fix: "Push the Global Up One Level" }
+    refactor: { gone: 'import\.meta\.env', count_max: 0, scope: 'src/services/' }
+
+- id: CTRL.R8.err-not-found
+  rule: R8
+  control: true
+  files: [src/services/deviceRepository.ts]
+  anchor: '^export class NotFoundError extends Error \{'
+  symbol: 'NotFoundError'
+  mention_ok: true
+  expect: { review: { findings: 0 } }
+
+# `var _ Store = (*FileRepo)(nil)` becomes a `satisfies` clause: the route table
+# is checked against its shape at compile time and carries no run-time cost.
+- id: CTRL.R8.compile-time-check
+  rule: R8
+  control: true
+  files: [src/routes.ts]
+  anchor: '\} as const satisfies Record<string, '
+  symbol: '\bROUTES\b'
+  expect: { review: { findings: 0 } }
+
+- id: CTRL.R8.main-composition-root
+  rule: R8
+  control: true
+  files: [src/main.tsx]
+  anchor: '^load\(\)$|setQueryClient\(queryClient\)|import\.meta\.env\.VITE_READ_ONLY'
+  symbol: 'main\.tsx'
+  mention_ok: true
+  expect: { review: { findings: 0, note: "globals at the composition root are the pragmatic endpoint" } }
+
+# ─── R9 repo brain ──────────────────────────────────────────────────────────
+
+- id: R9.Q1.orphan-doc
+  rule: R9
+  questions: [Q1]
+  files: [docs/heartbeat-protocol.md]
+  anchor: '^# Heartbeat protocol'
+  expect:
+    review:   { category: "🟡", fix: "Rewire orphan doc" }
+    refactor: { present_file: 'docs/index.md', present: 'heartbeat-protocol\.md' }
+
+- id: R9.Q2.file-line-citation
+  rule: R9
+  questions: [Q2]
+  files: [docs/heartbeat-protocol.md]
+  anchor: 'heartbeatFeed\.ts:142'
+  expect:
+    review:   { category: "🟡", fix: "Update the stale doc with the behavior change", note: "file:line citations are a policy violation whether or not they resolve; cite the exported symbol" }
+    refactor: { gone: '\.tsx?:[0-9]+', count_max: 0, scope: 'docs/' }
+
+- id: R9.Q2.phantom-symbol
+  rule: R9
+  questions: [Q2]
+  files: [docs/heartbeat-protocol.md]
+  anchor: 'SnapshotRunner'
+  expect:
+    review:   { category: "🟡", fix: "Update the stale doc with the behavior change", flag: "⚠️ unresolvable" }
+    refactor: { gone: 'SnapshotRunner', count_max: 0 }
+
+- id: R9.Q2.missing-doc-edge
+  rule: R9
+  questions: [Q2]
+  files: [src/types/heartbeat.ts]
+  anchor: 'See docs/snapshots\.md'
+  expect:
+    review:   { category: "🟡", fix: "Rewire orphan doc", flag: "⚠️ broken edge" }
+    refactor: { gone: 'docs/snapshots\.md', count_max: 0 }
+
+- id: R9.Q3.unwired-root
+  rule: R9
+  questions: [Q3]
+  files: [CLAUDE.md]
+  anchor: '^## Commands'
+  expect:
+    review:   { category: "🟡", fix: "Wire the root", note: "CLAUDE.md carries build commands only; no index import" }
+    refactor: { present: 'docs/index\.md|@docs/', scope: 'CLAUDE.md|AGENTS.md' }
+
+# WHAT-godoc becomes a WHAT-JSDoc: the summary line restates the type's name.
+- id: R9.Q4.what-comments
+  rule: R9
+  questions: [Q4]
+  files: [src/types/device.ts, src/types/heartbeat.ts, src/types/schedule.ts, src/pages/Heartbeats/heartbeatFeed.ts, src/services/notify.ts, src/services/cache.ts, src/features/report/reporter.ts, src/config/env.ts, src/services/alertService.ts, src/services/snapshotService.ts, src/services/syncService.ts]
+  anchor: '^\s*(/\*\*| \*) ?[A-Z]\w+ is (an?|the) [a-z ]+\.'
+  expect:
+    review:   { category: "🟡", fix: "Convert WHAT to WHY or delete" }
+    refactor: { gone: '^\s*(/\*\*| \*) ?[A-Z]\w+ is (an?|the) [a-z]+\.', count_max: 0 }
+
+- id: R9.Q4.creates-a-new
+  rule: R9
+  questions: [Q4]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts, src/services/notify.ts, src/services/alertService.ts, src/services/snapshotService.ts, src/services/syncService.ts, src/services/transport/client.ts, src/features/report/reporter.ts]
+  anchor: '^\s+(/\*\* Creates a new \w+\. \*/|\* Creates a new \w+\.)$'
+  expect:
+    review:   { category: "🟡", fix: "Convert WHAT to WHY or delete" }
+    refactor: { gone: '^\s+(/\*\* Creates a new \w+\. \*/|\* Creates a new \w+\.)$', count_max: 0 }
+
+# An exported interface, function or enum with no JSDoc at all. The repository
+# configures no eslint-plugin-jsdoc, so nothing fires; the naked export line is
+# the anchor.
+- id: R9.Q5.naked-exports
+  rule: R9
+  questions: [Q5]
+  files: [src/types/alert.ts, src/types/job.ts, src/types/snapshot.ts, src/types/tags.ts, src/types/jobKind.ts, src/services/validate.ts]
+  anchor: '^export (interface (Alert|Job|Snapshot) \{|function (normalizeTags|validateAlert)\(|enum Priority \{)'
+  expect:
+    review: { category: "🟡", fix: "Convert WHAT to WHY or delete", note: "public symbols with no JSDoc at all" }
+    lint:   { linter: "-", route: R9, note: "jsdoc/require-jsdoc is not configured" }
+
+- id: CTRL.R9.snapshot-package-doc
+  rule: R9
+  control: true
+  files: [src/features/snapshot/index.ts]
+  anchor: '^ \* See docs/heartbeat-protocol\.md'
+  symbol: 'snapshot/index\.ts'
+  mention_ok: true
+  expect: { review: { findings: 0, note: "WHY-doc with one resolving See-edge" } }
+
+- id: CTRL.R9.why-comments
+  rule: R9
+  control: true
+  files: [src/services/preferencesStore.ts, src/pages/Devices/trace.ts, src/features/snapshot/repository.ts]
+  anchor: 'refuses storage|joined later|races a manual cleanup'
+  symbol: 'refuses storage|joined later|races a manual cleanup'
+  expect: { review: { findings: 0 } }
+
+# ─── R10 concurrency ────────────────────────────────────────────────────────
+
+# Goroutines are timers and effects: a setInterval started in a constructor and
+# in an effect, neither of which is ever cleared.
+- id: R10.Q1.unowned-loop
+  rule: R10
+  questions: [Q1]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts, src/hooks/useDeviceFeed.ts]
+  anchor: '^\s+setInterval\(\(\) => \{$'
+  expect:
+    review:   { category: "🐛", fix: "Inject the Exit Path" }
+    refactor: { present: 'clearInterval\(', scope: 'src/(pages/Heartbeats|hooks)/' }
+
+# The goroutine started in a constructor is the interval the FeedStore starts
+# as it is built, and the fetch a provider starts in its render body.
+- id: R10.Q2.goroutine-in-constructor
+  rule: R10
+  questions: [Q2]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts, src/context/CustomerContext.tsx]
+  anchor: '^\s+setInterval\(\(\) => \{$|started\.current = true'
+  expect:
+    review:   { category: "🐛", fix: "Make Concurrent Work Joinable" }
+    refactor: { gone: 'started\.current = true', count_max: 0 }
+
+- id: R10.Q4.split-guard
+  rule: R10
+  questions: [Q4]
+  files: [src/services/cache.ts]
+  anchor: 'if \(this\.inFlight\.has\(key\)\) \{|^\s+return this\.items$'
+  expect:
+    review: { category: "🐛", fix: "Extract Synchronized Owner", note: "refresh checks inFlight, awaits, then adds; all() hands the map out by reference" }
+
+- id: R10.Q5.production-sleep
+  rule: R10
+  questions: [Q5]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts, src/services/retry.ts, src/services/syncService.ts]
+  anchor: 'new Promise\(\(resolve\) => setTimeout\(resolve, '
+  # every report cites these files many times; the plant is the awaited
+  # setTimeout with a backoff argument, or the fix named for it. Test sleeps
+  # (R7 Q6) and the flush interval (Q1/Q2) do not match.
+  recall_match: 'setTimeout\(resolve, \(?(attempt|retryDelay|\(attempt)|Replace Sleep with Cancellable Wait|awaited \x60?setTimeout\x60?[^\n]{0,60}(retry|backoff)'
+  expect:
+    review:   { category: "🔴", fix: "Replace Sleep with Cancellable Wait" }
+    refactor: { gone: 'new Promise\(\(resolve\) => setTimeout\(resolve, ', count_max: 0, scope: 'src/(services|pages)/' }
+
+# `govet copylocks` (a Mutex passed by value) has no TypeScript twin at all:
+# there are no locks. The id stays for the parity report and counts with the
+# split guard beside it; review-only.
+- id: R10.lint.copylocks
+  rule: R10
+  questions: [lint]
+  files: [src/services/cache.ts]
+  anchor: 'private readonly inFlight = new Set<string>\(\)'
+  expect:
+    review: { category: "🐛", fix: "Extract Synchronized Owner", note: "the in-flight set is written on both sides of an await; counted with R10.Q4" }
+    lint:   { linter: "-", route: R10, note: "no copylocks twin in ESLint" }
+
+# errcheck's twin is the floating promise: a send nobody awaits or catches.
+- id: R10.lint.errcheck
+  rule: R10
+  questions: [lint]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts]
+  anchor: 'eslint-disable-next-line @typescript-eslint/no-floating-promises'
+  expect:
+    lint: { linter: "@typescript-eslint/no-floating-promises", action: FIX }
+
+# wrapcheck's twin is a rethrow that drops the original: `throw new XError(...)`
+# inside a catch with no `cause`. No ESLint rule is configured for it.
+- id: R10.lint.wrapcheck
+  rule: R10
+  questions: [lint]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts, src/services/notify.ts]
+  anchor: ': \$\{String\(err\)\}`\)$'
+  expect:
+    lint: { linter: "-", action: FIX, note: "no wrapcheck twin in ESLint; preserve-caught-error is not configured" }
+
+# No locks in TypeScript; the healthy guard is the effect that owns its
+# subscription and returns the cleanup that removes it.
+- id: CTRL.R10.repo-mutex
+  rule: R10
+  control: true
+  files: [src/hooks/useAlerts.ts]
+  anchor: 'window\.removeEventListener\(''focus'', onFocus\)'
+  symbol: 'useAlerts\b'
+  precision: finding
+  expect: { review: { findings: 0, note: "the listener is added and removed in the same effect" } }
+
+- id: CTRL.R10.main-jitter-sleep
+  rule: R10
+  control: true
+  files: [src/main.tsx]
+  anchor: 'Math\.floor\(Math\.random\(\) \* JITTER_MAX_MS\)'
+  symbol: 'JITTER_MAX_MS|Math\.random'
+  expect: { review: { findings: 0 } }
+
+# `for j := range jobs` exits when the channel closes; the promise twin is a
+# bounded Promise.all over workers that each drain a shared list.
+- id: CTRL.R10.worker-range
+  rule: R10
+  control: true
+  files: [src/export/workers.ts]
+  anchor: 'await Promise\.all\(workers\)'
+  symbol: 'Promise\.all\(workers\)'
+  expect: { review: { findings: 0, note: "every worker ends when the list is empty" } }
+
+# ─── R11 conditional dispatch ───────────────────────────────────────────────
+
+- id: R11.Q1.channel-switch
+  rule: R11
+  questions: [Q1, Q3]
+  files: [src/services/notify.ts, src/services/validate.ts, src/services/retry.ts]
+  anchor: 'switch \(a\.channel\) \{|a\.channel === '''
+  expect:
+    review:   { category: "🔴", cluster: "Alert.channel", fix: "Replace Duplicated Switch with Interface Dispatch", note: "already drifted: validate lacks pagerduty" }
+    refactor: { gone: 'switch \(a\.channel\)', count_max: 1, present: 'parse\w*[Cc]hannel\w*\(|^export type Channel = |Record<Channel, ' }
+    lint:     { linter: "-", route: R1, note: "channel names are enum-shaped; no-duplicate-string skips short literals" }
+    prepare:  { gate: MULTIPLY, spec: sms-channel }
+
+- id: R11.Q1.job-kind-if
+  rule: R11
+  questions: [Q1]
+  files: [src/services/snapshotService.ts, src/types/job.ts]
+  anchor: '\.kind === ''snapshot'''
+  expect:
+    review:   { category: "🔴", cluster: "Job.kind", fix: "Replace If-Chain with Strategy Map" }
+    refactor: { gone: 'kind === ''snapshot''', count_max: 1 }
+    lint:     { linter: "-", route: R11 }
+
+- id: R11.Q1.status-switch
+  rule: R11
+  questions: [Q1]
+  files: [src/pages/Status/StatusPage.tsx, src/services/alertService.ts, src/pages/Heartbeats/heartbeatFeed.ts]
+  anchor: 'switch \(d\.status\) \{'
+  expect:
+    review:   { category: "🔴", cluster: "Device.status", fix: "Replace Duplicated Switch with Interface Dispatch" }
+    refactor: { gone: 'switch \(d\.status\)', count_max: 1 }
+
+# The unknown-kind default appears twice: a throw deep in notify and a
+# `default: return null` in a render switch.
+- id: R11.Q3.default-unknown-channel
+  rule: R11
+  questions: [Q3]
+  files: [src/services/notify.ts, src/components/StatusBadge/StatusBadge.tsx]
+  anchor: 'unknown channel|^\s+return null$'
+  expect:
+    review:   { category: "🔴", cluster: "Alert.channel", fix: "Replace Duplicated Switch with Interface Dispatch", note: "decide once, at the edge" }
+    refactor: { gone: 'unknown channel', count_max: 1 }
+
+- id: R11.Q4.flag-arguments
+  rule: R11
+  questions: [Q4]
+  files: [src/pages/Heartbeats/heartbeatFeed.ts, src/services/syncService.ts, src/components/DeviceTable/DeviceTable.tsx]
+  anchor: '(short|force|dryRun|showTenant|compact|showTags): boolean'
+  expect:
+    review:   { category: "🔴", fix: "Split Flag Argument" }
+    refactor: { gone: ', short: boolean\)', count_max: 0 }
+    lint:     { linter: "-", route: R11, note: "no positional-boolean rule in ESLint; prefer-read-only-props fires on the component's props instead" }
+
+- id: R11.Q5.unearned-formatter
+  rule: R11
+  questions: [Q5]
+  files: [src/services/alertService.ts]
+  anchor: '^export interface AlertFormatter \{'
+  expect:
+    review: { category: "🟢", fix: "Keep the Single Exhaustive Switch", skeptic: "REFUTED with the cheaper alternative" }
+
+# switch-exhaustiveness-check is not configured, so the incomplete switch over
+# Priority is review-only; sonarjs/no-redundant-assignments fires on its
+# `attempts = 1` arm, which is the same plant seen sideways.
+- id: R11.Q1.priority-switch-not-exhaustive
+  rule: R11
+  questions: [Q1]
+  files: [src/services/retry.ts]
+  anchor: 'switch \(p\) \{'
+  expect:
+    review: { category: "🔴", fix: "Keep the Single Exhaustive Switch" }
+    lint:   { linter: sonarjs/no-redundant-assignments, route: R11, note: "no exhaustiveness rule without switch-exhaustiveness-check" }
+
+- id: CTRL.R11.region-zone-switch
+  rule: R11
+  control: true
+  files: [src/types/region.ts]
+  anchor: 'switch \(region\) \{'
+  symbol: 'zoneOf\b'
+  precision: finding   # reports name zoneOf when describing the Region type the bypassing code should use
+  expect: { review: { findings: 0, note: "one site, a union, closed by assertNever" } }
+
+- id: CTRL.R11.errors-is
+  rule: R11
+  control: true
+  files: [src/services/deviceRepository.ts, src/pages/DeviceView/DeviceView.tsx]
+  anchor: 'instanceof ApiError'
+  symbol: 'instanceof ApiError'
+  mention_ok: true
+  expect: { review: { findings: 0 } }
+
+- id: CTRL.R11.value-conditional
+  rule: R11
+  control: true
+  files: [src/features/snapshot/schedule.ts]
+  anchor: 'if \(this\.start < this\.end\) \{'
+  symbol: 'this\.start < this\.end'
+  expect: { review: { findings: 0 } }
+
+# ─── R12 mutation discipline ────────────────────────────────────────────────
+
+- id: R12.Q1.leaked-internals
+  rule: R12
+  questions: [Q1]
+  files: [src/services/cache.ts, src/types/grants.ts, src/types/schedule.ts, src/services/snapshotService.ts]
+  anchor: 'return this\.(items|perms|days|taken)$'
+  expect:
+    review:   { category: "🔴", fix: "Copy on the Way Out / Encapsulate Collection" }
+    refactor: { gone: 'return this\.items$', count_max: 0 }
+
+- id: R12.Q2.stored-parameter
+  rule: R12
+  questions: [Q2]
+  files: [src/types/schedule.ts, src/types/grants.ts]
+  anchor: 'this\.(days|perms) = (days|perms)$'
+  expect:
+    review:   { category: "🔴", fix: "Copy on the Way In" }
+    refactor: { present: '\[\.\.\.(days|perms)\]|Array\.from\((days|perms)\)|(days|perms)\.slice\(\)' }
+
+- id: R12.Q3.query-that-mutates
+  rule: R12
+  questions: [Q3]
+  files: [src/services/cache.ts, src/hooks/useDevices.ts]
+  anchor: 'get\(key: string\): Device \| undefined \{|devices\.sort\('
+  expect:
+    review: { category: "🔴", fix: "Separate Query from Modifier", note: "get refreshes the TTL and evicts; the selector sorts the query cache in place" }
+
+# The setter is the hook form: a state updater that assigns into the previous
+# state and returns the same reference, so React skips the render.
+- id: R12.Q4.setter
+  rule: R12
+  questions: [Q4]
+  files: [src/pages/DeviceView/tabs/OverviewTab.tsx]
+  anchor: 'setDevice\(\(d\) => \{'
+  expect:
+    review:   { category: "🔴", cluster: "Device", fix: "Remove Setting Method" }
+    refactor: { gone: 'setDevice\(\(d\) => \{', count_max: 0 }
+
+- id: CTRL.R12.boundary-clone
+  rule: R12
+  control: true
+  files: [src/features/snapshot/schedule.ts, src/features/report/catalog.ts]
+  anchor: '\[\.\.\.(windows|devices|this\.list)\]'
+  symbol: '\[\.\.\.(windows|devices|this\.list)\]'
+  mention_ok: true
+  expect: { review: { findings: 0 } }
+
+- id: CTRL.R12.honest-mutator
+  rule: R12
+  control: true
+  files: [src/features/snapshot/scheduler.ts]
+  anchor: '^\s+drainPending\(\): string\[\] \{'
+  symbol: 'drainPending\(\)'
+  expect: { review: { findings: 0, note: "pops and returns, named as a mutator, every caller wants both" } }
+
+# ─── Case A — retention: inline range check, duplicated, re-check, sentinel ──
+
+- id: CASE-A.retention-range-twice
+  rule: R1
+  case: A
+  questions: [Q2]
+  files: [src/features/snapshot/policy.ts, src/features/snapshot/config.ts]
+  anchor: '> 365'
+  expect:
+    review:   { category: "🔴", cluster: "retention", fix: "Replace Primitive with Domain Type", skeptic: "CONFIRMED ≥ 4" }
+    refactor: { gone: '> 365', count_max: 1, present: 'function parse\w*\(|static (parse|from)\w*\(', scope: 'src/features/snapshot/' }
+    lint:     { linter: no-magic-numbers, route: R1 }
+
+- id: CASE-A.defensive-recheck
+  rule: R2
+  case: A
+  questions: [Q2]
+  files: [src/features/snapshot/policy.ts]
+  anchor: 'days > 0 && days <= 365'
+  expect:
+    review:   { category: "🔴", cluster: "retention", fix: "Delete re-validation of composed types" }
+    refactor: { gone: 'days > 0 && days <= 365', count_max: 0 }
+    lint:     { linter: no-magic-numbers, route: R2, note: "a named constant is not the fix; the re-check goes" }
+
+- id: CASE-A.zero-sentinel
+  rule: R1
+  case: A
+  questions: [Q4]
+  files: [src/features/snapshot/config.ts]
+  anchor: 'return 0 // sentinel'
+  expect:
+    review:   { category: "🔴", cluster: "retention", fix: "Replace Sentinel with Declared Absence" }
+    refactor: { gone: 'return 0 // sentinel', count_max: 0 }
+
+# ─── Case B — host/port/tls clump + stringly-typed scheme ───────────────────
+
+- id: CASE-B.host-port-tls-clump
+  rule: R1
+  case: B
+  questions: [Q5]
+  files: [src/services/transport/client.ts]
+  anchor: 'host: string, port: number'
+  expect:
+    review:   { category: "🔴", fix: "Introduce Parameter Object", skeptic: "CONFIRMED" }
+    refactor: { gone: 'host: string, port: number', count_max: 0, present: 'static (parse|from)\w*\(|function parse\w*\(', scope: 'src/services/transport/' }
+
+- id: CASE-B.scheme-decided-twice
+  rule: R1
+  case: B
+  questions: [Q3]
+  files: [src/services/transport/client.ts]
+  anchor: '''https'''
+  expect:
+    review:   { category: "🔴", fix: "Name enum strings" }
+    refactor: { gone: '''https''', count_max: 1 }
+
+- id: CASE-B.port-range-twice
+  rule: R1
+  case: B
+  questions: [Q2]
+  files: [src/services/transport/client.ts]
+  anchor: 'port <= 0 \|\| port > 65535'
+  expect:
+    review:   { category: "🔴", fix: "Replace Primitive with Domain Type" }
+    refactor: { gone: 'port <= 0 \|\| port > 65535', count_max: 1 }
+    lint:     { linter: no-magic-numbers, route: R1 }
+
+# ─── Case C — boolean flags tracking a loop → collection type ───────────────
+
+- id: CASE-C.flag-loop
+  rule: R3
+  case: C
+  questions: [Q4]
+  files: [src/pages/Devices/placement/picker.ts]
+  anchor: 'Found = (true|false)'
+  expect:
+    review:   { category: "🟡", fix: "Extract Leaf Type" }
+    refactor: { gone: 'Found = (true|false)', count_max: 0, present: '^export class \w+ (extends Array<Node>|\{)|readonly nodes: (readonly )?Node\[\]' }
+    postcheck: { cognitive_max: 5, function: pickReplicas }
+
+- id: CASE-C.inline-validity
+  rule: R2
+  case: C
+  questions: [Q2]
+  files: [src/pages/Devices/placement/picker.ts]
+  anchor: '!n\.zone \|\| n\.capacity <= 0'
+  expect:
+    review:   { category: "🔴", fix: "Add validating constructor" }
+    refactor: { gone: '!n\.zone', count_max: 0 }
+
+# `(Node, Node, error)` is a three-tuple with the error as a value; the honest
+# TypeScript shapes are a thrown error and an optional `first()` on the
+# collection (`Node | undefined`).
+- id: CASE-C.tuple-return
+  rule: R1
+  case: C
+  questions: [Q5]
+  files: [src/pages/Devices/placement/picker.ts]
+  anchor: '\[Node \| undefined, Node \| undefined, string \| undefined\]'
+  expect:
+    review:   { category: "🔴", fix: "Introduce Parameter Object" }
+    refactor: { present: ': Node \| undefined \{' }
+
+# ─── Case D — ceremony must not be extracted ────────────────────────────────
+
+- id: CASE-D.replica-count
+  rule: R1
+  case: D
+  questions: [Q6]
+  files: [src/types/grants.ts]
+  anchor: '^export class ReplicaCount \{'
+  expect:
+    review:   { category: "🟢", fix: "Over-abstraction found instead? Apply the cheaper alternative", alternative: "delete the wrapper, keep number" }
+    refactor: { gone_or_untouched: 'class ReplicaCount', never_grown: true }
+
+- id: CASE-D.name-wrapper
+  rule: R1
+  case: D
+  questions: [Q6]
+  files: [src/types/grants.ts]
+  anchor: '^export class Name \{'
+  expect:
+    review: { category: "🟢", fix: "Over-abstraction found instead? Apply the cheaper alternative" }
+
+# ─── Case E — undefined as field, return, and parameter ─────────────────────
+
+- id: CASE-E.nil-field-rechecked
+  rule: R2
+  case: E
+  questions: [Q2]
+  files: [src/features/report/reporter.ts]
+  anchor: 'if \(this\.(sink|clock) === undefined\)'
+  expect:
+    review:   { category: "🔴", cluster: "Reporter", fix: "Introduce Null Object", also: "Hoist method checks into the constructor is the move only if sink were required" }
+    refactor: { gone: 'if \([a-z]\w*\.\w+ === undefined\)', count_max: 0, scope: 'src/features/report/', guard: '^export (interface|abstract class) ', guard_count_max: 1 }
+
+- id: CASE-E.exported-nilable-fields
+  rule: R2
+  case: E
+  questions: [Q1]
+  files: [src/features/report/reporter.ts]
+  anchor: 'sink: Sink \| undefined|clock: Clock \| undefined'
+  expect:
+    review:   { category: "🔴", cluster: "Reporter", fix: "Add validating constructor" }
+    refactor: { gone: '^\s+(sink: Sink \| undefined|clock: Clock \| undefined)', count_max: 0 }
+
+# `Find` returning nil has no TypeScript twin: `find` returning `T | undefined`
+# is the declared absence, checked by tsc at every call site, and not a
+# disease. The plant is the parser beside it. `parseDevice` returns null for a
+# blank line (an absence the caller skips) and again for a malformed line (a
+# failure disguised as absence, so a broken catalog text silently shrinks).
+# The anchor is the failure return; the fix throws there and keeps the
+# blank-line null, so one `return null` survives the refactor. Never
+# `[CatalogDevice, boolean]`.
+- id: CASE-E.nil-return
+  rule: R2
+  case: E
+  questions: [Q5]
+  files: [src/features/report/catalog.ts]
+  anchor: 'return null$'
+  # catalog.ts is cited for its JSDoc in every report; the plant is named by the
+  # function or by a line inside it (parseDevice spans catalog.ts:48-62).
+  recall_match: 'parseDevice|catalog\.ts:(4[8-9]|5[0-9]|6[0-2])\b'
+  expect:
+    review:   { category: "🔴", fix: "Separate Failure from Absence" }
+    refactor: { gone: 'return null$', count_max: 1, scope: 'src/features/report/catalog.ts', present: 'throw new \w*Error' }
+
+- id: CASE-E.nil-parameters
+  rule: R2
+  case: E
+  questions: [Q6]
+  files: [src/features/report/wire.ts, src/features/report/reporter.ts]
+  anchor: 'new Reporter\(sink, undefined, undefined\)|(opts|clock) === undefined|clock \?\? now'
+  expect:
+    review:   { category: "🔴", cluster: "Reporter", fix: "Add validating constructor" }
+    refactor: { gone: 'new Reporter\([^)]*\bundefined\b', count_max: 0, present: '(NULL_SINK|SYSTEM_CLOCK|DEFAULT_OPTIONS|nullSink|systemClock)\b|^export const \w+: Sink = ' }
+
+# ─── Case F — a global reached from every layer ─────────────────────────────
+
+# The global is a module-level `export let CONFIG`, rebound by load()
+# (import/no-mutable-exports, the one ESLint rule that sees it) and mutated in
+# place by a test.
+- id: CASE-F.env-config-global
+  rule: R8
+  case: F
+  questions: [Q1]
+  files: [src/config/env.ts]
+  anchor: '^export let CONFIG: Configuration = \{'
+  # Reports name this plant by its symbol as often as by its file.
+  recall_match: 'env\.ts|\bCONFIG\b'
+  expect:
+    review:   { category: "🔴", fix: "Extract Clean Island", nolint_finding: true }
+    refactor: { gone: '^(export let CONFIG|const region = import\.meta\.env)', count_max: 0, scope: 'src/config/', present: 'function load\(\): Configuration' }
+    lint:     { linter: import/no-mutable-exports, route: R8 }
+    prepare:  { gate: MULTIPLY, spec: per-tenant-worker-limit }
+
+- id: CASE-F.deep-reads
+  rule: R8
+  case: F
+  questions: [Q5]
+  files: [src/export/workers.ts, src/hooks/useSnapshotScheduler.ts]
+  anchor: 'CONFIG\.(numWorkers|batchSize|pollMs)'
+  expect:
+    review:   { category: "🔴", fix: "Extract Clean Island", then: "Push the Global Up One Level" }
+    refactor: { gone: 'from ''(\.\./)+config/env''', count_max: 1, ratchet: "CONFIG refs outside main.tsx non-increasing per commit, reaching 0" }
+    shallow_fix_rejected: { gone: '\bConfiguration\b', count_max: 0, scope: 'src/(export|hooks|services|pages)/' }
+
+# Go's payoff was `t.Parallel()`; the TypeScript payoff is the worker count
+# handed to start() as an argument instead of written into the module global.
+- id: CASE-F.test-mutates-global
+  rule: R8
+  case: F
+  questions: [Q6]
+  files: [src/export/workers.test.ts]
+  anchor: 'CONFIG\.numWorkers = 2'
+  expect:
+    review:   { category: "🔴", fix: "Extract Clean Island" }
+    refactor: { gone: 'CONFIG\.\w+ = ', count_max: 0, scope: '\.test\.tsx?$', present: '(workers|numWorkers): 2|start\([a-z]+, 2\)' }
+
+- id: CASE-F.region-read-in-init
+  rule: R8
+  case: F
+  questions: [Q2, Q5]
+  files: [src/config/env.ts]
+  anchor: '^const region = import\.meta\.env\.VITE_REGION'
+  expect:
+    review:   { category: "🔴", fix: "Replace Import-Time Initialization with a Constructor" }
+    lint:     { linter: "-", route: R8, note: "an import-time read has no ESLint rule; import/no-mutable-exports fires on CONFIG's `export let` instead" }
+
+# ─── React-only plants (no Go or Python twin) ───────────────────────────────
+
+- id: R3.react.unstable-nested-component
+  rule: R3
+  questions: [Q1]
+  files: [src/pages/DeviceView/DeviceView.tsx]
+  anchor: '^\s+function TabButton\('
+  expect:
+    review:   { category: "🟡", fix: "Extract Function named after the comment", note: "a component declared inside the page remounts on every render" }
+    refactor: { gone: '^\s+function TabButton\(', count_max: 0 }
+    lint:     { linter: react/no-unstable-nested-components, route: R3, also: [react/no-multi-comp] }
+
+- id: R6.react.vi-mock-internal-hook
+  rule: R6
+  questions: [Q2]
+  files: [src/pages/Devices/DevicesPage.test.tsx]
+  anchor: 'vi\.mock\(''\.\./\.\./hooks/useDevices'''
+  expect:
+    review:   { category: "🔴", fix: "Rewrite the test around real collaborators", note: "MSW handlers for /api/devices exist beside it" }
+    refactor: { gone: 'vi\.mock\(''[./]', count_max: 0, scope: '\.test\.tsx?$' }
+
+- id: R7.react.testid-over-role
+  rule: R7
+  questions: [Q3]
+  files: [src/pages/Devices/DeviceForm.test.tsx]
+  anchor: 'getByTestId\(''reg-'
+  expect:
+    review: { category: "🔴", fix: "Move the behavior down a rung", note: "every element reached by test id while each has a label" }
+
+- id: R10.react.fetch-in-effect-no-abort
+  rule: R10
+  questions: [Q2]
+  files: [src/pages/DeviceView/tabs/AlertsTab.tsx]
+  anchor: 'fetchAlerts\(apiClient\)$'
+  expect:
+    review:   { category: "🔴", fix: "Make Concurrent Work Joinable", note: "the repository has TanStack Query and a useAlerts hook" }
+    refactor: { gone: 'fetchAlerts\(apiClient\)$', count_max: 0, scope: 'src/pages/' }
+    lint:     { linter: promise/prefer-await-to-then, route: R10 }
+
+- id: R10.react.exhaustive-deps-disabled
+  rule: R10
+  questions: [Q1]
+  files: [src/hooks/useDeviceFeed.ts]
+  anchor: 'eslint-disable-next-line react-hooks/exhaustive-deps'
+  expect:
+    review:   { category: "🐛", fix: "Inject the Exit Path", note: "the interval closes over the first render's data and is never cleared" }
+    refactor: { gone: 'eslint-disable-next-line react-hooks/exhaustive-deps', count_max: 0 }
+    lint:     { linter: react-hooks/exhaustive-deps, route: R10 }
+
+- id: R5.react.prop-drilling
+  rule: R5
+  questions: [Q2]
+  files: [src/pages/DeviceView/DeviceView.tsx, src/pages/DeviceView/DeviceTabs.tsx, src/pages/DeviceView/tabs/OverviewTab.tsx]
+  anchor: 'clusterId=\{clusterId\}|clusterId=\{cluster\?\.id'
+  expect:
+    review: { category: "🔴", fix: "Slice out a feature", note: "tenantId and clusterId handed through three components unchanged" }
+
+- id: R12.react.sort-in-render
+  rule: R12
+  questions: [Q3]
+  files: [src/hooks/useDevices.ts]
+  anchor: 'devices\.sort\('
+  expect:
+    review:   { category: "🔴", fix: "Separate Query from Modifier", note: "the selector sorts the query cache's array in place" }
+    refactor: { gone: 'devices\.sort\(', count_max: 0 }
+    lint:     { linter: sonarjs/no-misleading-array-reverse, route: R12 }
+
+- id: R2.react.nullable-prop
+  rule: R2
+  questions: [Q5]
+  files: [src/pages/DeviceView/tabs/OverviewTab.tsx]
+  anchor: 'cluster: Cluster \| null \| undefined'
+  expect:
+    review:   { category: "🔴", fix: "Separate Failure from Absence", note: "the parent decides; the child takes Cluster or renders without the section" }
+    refactor: { gone: 'Cluster \| null \| undefined', count_max: 0 }

@@ -1,0 +1,15 @@
+Looking at the FOCUS file against the RUBRIC:
+
+**Requirement 1 (unexported fields):** ✓ Both `sink` and `clock` are lowercase (unexported), preventing struct literal construction.
+
+**Requirement 2 (not nil-able, real defaults):** ✗ The constructor parameters are still `*Sink` (a nil-able pointer) and `func() time.Time` (a nil-able func value). The code only validates these at runtime via `if sink == nil` and `if clock == nil` checks, returning errors. There's no Null Object pattern (like `&Sink{w: io.Discard}`), and no real default clock value (like a `DefaultClock()` constructor). This leaves nil still representable through the type system—the code just rejects it at construction time.
+
+**Requirement 3 (no nil re-checks):** ✓ No nil checks in methods.
+
+**Requirement 4 (error return appropriateness):** Follows naturally from requirement 2 failing—since nil *is* still representable, the error return is needed.
+
+The RUBRIC explicitly identifies this pattern as a "shallow fix" and declares it FAIL: "moving `if sink == nil { return nil, err }` into NewReporter while keeping `*Sink` parameters and a `*Reporter` return — is FAIL: nil is still representable, just rejected."
+
+The refactor would need to make nil unreachable at the type level (via Null Object, concrete types, or real default values), not just reject it at runtime.
+
+VERDICT: FAIL

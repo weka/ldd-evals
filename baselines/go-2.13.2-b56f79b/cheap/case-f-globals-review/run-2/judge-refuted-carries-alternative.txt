@@ -1,0 +1,21 @@
+--- vote 1: PASS ---
+Looking through the report for any wrapper type proposals for worker count:
+
+The report mentions `env.Config.NumWorkers` and `env.Config.BatchSize` multiple times, but only as observations about **existing code structure** — e.g., "read sideways from library code," "test must write `env.Config.NumWorkers = 2` directly." 
+
+The design debt recommendations focus on threading the existing `*Configuration` struct as a parameter (`"thread `*Configuration` in as a parameter"`), not on creating a new wrapper type like `WorkerCount`, `NumWorkers`, or similar.
+
+No hunter proposal for a new worker-count wrapper type appears in the report.
+
+**VERDICT: PASS**
+
+--- vote 2: PASS ---
+The report mentions `NumWorkers` and `BatchSize` in the Design Debt section, but does not propose creating a wrapper type (like `WorkerCount`) for the worker count. Instead, the fix proposes threading the existing `*Configuration` type through constructors:
+
+> `internal/pool/workers.go:18` + `internal/jobs/scheduler.go:44` | R8 Q1: ... | Push the Global Up One Level / Extract Clean Island: **thread `*Configuration` in as a parameter**
+
+This solution uses the existing `Configuration` struct (which already contains `NumWorkers` and `BatchSize` as fields) rather than introducing a new wrapper. No new wrapper type is proposed anywhere in the report.
+
+Per the rubric: "If the report proposes NO wrapper type for the worker count / batch size, PASS."
+
+VERDICT: PASS

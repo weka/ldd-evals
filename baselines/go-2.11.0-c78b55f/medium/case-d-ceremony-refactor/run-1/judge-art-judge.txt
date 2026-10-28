@@ -1,0 +1,61 @@
+--- vote 1: FAIL ---
+Looking at the FOCUS code against the RUBRIC:
+
+**Point 1 (No new indirection):** FAIL
+
+The current `internal/handlers/trace.go` introduces significant new structure that wasn't supposed to be there:
+- Lines 6-8: `Handler` struct wrapping `store` — this is new indirection
+- Lines 10-12: `NewHandler` constructor — new factory pattern
+- Lines 14-20: `List` method — new method on Handler struct  
+- Lines 27-35: `Routes` orchestration function — new structure
+
+The rubric explicitly states the original held "a one-line `trace` helper with a comment stating a real reason." The current code has wrapped that in a full struct-based architecture with constructor, methods, and routing orchestration. This is exactly the kind of added indirection the control measures against — an object-oriented layer where a simple helper sufficed.
+
+Comparison to `internal/handlers/devices.go` reinforces this: handlers there remain standalone functions (Register, Status) returning `http.HandlerFunc`, not methods on a struct. The architectural shift in `trace.go` adds unnecessary abstraction layers.
+
+**Point 3 (Trace reason survives):** PASS
+
+Lines 23-25: The comment "trace echoes the caller's trace id so a device's log lines and the request that produced them can be joined later" is preserved verbatim next to the header write.
+
+**Point 2 (Deletion is allowed):** PASS  
+
+In `internal/models/grants.go`, the unreferenced `ReplicaCount` and `Name` are gone (dead-code removal). `Grants` survived with `Has`/`All` unchanged, plus a new `NewGrants` constructor and `Permission` type that don't violate growth — those are legitimate domain additions, not wrapping.
+
+**Point 4 (Names kept or sharpened):** Moot given Point 1 failure.
+
+The added identifiers (`Handler`, `NewHandler`, `List`, `Routes`) are meaningful on their own, but their *presence* violates the no-new-indirection rule.
+
+VERDICT: FAIL
+
+--- vote 2: FAIL ---
+Looking at the FOCUS against the RUBRIC's negative control criteria:
+
+**Criterion 1 (No new indirection) - FAIL:**
+The original `internal/handlers/trace.go` contained "a one-line `trace` helper with a comment." The current code introduces a `Handler` wrapper struct around `repository.Store`:
+```go
+type Handler struct {
+	store repository.Store
+}
+```
+The original simple `trace` function is now wrapped as a method on this struct. This violates the core principle: "nothing was wrapped, layered or renamed for the sake of change." The `List` method and `Routes` function are additional structure the old code did not need.
+
+**Criterion 2 (Deletion allowed, growth not):**
+In `grants.go`, `ReplicaCount` and `Name` are deleted (dead-code removal passes). `Grants` itself hasn't grown—still has only `Has`, `All`, and `NewGrants`. This passes.
+
+**Criterion 3 (Trace reason survives):**
+The comment survives and is placed next to the header write:
+```go
+// trace echoes the caller's trace id so a device's log lines and the request
+// that produced them can be joined later.
+func (h *Handler) trace(w http.ResponseWriter, traceID string) {
+	w.Header().Set("X-Trace", traceID)
+}
+```
+This passes.
+
+**Criterion 4 (Names kept):**
+`Has`, `All`, `NewGrants` retain their meanings. No names added unnecessary words. This passes.
+
+The fatal issue is criterion 1. A wrapper type was introduced where the code's box should have stayed closed: the original one-line helper is now method-wrapped in a struct that organizes multiple HTTP handlers together—adding the indirection and layering the rubric explicitly warns against.
+
+VERDICT: FAIL

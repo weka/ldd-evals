@@ -1,0 +1,43 @@
+--- vote 1: PASS ---
+## Analysis
+
+Checking against the four PASS requirements:
+
+1. **One box** ✓  
+   The `endpoint` type (host, port, tls) is built through `newEndpoint()`, which owns the port-range rule once: `if port <= 0 || port > 65535 { port = defaultPort }`. It answers its own questions: `scheme()`, `addr()`, `url(path)`, and `dial()`. No free functions taking `(host, port, tls)` remain.
+
+2. **Scheme decided once** ✓  
+   The only occurrence of "https" and "http" together is in `endpoint.scheme()`:
+   ```go
+   func (e endpoint) scheme() string {
+       if e.tls {
+           return "https"
+       }
+       return "http"
+   }
+   ```
+
+3. **Names speak intent** ✓  
+   Client methods read as stories: `Get(path)` calls `c.endpoint.url(path)`, `HealthURL()` calls `c.endpoint.url("/healthz")`, and `Ping()` calls `c.endpoint.dial()`. No `fmt.Sprintf` assembly inside these methods; the URL building lives where it belongs, in `endpoint.url()`.
+
+4. **No leftover ceremony** ✓  
+   Port validation appears once in the constructor; `dial()` reuses `e.addr()` without re-validating; comments (package, Client type, method docs) state contracts and intent, not just what names mean.
+
+Bonus: `Ping()` doesn't explicitly call `Handshake()` before closing, but that wasn't required.
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+Analyzing the code against all four rubric criteria:
+
+1. **One box.** ✓ An `endpoint` struct cleanly encapsulates host, port, and tls. The `newEndpoint()` constructor validates port range once. Methods answer their own questions: `scheme()` returns the scheme, `addr()` the dial address, `url(path)` the full URL, and `dial()` the connection. The `Client` delegates to this box rather than branching on `c.tls` itself. No free functions linger with the old three-parameter signature.
+
+2. **The scheme is decided once.** ✓ `"https"` and `"http"` appear together only in the `scheme()` method. No other if-tls blocks checking scheme.
+
+3. **Names speak intent.** ✓ Client method bodies read as stories: `HealthURL()` calls `c.endpoint.url("/healthz")`, `Get()` calls `c.endpoint.url(path)`, `Ping()` calls `c.endpoint.dial()`. The string assembly (`fmt.Sprintf`) lives only inside `endpoint.url()`, not in the Client methods themselves.
+
+4. **No leftover ceremony.** ✓ Port validation appears once in `newEndpoint()`. The `dial()` method doesn't re-validate (the port is already valid). Comments state contracts (Body closing, goroutine safety, port fallback) rather than restating method names.
+
+Bonus: No explicit `Handshake()` call in `Ping()` before `Close()`, so the bonus observation doesn't apply.
+
+VERDICT: PASS

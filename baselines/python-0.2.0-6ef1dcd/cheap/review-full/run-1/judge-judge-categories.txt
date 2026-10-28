@@ -1,0 +1,45 @@
+--- vote 1: FAIL ---
+Looking at the report against the RUBRIC:
+
+**Question 1: Is the unguarded concurrent dict access listed under 🐛 Bugs?**
+
+YES. The report explicitly lists under 🐛 Bugs:
+```
+`internal/services/device_service.py:194,383-385,436-439,458-460` | R10 Q3/Q4: `self.last_seen` is written with no lock in `process_heartbeat` (request-handler threads), independently read-and-deleted with no lock in the background `_flush_loop`, and deleted again with no lock in `purge()` — the field is never declared beside a lock that actually guards every access path
+```
+
+This is correctly categorized as a real concurrent dict access bug.
+
+**Question 2: Is the production `time.sleep` (retry backoff / polling sleep) listed under 🔴 Design Debt rather than 🐛 Bugs?**
+
+NO. Searching the entire report, `time.sleep` is mentioned only in the 🟡 Readability Debt section under R7, and only in reference to test code:
+- `test_service.py:61-67` — testing artifact
+- `test_heartbeat.py:109-119` — testing artifact
+
+The report makes no mention of production `time.sleep` calls (retry backoff or polling sleep) in `retry.py`, `sync_service.py`, or `process_heartbeat` anywhere. These findings are absent from the report entirely, and therefore not filed under Design Debt.
+
+Both questions must answer yes; only the first does.
+
+VERDICT: FAIL
+
+--- vote 2: FAIL ---
+Looking at the report against the CRITERIA:
+
+**Question 1: Is the unguarded concurrent dict access listed under 🐛 Bugs?**
+
+YES. The report clearly lists it under the Bugs section:
+> `` `internal/services/device_service.py:194,383-385,436-439,458-460` | R10 Q3/Q4: `self.last_seen` is written with no lock in `process_heartbeat` (request-handler threads), independently read-and-deleted with no lock in the background `_flush_loop`, and deleted again with no lock in `purge()` ``
+
+This exactly matches the concurrent dict access problem described in the criteria.
+
+**Question 2: Are the production time.sleep calls listed under 🔴 Design Debt?**
+
+NO. Searching the entire Design Debt section, there is no explicit mention of time.sleep calls for retry backoff. The only time.sleep mentions in the document appear under 🟡 Readability Debt in the R7 section (Test Placement), and both of those are **test code**, not production code:
+- `internal/services/test_service.py:61-67` (time.sleep in a test)
+- `internal/handlers/test_heartbeat.py:109-119` (time.sleep in a test)
+
+While `internal/services/retry.py:11,20` is mentioned in Design Debt under R4 (Helper Placement), this entry discusses the `_retry_delay` *function* itself as a helper that should be demoted—it does not explicitly call out production time.sleep calls as a Design Debt issue.
+
+The criteria requires BOTH questions to be answered yes.
+
+VERDICT: FAIL

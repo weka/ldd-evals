@@ -1,0 +1,29 @@
+Looking at the ProcessHeartbeat method in the FOCUS file, I need to verify it matches the single-altitude requirement and contains only named calls, assignments of one, or early error returns.
+
+Let me trace through the body:
+
+1. Parse: `hb, err := parseHeartbeat(raw, force)` + early return ✓
+2. Load/create: `d, err := s.loadOrCreateDevice(tenant, id, tags)` + early return ✓
+3. Apply status transition: `status := s.dampFlap(d, hb.status, force)` ✓
+4. Notify: `s.notifyDown(id)` inside if block ✓
+5. Apply tags: `applyVersionAndTags(&d, hb.version, tags)` ✓
+6. Score: `score = heartbeatScore(status, tags)` ✓
+7. Persist: `s.repo.Save(context.Background(), d)` ✓
+
+However, the method violates the stated criterion. Looking at lines that persist to cache:
+
+```go
+s.cache[cacheKey(tenant, id)] = d
+```
+
+and 
+
+```go
+s.lastSeen[id] = d.LastSeen
+```
+
+These are **map indexing operations**, which the CRITERIA explicitly forbids: "no string, index or byte manipulation in the body." The RUBRIC reinforces this, citing "slice indexing like `parts[0]`" as forbidden.
+
+Map indexing (`s.cache[key]` and `s.lastSeen[id]`) is index manipulation, which should be delegated to a helper function rather than appearing in the ProcessHeartbeat body itself.
+
+VERDICT: FAIL

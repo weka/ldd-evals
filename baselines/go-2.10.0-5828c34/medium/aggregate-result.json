@@ -1,0 +1,729 @@
+{
+  "schemaVersion": "1",
+  "suite": "evals",
+  "startedAt": "2026-09-10T16:42:21.978679558Z",
+  "finishedAt": "2026-09-10T16:52:31.26103778Z",
+  "cases": [
+    {
+      "name": "case-a-retention-refactor",
+      "tier": "medium",
+      "tags": [
+        "medium",
+        "refactor",
+        "logic-hunter",
+        "case-a"
+      ],
+      "runs": 1,
+      "passed": 1,
+      "passRate": 1,
+      "results": [
+        {
+          "case": "case-a-retention-refactor",
+          "run": 1,
+          "model": "claude-sonnet-5",
+          "passed": true,
+          "graders": [
+            {
+              "name": "art-judge",
+              "type": "llm",
+              "passed": true,
+              "detail": "judge claude-haiku-4-5: ## Analysis\n\nChecking each criterion:\n\n1. **One box.** The `Retention` type owns its parsing entirely. `ParseRetention` handles the `\"d\"` suffix stripping and range validation in one place: `strconv.Atoi(strings.TrimSuffix(v, \"d\"))` and `if err != nil || days <= 0 || days > 365`. No caller re-parses or re-checks. ✓\n\n2. **Names speak intent.** The `Prune` method reads top-down in domain language: `expired := r.Expired(snaps, s.now())`. The `Expired` method name says what it does semantically, not mechanically. ✓\n\n3. **One altitude per function.** The `Prune` body is a story: obtain retention → call `Expired()` → delete → return. No arithmetic, strconv, or strings operations in the function body itself; all parsing is delegated to `ParseRetention`. ✓\n\n4. **No ceremony.** The `Retention` type has no zero sentinel. Comments present explain non-obvious invariants (`strict inequality`) or parsing rules, not defensive re-checks. No comment left where a name now says it (e.g., no \"already validated\" comment). ✓\n\nThe FAIL conditions are also avoided: `strconv.Atoi(strings.TrimSuffix(...` appears only inside `ParseRetention`, and the range check `days <= 0 || days > 365` appears only once.\n\nVERDICT: PASS",
+              "cost_usd": 0.024239999999999998
+            },
+            {
+              "name": "gone-defensive-recheck",
+              "type": "regex",
+              "passed": true,
+              "detail": "days > 0 && days <= 365 over files: 0 match(es); want exactly 0"
+            },
+            {
+              "name": "gone-int-sentinel-helper",
+              "type": "regex",
+              "passed": true,
+              "detail": "func retentionDays\\(raw map\\[string\\]string\\) int over files: 0 match(es); want exactly 0"
+            },
+            {
+              "name": "gone-zero-sentinel",
+              "type": "regex",
+              "passed": true,
+              "detail": "return 0 // sentinel over files: 0 match(es); want exactly 0"
+            },
+            {
+              "name": "postcheck",
+              "type": "postcheck",
+              "passed": true,
+              "detail": "task test: ok\nPASS  task test green\ntask lint: ok\nPASS  task lint green\nPASS  retention range predicate has one owner in internal/snapshot (1 <= 1)\nPASS  strconv.Atoi on retention happens once (one boundary parse) (1 <= 1)\nPASS  raw retention value inspected at most once downstream (1 <= 1)\nnew constructors: ParseRetention\nPASS  a new (Parse|New)X(...) (X, error) constructor exists in internal/snapshot (1 >= 1)\nPASS  snapshot_test calls a new constructor (3 >= 1)\nPASS  Retention has no exported fields (0)\nPASS  Retention is never built by literal outside internal/snapshot/policy.go (0)\nPASS  no //nolint added to internal/snapshot (0)\n== black-box suite: builds cmd/svc, replays the recorded heartbeats ==\n--- PASS: TestHeartbeatContract (1.21s)\n--- PASS: TestExpectedTSVMatchesTable (0.00s)\nok  \texample.com/heartbeat-blackbox\t1.211s\nblack-box: PASS\nPASS  black-box heartbeat suite\npostcheck: all checks passed"
+            }
+          ],
+          "cost_usd": 2.2061858000000005,
+          "judge_cost_usd": 0.024239999999999998,
+          "duration_ms": 696859,
+          "num_turns": 67,
+          "segments": 3,
+          "scaffold_dir": "/tmp/ldd-eval-case-a-retention-refactor-284870262"
+        }
+      ]
+    },
+    {
+      "name": "case-b-endpoint-refactor",
+      "tier": "medium",
+      "tags": [
+        "medium",
+        "refactor",
+        "logic-hunter",
+        "case-b"
+      ],
+      "runs": 1,
+      "passed": 1,
+      "passRate": 1,
+      "results": [
+        {
+          "case": "case-b-endpoint-refactor",
+          "run": 1,
+          "model": "claude-sonnet-5",
+          "passed": true,
+          "graders": [
+            {
+              "name": "art-judge",
+              "type": "llm",
+              "passed": true,
+              "detail": "judge claude-haiku-4-5: Looking at the code against each rubric criterion:\n\n1. **One box**: The `endpoint` type holds host, port, and tls; the constructor `newEndpoint` owns the port-range rule (`if port <= 0 || port > 65535 { port = defaultPort }`); it answers all its own questions: `scheme()`, `URL(path)`, `HealthURL()`, and `Dial()`. Client methods delegate cleanly to these without branching on tls themselves.\n\n2. **Scheme decided once**: \"https\" and \"http\" appear together only in `endpoint.scheme()`:\n   ```go\n   if e.tls {\n       return \"https\"\n   }\n   return \"http\"\n   ```\n   No duplication elsewhere.\n\n3. **Names speak intent**: Client method bodies read as stories:\n   - `Get`: `url := c.endpoint.URL(path); resp, err := c.http.Get(url)`\n   - `Ping`: `conn, err := c.endpoint.Dial(dialTimeout); conn.Close()`\n   - `HealthURL`: `return c.endpoint.HealthURL()`\n   \n   No sprintf assembly in Client methods; it's delegated to `endpoint.URL()`.\n\n4. **No leftover ceremony**: Port validation happens once in `newEndpoint`; `Dial` doesn't re-check (port is already valid); comments state contracts (\"out-of-range port falls back\", \"endpoint's port is always within range\") rather than restating names.\n\nVERDICT: PASS",
+              "cost_usd": 0.026702000000000004
+            },
+            {
+              "name": "gone-host-port-clump",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?m)^func [a-z][A-Za-z]*\\(host string, port int, tls bool\\) \\(?(net\\.Conn|string) over files: 0 match(es); want exactly 0"
+            },
+            {
+              "name": "one-https-owner",
+              "type": "regex",
+              "passed": true,
+              "detail": "\"https(://)?\" over files: 1 match(es); want exactly 1"
+            },
+            {
+              "name": "postcheck",
+              "type": "postcheck",
+              "passed": true,
+              "detail": "task test: ok\nPASS  task test green\ntask lint: ok\nPASS  task lint green\nPASS  port range predicate (65535 or a named max port) has one owner (1 <= 1)\nPASS  scheme decided once inside transport (1 <= 1)\nnew constructors: newEndpoint\nPASS  a new constructor for the endpoint value exists in internal/transport (1 >= 1)\nPASS  no //nolint added to internal/transport (0)\n== black-box suite: builds cmd/svc, replays the recorded heartbeats ==\n--- PASS: TestHeartbeatContract (1.20s)\n--- PASS: TestExpectedTSVMatchesTable (0.00s)\nok  \texample.com/heartbeat-blackbox\t1.201s\nblack-box: PASS\nPASS  black-box heartbeat suite\npostcheck: all checks passed"
+            }
+          ],
+          "cost_usd": 1.5206933,
+          "judge_cost_usd": 0.026702000000000004,
+          "duration_ms": 504918,
+          "num_turns": 45,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-case-b-endpoint-refactor-3998597025"
+        }
+      ]
+    },
+    {
+      "name": "case-c-picker-refactor",
+      "tier": "medium",
+      "tags": [
+        "medium",
+        "refactor",
+        "logic-hunter",
+        "case-c"
+      ],
+      "runs": 1,
+      "passed": 0,
+      "passRate": 0,
+      "results": [
+        {
+          "case": "case-c-picker-refactor",
+          "run": 1,
+          "model": "claude-sonnet-5",
+          "passed": false,
+          "graders": [
+            {
+              "name": "art-judge",
+              "type": "llm",
+              "passed": false,
+              "detail": "judge claude-haiku-4-5: Reading through the code against the rubric:\n\n**Criterion 1 (collection type):** FAILS. There is no `Nodes` type or equivalent collection. The loop still lives directly in `pickReplicas` as a plain `for _, n := range nodes` iteration. The walking isn't owned by a collection type with methods like `InZone()`, `First()`, etc.\n\n**Criterion 2 (node knows its health):** FAILS. `usable()` is a package-level function, not a method on `Node`. The rubric requires \"as a method on `Node` (`Usable()`, `Healthy()`).\"\n\n**Criterion 3 (Pick tells the story):** FAILS. The logic is delegated to `pickReplicas`, and crucially, the code retains `havePrimary` and `haveSecondary` booleans—renamed flags that still track \"found\" state. The rubric explicitly says: \"FAIL outright if `primaryFound`, `secondaryFound` or any `found` flag survives.\" These are that same pattern.\n\n**Criterion 4 (names and comments):** FAILS. `// Placer is a placer.` is exactly the restatement the rubric forbids.\n\n**FAIL OUTRIGHT condition:** `pickReplicas` still ranges over the slice with an `if` conditional inside (`if !usable(n)`). The rubric demands: \"FAIL outright if `pickReplicas` still ranges over the slice with nested `if`.\"\n\nThe code hasn't been refactored into the desired shape—it's still structured as a loop with flag state, just wrapped through a couple of helper methods.\n\nVERDICT: FAIL",
+              "cost_usd": 0.022433
+            },
+            {
+              "name": "collection-type-exists",
+              "type": "regex",
+              "passed": false,
+              "detail": "^type \\w+ \\[\\]Node over files: 0 match(es); want at least 1"
+            },
+            {
+              "name": "comma-ok-query",
+              "type": "regex",
+              "passed": false,
+              "detail": "\\) \\(Node, bool\\) over files: 0 match(es); want at least 1"
+            },
+            {
+              "name": "gone-found-flags",
+              "type": "regex",
+              "passed": true,
+              "detail": "Found\\s*:?=\\s*(true|false) over files: 0 match(es); want exactly 0"
+            },
+            {
+              "name": "gone-inline-capacity-check",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\.Capacity <= 0 over files: 0 match(es); want exactly 0"
+            },
+            {
+              "name": "gone-inline-zone-check",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\.Zone == \"\" over files: 0 match(es); want exactly 0"
+            },
+            {
+              "name": "single-altitude",
+              "type": "llm",
+              "passed": false,
+              "detail": "judge claude-haiku-4-5: Looking at the code structure:\n\nThe `Pick` method is clean—it's a single delegated call to `pickReplicas` with error handling.\n\nHowever, `pickReplicas` contains a direct `for _, n := range nodes` loop that iterates over the node slice (lines 35-40). The rubric explicitly forbids this: \"NO loop over the node slice\" and \"Loops... are not allowed in the orchestrator.\"\n\nWhile `pickReplicas` delegates the decision-making to `sel.offer()` and `usable()`, the loop itself remains in the orchestrator method. The rubric expects this loop to be encapsulated inside a method on a collection type (like `type Nodes []Node` with a method that performs the iteration and delegation), not exposed in the orchestrator itself.\n\nThe refactored pattern would move the loop into a `Nodes` collection method, leaving `pickReplicas` with only named calls: something like `primary, secondary, err := nodes.selectReplicas(zone)`.\n\nVERDICT: FAIL",
+              "cost_usd": 0.019401
+            },
+            {
+              "name": "postcheck",
+              "type": "postcheck",
+              "passed": true,
+              "detail": "task test: ok\nPASS  task test green\ntask lint: ok\nPASS  task lint green\nPASS  Placer.Pick still exists in internal/placement\n  gocognit(pickReplicas) = 4\nPASS  gocognit of Pick and every receiver method it calls (4 <= 5)\nPASS  no //nolint in internal/placement production code (0)\n== black-box suite: builds cmd/svc, replays the recorded heartbeats ==\n--- PASS: TestHeartbeatContract (1.18s)\n--- PASS: TestExpectedTSVMatchesTable (0.00s)\nok  \texample.com/heartbeat-blackbox\t1.185s\nblack-box: PASS\nPASS  black-box heartbeat suite\npostcheck: all checks passed"
+            }
+          ],
+          "cost_usd": 0.5614660000000001,
+          "judge_cost_usd": 0.041834,
+          "duration_ms": 155875,
+          "num_turns": 27,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-case-c-picker-refactor-3583333173"
+        }
+      ]
+    },
+    {
+      "name": "case-d-ceremony-refactor",
+      "tier": "medium",
+      "tags": [
+        "medium",
+        "refactor",
+        "logic-hunter",
+        "case-d",
+        "precision"
+      ],
+      "runs": 1,
+      "passed": 0,
+      "passRate": 0,
+      "results": [
+        {
+          "case": "case-d-ceremony-refactor",
+          "run": 1,
+          "model": "claude-sonnet-5",
+          "passed": false,
+          "graders": [
+            {
+              "name": "art-judge",
+              "type": "llm",
+              "passed": false,
+              "detail": "judge claude-haiku-4-5: Looking at the FOCUS files against the RUBRIC's four criteria:\n\n**Criterion 1 - No new indirection:**\nSeveral types introduce accessors that add a layer over direct field access:\n- `Heartbeat` has `// Line returns the line. func (h Heartbeat) Line() string { return h.Raw }` — wraps the public `Raw` field unnecessarily. Quote: `func (h Heartbeat) Line() string { return h.Raw }`\n- `Device` has `func (d *Device) SetStatus(s string) { d.Status = s }` — setter for a public field. The comment `// SetStatus sets the status.` restates the obvious without explaining why this indirection exists.\n- `Schedule` has `func (s Schedule) Days() []Weekday { return s.days }` — accessor for a private field, which is reasonable, but the comment `// Days returns the days.` adds length without WHY.\n\nThese setters and getters add structure (indirection) that the plain fields and direct access did not need, violating the principle. ✗\n\n**Criterion 2 - Deletion allowed, growth not:**\n`grants.go` is absent from FOCUS (deleted if unreferenced, which passes). However, visible code includes methods on structs — without the before state, unclear if grown. The pattern of accessor methods suggests growth. ✗\n\n**Criterion 3 - Trace reason survives:**\nQuote from `trace.go`: `// List returns the device listing handler. It echoes the caller's X-Trace header so a device's log lines and the request that produced them can be joined later.` ✓\n\n**Criterion 4 - Names kept, sharpened:**\nIdentifiers `List`, `Routes`, `Status`, `IsOnline`, `Outranks` are sharp, no renames adding words. ✓\n\n**Additional violation:**\nThe non-informative comments (`SetStatus sets the status`, `Line returns the line`, `Days returns the days`, `IsOnline returns whether the device is online`) make code longer to read without adding information about WHY, violating the rubric's principle: \"Anything that made a reader's glance longer than before is FAIL.\"\n\nSetters like `SetStatus` and accessors like…(truncated)",
+              "cost_usd": 0.07872900000000001
+            },
+            {
+              "name": "no-traceid-type",
+              "type": "regex",
+              "passed": true,
+              "detail": "type TraceID over files: 0 match(es); want exactly 0"
+            },
+            {
+              "name": "trace-header-still-set",
+              "type": "regex",
+              "passed": true,
+              "detail": "Header\\(\\)\\.Set\\(\"X-Trace\" over files: 1 match(es); want at least 1"
+            },
+            {
+              "name": "postcheck",
+              "type": "postcheck",
+              "passed": true,
+              "detail": "task test: ok\nPASS  task test green\ntask lint: ok\nPASS  task lint green\nPASS  ReplicaCount has at most its original single method (deleted or untouched, never grown) (0 <= 1)\nPASS  ReplicaCount is declared at most once (0 <= 1)\nPASS  no TraceID-like wrapper appeared anywhere (0)\n== black-box suite: builds cmd/svc, replays the recorded heartbeats ==\n--- PASS: TestHeartbeatContract (1.21s)\n--- PASS: TestExpectedTSVMatchesTable (0.00s)\nok  \texample.com/heartbeat-blackbox\t1.215s\nblack-box: PASS\nPASS  black-box heartbeat suite\npostcheck: all checks passed"
+            }
+          ],
+          "cost_usd": 0.3171314,
+          "judge_cost_usd": 0.07872900000000001,
+          "duration_ms": 96453,
+          "num_turns": 22,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-case-d-ceremony-refactor-167591424"
+        }
+      ]
+    },
+    {
+      "name": "case-e-nils-refactor",
+      "tier": "medium",
+      "tags": [
+        "medium",
+        "refactor",
+        "logic-hunter",
+        "case-e"
+      ],
+      "runs": 1,
+      "passed": 0,
+      "passRate": 0,
+      "results": [
+        {
+          "case": "case-e-nils-refactor",
+          "run": 1,
+          "model": "claude-sonnet-5",
+          "passed": false,
+          "graders": [
+            {
+              "name": "art-judge",
+              "type": "llm",
+              "passed": false,
+              "detail": "judge claude-haiku-4-5: Looking at the code against each rubric condition:\n\n**1. Absence has a name:** ✓\n- `Find` returns `(Device, bool)`, not nil\n- \"No sink\" is explicitly `DiscardSink()` or `NopSink{}`\n- `Record` has no nil checks\n- Default clock set in constructor (`clock: time.Now`), never re-defaulted in methods\n\n**2. Constructor owns invariants:** ✓\n- `Reporter.sink` and `Reporter.clock` are unexported\n- `NewReporter(sink Sink, opts ...Option)` takes what it needs; no positional nils\n- `wire.go` reads as `NewReporter(NewSink(w))` — clean\n\n**3. Methods read as sentences:** ✓\n- `Record` is one line: `r.sink.Write(ev.At(r.clock()))`\n- `Announce` uses comma-ok pattern: `if d, ok := catalog.Find(name); ok {`\n\n**4. Comments earn their place:** ✗\n- `// Sink is where events are written.` — This comment is explicitly listed in the rubric as something that should be gone. The name `Sink` already conveys this; the comment adds no contract.\n- `// Record records the event.` — Follows the same self-referential pattern as `// Reporter is a reporter.`, which the rubric forbids.\n- `// Event is a reported event.` — Also somewhat self-evident.\n\nThe rubric states \"PASS only if all four hold\" and explicitly calls out `// Sink is where events are written.` as something that must not survive.\n\nVERDICT: FAIL",
+              "cost_usd": 0.02391
+            },
+            {
+              "name": "default-constructor-exists",
+              "type": "regex",
+              "passed": true,
+              "detail": "func (Default|System|Discard|Nop|Noop|Null)\\w*\\(\\) over files: 1 match(es); want at least 1"
+            },
+            {
+              "name": "find-callsite-comma-ok",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\w+, \\w+ := \\w+\\.Find\\( over files: 3 match(es); want at least 1"
+            },
+            {
+              "name": "find-returns-comma-ok-or-error",
+              "type": "regex",
+              "passed": true,
+              "detail": "func \\(\\w+ \\*?Catalog\\) Find\\(\\w+ string\\) \\(\\*?\\w+, (bool|error)\\) over files: 1 match(es); want at least 1"
+            },
+            {
+              "name": "gone-exported-nilable-fields",
+              "type": "regex",
+              "passed": true,
+              "detail": "^\\s+(Sink\\s+\\*Sink|Clock\\s+func\\(\\) time\\.Time) over files: 0 match(es); want exactly 0"
+            },
+            {
+              "name": "gone-nil-args-to-newreporter",
+              "type": "regex",
+              "passed": true,
+              "detail": "NewReporter\\([^)]*\\bnil\\b over files: 0 match(es); want exactly 0"
+            },
+            {
+              "name": "gone-opts-clock-nil-checks",
+              "type": "regex",
+              "passed": true,
+              "detail": "if (opts|clock) == nil over files: 0 match(es); want exactly 0"
+            },
+            {
+              "name": "nil-unrepresentable",
+              "type": "llm",
+              "passed": false,
+              "detail": "judge claude-haiku-4-5: Looking at the code against the RUBRIC requirements:\n\n**Requirement 1 (unexported fields)**: ✓ PASS\n- `sink`, `clock`, and `flushEvery` are all lowercase/unexported. No struct literal can build an invalid Reporter directly.\n\n**Requirement 2 (not nil-able, real defaults)**: ✗ FAIL\n- The `sink` field is `Sink` (an interface), which can still hold a nil value. The constructor accepts `sink Sink` directly with no validation, so `NewReporter(nil)` is valid syntax that produces a Reporter with nil sink.\n- The `clock` can still be set to nil: `WithClock(nil)` passes nil through without validation, allowing `clock` to become nil after construction.\n- While `time.Now` is the default, the `WithClock` option doesn't prevent nil, so nil remains representable through options.\n\n**Requirement 3 (no nil re-checks)**: ✓ PASS\n- `Record` has no nil checks; neither does the constructor. No branching to turn nil into defaults.\n\n**Requirement 4 (no error return)**: ✓ PASS\n- `NewReporter` returns only `*Reporter`, not an error.\n\nThe code meets the syntactic structure (unexported fields, no nil handling), but fails the semantic requirement: nil is still *representable* in both `sink` and `clock` (just not *handled* — it would panic at runtime instead). The criteria demands nil is \"no longer representable,\" which requires either validation in options, concrete non-nil parameter types, or mandatory use of Null Object defaults.\n\nVERDICT: FAIL",
+              "cost_usd": 0.024058999999999997
+            },
+            {
+              "name": "postcheck",
+              "type": "postcheck",
+              "passed": false,
+              "detail": "exit status 1\ntask test: ok\nPASS  task test green\ntask lint: ok\nPASS  task lint green\nPASS  R2 Q2: no receiver-field nil re-check inside internal/report methods (0)\nPASS  R2 Q5: no 'return nil' in catalog.go (0)\nPASS  R2 Q1: Reporter built by literal only inside its constructor (1 <= 1)\nPASS  a Default*/System*/Discard* constructor is CALLED (not just declared) in internal/report (1 >= 1)\nFAIL  R6 Q1: no interface introduced in internal/report (got '1', want '0')\nPASS  no //nolint added to internal/report (0)\n== black-box suite: builds cmd/svc, replays the recorded heartbeats ==\n--- PASS: TestHeartbeatContract (1.18s)\n--- PASS: TestExpectedTSVMatchesTable (0.00s)\nok  \texample.com/heartbeat-blackbox\t1.184s\nblack-box: PASS\nPASS  black-box heartbeat suite\npostcheck: 1 check(s) failed"
+            }
+          ],
+          "cost_usd": 3.0247399000000006,
+          "judge_cost_usd": 0.047969,
+          "duration_ms": 887282,
+          "num_turns": 82,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-case-e-nils-refactor-2049646083"
+        }
+      ]
+    },
+    {
+      "name": "case-f-globals-refactor",
+      "tier": "medium",
+      "tags": [
+        "medium",
+        "refactor",
+        "logic-hunter",
+        "case-f"
+      ],
+      "runs": 1,
+      "passed": 0,
+      "passRate": 0,
+      "results": [
+        {
+          "case": "case-f-globals-refactor",
+          "run": 1,
+          "model": "claude-sonnet-5",
+          "passed": false,
+          "graders": [
+            {
+              "name": "art-judge",
+              "type": "llm",
+              "passed": false,
+              "detail": "judge claude-haiku-4-5: Looking at this code against the rubric:\n\n**Criterion 1 (Root as wiring diagram):** `main` loads `cfg` once and passes specific values (`cfg.BatchSize`, `cfg.NumWorkers`, `cfg.FlapWindowSec`, `cfg.Region`) to collaborators. This part is sound.\n\n**Criterion 2 (Islands clean):** \n- `pool` is clean: `Start(jobs <-chan Job, numWorkers int)` has explicit, named parameters. ✓\n- `jobs` is **not clean**: `registry.go` has three package-level mutable globals (`handlers`, `store`, `storeOnce`) hidden from callers. The `dispatch` function looks up `handlers[\"snapshot\"]` and `handlers[\"sync\"]` — these dependencies are initialized in `init()` and invisible to whoever calls `Scheduler`. The `GetStore()` singleton is lazily initialized; main never passes the store to jobs, so jobs still reaches for a hidden global.\n\n**Criterion 3 (env only loads):**\n- `env.go` contains `func init()` (line initializing `region = os.Getenv(\"REGION\")`). ✗\n- `env.go` contains package-level mutable `var region string`. ✗\n\n**Criterion 4 (Names carry meaning):** Parameter names are good (`numWorkers`, `batchSize`), but the underlying problem is they're not the core issue here.\n\n**Explicit FAIL conditions met:**\n- `env.go` still contains `func init()`. \n- `env.go` contains package-level mutable config (`region`).\n\nThe globals haven't moved to the root; they've been rearranged. The jobs package still has hidden initialization via `init()`, package-level handler registration, and a lazy-singleton store pattern. Main never explicitly wires the store or handlers — they're sprung by the jobs package itself.\n\nVERDICT: FAIL",
+              "cost_usd": 0.026031
+            },
+            {
+              "name": "gone-config-global",
+              "type": "regex",
+              "passed": true,
+              "detail": "^var Config Configuration over files: 0 match(es); want exactly 0"
+            },
+            {
+              "name": "gone-nolint-gochecknoglobals-env",
+              "type": "regex",
+              "passed": true,
+              "detail": "nolint:gochecknoglobals // loaded in main over files: 0 match(es); want exactly 0"
+            },
+            {
+              "name": "load-returns-a-value",
+              "type": "regex",
+              "passed": true,
+              "detail": "^func Load\\(\\) \\(?[A-Z]\\w*(, error)?\\)? \\{ over files: 1 match(es); want at least 1"
+            },
+            {
+              "name": "main-reads-as-a-story",
+              "type": "llm",
+              "passed": false,
+              "detail": "judge claude-haiku-4-5: Analyzing the FOCUS file against the RUBRIC requirements:\n\n**Requirement 1 Analysis:** Configuration is obtained once (`cfg := env.Load()` on line 28), but individual values are NOT consistently handed to constructors. While `cfg.FlapWindowSec`, `cfg.BatchSize`, `cfg.NumWorkers`, and `cfg.Region` are properly extracted and passed (lines 54, 56, 65), the `WEBHOOK_URL` is read directly inline (line 52: `os.Getenv(\"WEBHOOK_URL\")`). This violates the stated principle that \"individual values are handed to constructors\" after being obtained once—it should either be part of `cfg` or extracted into a named variable first like the `listenAddr()` and `defaultStorePath()` helpers.\n\n**Requirement 2 Analysis:** The flow mostly reads as a narrative (load config → build store → build services → serve), but has interruptions. The random jitter sleep (lines 31–33) is an unnamed side effect that doesn't fit the story. The store validation (lines 48–50) happens after services are partially constructed, adding a non-standard step. The story is roughly there but not cleanly at one altitude.\n\n**Requirement 3 Analysis:** No problematic business logic is present—the wiring helpers (`listenAddr`, `defaultStorePath`, `mustOpenFileRepo`, `routes`, `healthz`) are appropriately scoped. This requirement is satisfied.\n\n**Critical Issue:** The code fails requirement 1 because `WEBHOOK_URL` is obtained via `os.Getenv()` inline rather than being obtained once and handed explicitly, breaking the pattern established by other config values.\n\nVERDICT: FAIL",
+              "cost_usd": 0.04595200000000001
+            },
+            {
+              "name": "postcheck",
+              "type": "postcheck",
+              "passed": false,
+              "detail": "exit status 1\ntask test: ok\nPASS  task test green\ntask lint: ok\nPASS  task lint green\n== the ratchet: env.Config references outside cmd/, per commit ==\nPASS  at least 3 commits after the scaffold base (6 >= 3)\n  5ec8e35    7  go-mini: initial import\n  a7adcc5    7  env: return the loaded Configuration from Load\n  d6ebfda    6  pool: take numWorkers as an explicit parameter\n  0d38ce0    4  jobs: take batchSize/numWorkers as Scheduler fields\n  3c18129    0  services: take flapWindowSec/batchSize as constructor params\n  61efc88    0  cmd/svc: thread the loaded Configuration explicitly\n  0a394c7    0  env: remove the Config global\nPASS  env.Config references outside cmd/ never rise and end at 0\nPASS  no commit touches non-test code in more than 2 packages (island + its caller) (2 <= 2)\n== islands are clean ==\nPASS  pool no longer imports env (0)\nFAIL  jobs no longer imports env (got '1', want '0')\nPASS  shallow fix rejected: env.Configuration is not a param/field type in pool, jobs or handlers (0)\n== end state ==\nFAIL  R8 Q1: no package-level var left in internal/env (got '1', want '0')\nFAIL  R8 Q2: no init() left in internal/env (got '1', want '0')\nFAIL  no //nolint in internal/env (got '2', want '0')\nPASS  no //nolint in internal/pool (0)\nFAIL  no nolint:gochecknoglobals anywhere for the config global (got '1', want '0')\n== test payoff ==\nPASS  R8 Q6: no test mutates env.Config (0)\nFAIL  t.Parallel() in internal/pool tests (got '0', want >= 1)\nFAIL  a pool constructor is called with a literal number in its tests (got '0', want >= 1)\n== black-box suite: builds cmd/svc, replays the recorded heartbeats ==\n--- PASS: TestHeartbeatContract (1.23s)\n--- PASS: TestExpectedTSVMatchesTable (0.00s)\nok  \texample.com/heartbeat-blackbox\t1.231s\nblack-box: PASS\nPASS  black-box heartbeat suite\npostcheck: 7 check(s) failed"
+            }
+          ],
+          "cost_usd": 2.1473284000000006,
+          "judge_cost_usd": 0.071983,
+          "duration_ms": 428505,
+          "num_turns": 95,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-case-f-globals-refactor-4075009640"
+        }
+      ]
+    },
+    {
+      "name": "centerpiece-storify-refactor",
+      "tier": "medium",
+      "tags": [
+        "medium",
+        "refactor",
+        "logic-hunter",
+        "centerpiece"
+      ],
+      "runs": 1,
+      "passed": 0,
+      "passRate": 0,
+      "results": [
+        {
+          "case": "centerpiece-storify-refactor",
+          "run": 1,
+          "model": "claude-sonnet-5",
+          "passed": false,
+          "graders": [
+            {
+              "name": "art-judge",
+              "type": "llm",
+              "passed": false,
+              "detail": "judge claude-haiku-4-5: # Analysis\n\nLooking at `ProcessHeartbeat` and the surrounding service code, I'll evaluate against the five RUBRIC criteria:\n\n1. **The story** - ProcessHeartbeat does read as distinct chapters: parse → load/create → apply → persist. However, the chapters are incomplete. The persist step includes cache management (lines with `s.mu.Lock()`, `s.cache[...] = d`, `s.mu.Unlock()`) which is mechanical boilerplate, not a named domain concept. Similarly, `s.lastSeen[hb.id] = d.LastSeen` is left inline rather than boxed.\n\n2. **Concepts have boxes** - Most are well-boxed:\n   - Heartbeat parsing: `parsedHeartbeat` struct ✓\n   - Device loading: `loadOrCreateDevice()` ✓  \n   - Status transition: `applyHeartbeat()` with `resolveFlapping()` ✓\n   - Notification: `notifyDown()` with retry ✓\n   - **BUT** cache persistence is not boxed — the mutex lock/unlock and map update sit exposed in ProcessHeartbeat itself (lines within the `if changed || force` block). The \"cache\" concept doesn't have its own box.\n\n3. **Names are domain words** - Excellent. `parseHeartbeat`, `loadOrCreateDevice`, `applyHeartbeat`, `notifyDown`, `resolveFlapping` all read as domain operations a fleet operator would recognize. ✓\n\n4. **Comments earned their place** - The PR reference in the method docstring (\"added in PR #87 after the outage\") is historical noise rather than a why. The `// bounds-checked` comment justifies an invariant. Mostly acceptable but the PR reference is weak.\n\n5. **Nothing ugly hid elsewhere** - `notifyDown` properly encapsulates retry with backoff and audit logging rather than just moving old code. However, this doesn't excuse ProcessHeartbeat itself: the mutex choreography and cache assignment are mechanical details that didn't migrate to a helper.\n\n**Critical observation:** Lines like `s.mu.Lock(); s.cache[cacheKey(tenant, hb.id)] = d; s.mu.Unlock();` are the exact kind of mechanical boilerplate the rubric expects to be boxed. A reviewer would say…(truncated)",
+              "cost_usd": 0.082864
+            },
+            {
+              "name": "gone-block-comments",
+              "type": "regex",
+              "passed": true,
+              "detail": "// (parse the line|look up or create device|transitions)$ over files: 0 match(es); want exactly 0"
+            },
+            {
+              "name": "gone-five-results",
+              "type": "regex",
+              "passed": false,
+              "detail": "tags \\[\\]string, err error\\) over files: 1 match(es); want exactly 0"
+            },
+            {
+              "name": "gone-force-saves",
+              "type": "regex",
+              "passed": false,
+              "detail": "changed \\|\\| force over files: 1 match(es); want exactly 0"
+            },
+            {
+              "name": "gone-goto",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\bgoto\\b over files: 0 match(es); want exactly 0"
+            },
+            {
+              "name": "gone-minus-one-sentinel",
+              "type": "regex",
+              "passed": true,
+              "detail": ", -1, false over files: 0 match(es); want exactly 0"
+            },
+            {
+              "name": "gone-n-reused-as-score",
+              "type": "regex",
+              "passed": true,
+              "detail": "n = n \\* 10 over files: 0 match(es); want exactly 0"
+            },
+            {
+              "name": "gone-region-byte-slice",
+              "type": "regex",
+              "passed": false,
+              "detail": "t\\[7:\\] == \"eu\" over files: 1 match(es); want exactly 0"
+            },
+            {
+              "name": "process-heartbeat-kept",
+              "type": "regex",
+              "passed": true,
+              "detail": "func \\(\\w+ \\*DeviceService\\) ProcessHeartbeat\\( over files: 1 match(es); want at least 1"
+            },
+            {
+              "name": "single-altitude",
+              "type": "llm",
+              "passed": true,
+              "detail": "judge claude-haiku-4-5: Looking at the `ProcessHeartbeat` method in the file, I need to verify it meets the stated criteria.\n\n**Structure of ProcessHeartbeat:**\n\nThe method contains:\n1. `hb, err := parseHeartbeat(raw, force)` — parse (named call) ✓\n2. Error check with early return ✓\n3. `d, err := s.loadOrCreateDevice(...)` — look up/create (named call) ✓\n4. Error check with early return ✓\n5. `d, score, changed := s.applyHeartbeat(d, hb, force)` — apply transition (named call) ✓\n6. `d.LastSeen = time.Now()` — assignment of named call ✓\n7. Conditional persist block:\n   - `s.repo.Save(context.Background(), d)` — persist (named call) ✓\n   - `s.mu.Lock()` and `s.mu.Unlock()` — named calls ✓\n   - `s.cache[cacheKey(tenant, hb.id)] = d` — assignment ✓\n8. `s.lastSeen[hb.id] = d.LastSeen` — assignment ✓\n9. Return result ✓\n\n**Checking prohibited constructs:**\n\n- ✗ `strings.` calls: None\n- ✗ Slice indexing (`parts[0]`, `t[7:]`): None (map access is different)\n- ✗ String literal comparisons (`== \"READY\"`): None\n- ✗ Labeled `continue`: None\n- ✗ `goto`: None\n- ✗ `time.Sleep`: None (only `time.Now()`)\n- ✗ Hand-rolled retry loop: None\n- ✗ Nested `if` blocks more than 2 levels deep: Max nesting is 2 levels (the `if changed || force` containing `if err := s.repo.Save...`)\n\nEvery statement is either a named call, an assignment, or an early return of an error. The body delegates low-level work (notify-on-DOWN, scoring) to `applyHeartbeat` and `parseHeartbeat` helper functions, which the rubric explicitly allows.\n\nVERDICT: PASS",
+              "cost_usd": 0.07041
+            },
+            {
+              "name": "postcheck",
+              "type": "postcheck",
+              "passed": false,
+              "detail": "exit status 1\ntask test: ok\nPASS  task test green\ntask lint: ok\nPASS  task lint green\n== complexity ==\nPASS  gocognit(ProcessHeartbeat) (was 76) (6 <= 10)\nPASS  gocyclo(ProcessHeartbeat) (was 40) (6 <= 8)\nPASS  ProcessHeartbeat still defined in internal/services\nPASS  R1 Q3: no status string-literal comparison inside ProcessHeartbeat (0)\nPASS  R3 Q2: no strings./index manipulation inside ProcessHeartbeat (0)\nPASS  no //nolint on ProcessHeartbeat (0)\n== services-scoped oracles (baseline = scaffold base commit) ==\nFAIL  R8 Q3: context.Background() gone from internal/services (got '3', want '0')\nPASS  context.TODO() not used as an escape hatch (1 <= 1)\nFAIL  R10 Q5: the retry sleep is gone (time.Sleep count below baseline) (got '5', want <= 4)\nPASS  R1 Q5: functions returning >3 values (ProcessHeartbeat's gone) (1 <= 1)\nPASS  R1 Q3: \"READY\" literal has one owner on the heartbeat path (3 fewer than baseline) (2 <= 3)\nPASS  R3 Q4: the labeled-continue dedupe left ProcessHeartbeat (1 <= 1)\n== the parse leaf ==\nFAIL  production code CALLS a Parse*Heartbeat* constructor (declarations and comments excluded) (got '0', want >= 1)\nFAIL  R7: an external-package _test.go calls Parse*Heartbeat*( with a literal (got '0', want >= 1)\n== black-box suite: builds cmd/svc, replays the recorded heartbeats ==\n--- PASS: TestHeartbeatContract (1.18s)\n--- PASS: TestExpectedTSVMatchesTable (0.00s)\nok  \texample.com/heartbeat-blackbox\t1.188s\nblack-box: PASS\nPASS  black-box heartbeat suite\npostcheck: 4 check(s) failed"
+            }
+          ],
+          "cost_usd": 1.9884791999999998,
+          "judge_cost_usd": 0.153274,
+          "duration_ms": 572569,
+          "num_turns": 61,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-centerpiece-storify-refactor-631072742"
+        }
+      ]
+    },
+    {
+      "name": "prepare-sms",
+      "tier": "medium",
+      "tags": [
+        "medium",
+        "prepare"
+      ],
+      "runs": 1,
+      "passed": 1,
+      "passRate": 1,
+      "results": [
+        {
+          "case": "prepare-sms",
+          "run": 1,
+          "model": "claude-sonnet-5",
+          "passed": true,
+          "graders": [
+            {
+              "name": "multiply-gate",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)\\bMULTIPL|\\b(new|fourth|4th|another|extra|additional) (case|arm|branch)\\b[^\\n]{0,100}\\bswitch|\\bswitch(es)?\\b[^\\n]{0,100}\\b(new|fourth|4th|another|extra|additional) (case|arm|branch)\\b over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "preparation-log",
+              "type": "regex",
+              "passed": true,
+              "detail": "PREPARATION LOG over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "r11-named",
+              "type": "regex",
+              "passed": true,
+              "detail": "R11 over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "skeptic-consulted",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Agent(overabstraction-skeptic) called 1 time(s); want >= 1"
+            },
+            {
+              "name": "postcheck",
+              "type": "postcheck",
+              "passed": true,
+              "detail": "PASS  prep commits after the scaffold base (1 >= 1)\nPASS  no SMS feature code in non-test Go files\ntask test: ok\nPASS  task test green after prep\nPASS  internal/services/device_service.go untouched\npostcheck: all checks passed"
+            }
+          ],
+          "cost_usd": 1.5428472000000004,
+          "judge_cost_usd": 0,
+          "duration_ms": 387527,
+          "num_turns": 60,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-prepare-sms-219877179"
+        }
+      ]
+    },
+    {
+      "name": "quickfix-red-lint",
+      "tier": "medium",
+      "tags": [
+        "medium",
+        "quickfix"
+      ],
+      "runs": 1,
+      "passed": 1,
+      "passRate": 1,
+      "results": [
+        {
+          "case": "quickfix-red-lint",
+          "run": 1,
+          "model": "claude-sonnet-5",
+          "passed": true,
+          "graders": [
+            {
+              "name": "escalated-gocognit",
+              "type": "regex",
+              "passed": true,
+              "detail": "gocognit[^\\n]{0,240}\\bR3\\b over trace: 34 match(es); want at least 1"
+            },
+            {
+              "name": "escalated-line",
+              "type": "regex",
+              "passed": true,
+              "detail": "ESCALATED:|LINT STATUS: escalations pending over trace: 9 match(es); want at least 1"
+            },
+            {
+              "name": "fixed-errcheck",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?s)FIXED\\b.{0,600}errcheck over trace: 4 match(es); want at least 1"
+            },
+            {
+              "name": "globals-routed-r8",
+              "type": "regex",
+              "passed": true,
+              "detail": "gochecknoglobals[^\\n]{0,240}\\bR8\\b over trace: 17 match(es); want at least 1"
+            },
+            {
+              "name": "gocognit-routed-r3",
+              "type": "regex",
+              "passed": true,
+              "detail": "gocognit[^\\n]{0,240}R3-storifying over trace: 33 match(es); want at least 1"
+            },
+            {
+              "name": "no-bare-ready-const",
+              "type": "regex",
+              "passed": true,
+              "detail": "const \\w+ = \"READY\" over files: 0 match(es); want exactly 0"
+            },
+            {
+              "name": "no-nolint",
+              "type": "regex",
+              "passed": true,
+              "detail": "//nolint over files: 0 match(es); want exactly 0"
+            },
+            {
+              "name": "postcheck",
+              "type": "postcheck",
+              "passed": true,
+              "detail": "PASS  .golangci.yaml unchanged from the fixture's original\ntask test: ok\nPASS  task test green\ninfo  task lint issues remaining: 1\ninfo  commits since scaffold: 0\nPASS  assertions kept in ./internal/handlers/handlers_test.go (20 >= 20)\nPASS  assertions kept in ./internal/handlers/heartbeat_test.go (27 >= 27)\nPASS  assertions kept in ./internal/jobs/scheduler_test.go (10 >= 10)\nPASS  assertions kept in ./internal/models/region_test.go (4 >= 4)\nPASS  assertions kept in ./internal/models/tenant_test.go (3 >= 3)\nPASS  assertions kept in ./internal/pkg/deviceid/deviceid_test.go (4 >= 4)\nPASS  assertions kept in ./internal/placement/picker_test.go (4 >= 4)\nPASS  assertions kept in ./internal/pool/workers_test.go (1 >= 1)\nPASS  assertions kept in ./internal/report/report_test.go (11 >= 11)\nPASS  assertions kept in ./internal/services/service_test.go (57 >= 55)\nPASS  assertions kept in ./internal/snapshot/schedule_test.go (12 >= 12)\nPASS  assertions kept in ./internal/snapshot/scheduler_test.go (14 >= 14)\nPASS  assertions kept in ./internal/transport/client_test.go (1 >= 1)\nPASS  test file ./internal/utils/utils_test.go removed (had 7 assertion lines): tree total still covers the baseline 173 (197 >= 173)\npostcheck: all checks passed"
+            }
+          ],
+          "cost_usd": 15.050490400000006,
+          "judge_cost_usd": 0,
+          "duration_ms": 3074472,
+          "num_turns": 49,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-quickfix-red-lint-991666610"
+        }
+      ]
+    },
+    {
+      "name": "wire-repo-brain",
+      "tier": "medium",
+      "tags": [
+        "medium",
+        "repo-brain"
+      ],
+      "runs": 1,
+      "passed": 1,
+      "passRate": 1,
+      "results": [
+        {
+          "case": "wire-repo-brain",
+          "run": 1,
+          "model": "claude-sonnet-5",
+          "passed": true,
+          "graders": [
+            {
+              "name": "agents-exists",
+              "type": "file_exists",
+              "passed": true,
+              "detail": "1 match(es): AGENTS.md"
+            },
+            {
+              "name": "bootstrap-complete",
+              "type": "regex",
+              "passed": true,
+              "detail": "BOOTSTRAP COMPLETE over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "claude-md-wired",
+              "type": "regex",
+              "passed": true,
+              "detail": "@docs/index\\.md over files: 1 match(es); want at least 1"
+            },
+            {
+              "name": "conventions-exist",
+              "type": "file_exists",
+              "passed": true,
+              "detail": "1 match(es): docs/conventions.md"
+            },
+            {
+              "name": "gate-installed",
+              "type": "file_exists",
+              "passed": true,
+              "detail": "1 match(es): scripts/check-repo-brain.sh"
+            },
+            {
+              "name": "index-exists",
+              "type": "file_exists",
+              "passed": true,
+              "detail": "1 match(es): docs/index.md"
+            },
+            {
+              "name": "okf-version",
+              "type": "regex",
+              "passed": true,
+              "detail": "okf_version over files: 14 match(es); want at least 1"
+            },
+            {
+              "name": "orphan-handled",
+              "type": "regex",
+              "passed": true,
+              "detail": "heartbeat-protocol over last_message: 7 match(es); want at least 1"
+            },
+            {
+              "name": "phantom-symbol-reported",
+              "type": "regex",
+              "passed": true,
+              "detail": "SnapshotRunner over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "postcheck",
+              "type": "postcheck",
+              "passed": true,
+              "detail": "info  installed gate exit 1\n      stderr:   [Q2] ./internal/models/heartbeat.go:7 — code edge points at missing docs/snapshots.md — see docs/conventions.md\n      stderr:   [Q2] docs/heartbeat-protocol.md:23 — cites a file path or line number (churn-prone coordinate) — see docs/conventions.md\n      stderr:   [Q2] docs/heartbeat-protocol.md:27 — backticked `SnapshotRunner` does not resolve (SnapshotRunner not declared or found in the repo) — see docs/conventions.md\n      stderr: check-repo-brain: 3 violation(s) — rules: <docroot>/conventions.md\nPASS  installed gate clean, or red only on [Q2] content-doc citations (no Q1/Q3/Q7)\nPASS  installed gate byte-identical to the plugin's scripts/check-repo-brain.sh\npostcheck: all checks passed"
+            }
+          ],
+          "cost_usd": 1.1856762,
+          "judge_cost_usd": 0,
+          "duration_ms": 281423,
+          "num_turns": 41,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-wire-repo-brain-4272364754"
+        }
+      ]
+    }
+  ],
+  "aggregates": {
+    "passRate": 0.5,
+    "averageScore": 0.7962121212121211,
+    "totalCostUSD": 29.98976880000001
+  }
+}

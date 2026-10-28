@@ -1,0 +1,1 @@
+scaffolded ts-react-mini at /tmp/ldd-eval-review-full-1308400963 (4e025f2; node_modules from /tmp/ts-react-mini-npm-cache)

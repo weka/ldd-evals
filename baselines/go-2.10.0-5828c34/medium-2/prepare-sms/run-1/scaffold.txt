@@ -1,0 +1,1 @@
+scaffolded go-mini at /tmp/ldd-eval-prepare-sms-2329875888 (5ed49d5)

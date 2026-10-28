@@ -1,0 +1,14 @@
+17 ./internal/handlers/test_handlers.py
+24 ./internal/handlers/test_heartbeat.py
+7 ./internal/jobs/test_scheduler.py
+3 ./internal/models/test_region.py
+2 ./internal/models/test_tenant.py
+3 ./internal/pkg/deviceid/test_deviceid.py
+4 ./internal/placement/test_picker.py
+1 ./internal/pool/test_workers.py
+11 ./internal/report/test_report.py
+46 ./internal/services/test_service.py
+9 ./internal/snapshot/test_schedule.py
+7 ./internal/snapshot/test_scheduler.py
+7 ./internal/test_utils.py
+1 ./internal/transport/test_client.py

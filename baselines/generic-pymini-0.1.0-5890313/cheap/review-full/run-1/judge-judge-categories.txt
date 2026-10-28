@@ -1,0 +1,44 @@
+--- vote 1: PASS ---
+**Question 1: Is the unguarded concurrent dict access listed under 🐛 Bugs?**
+
+Yes. Under the 🐛 BUGS section, the third bullet explicitly cites `internal/services/device_service.py:194,383-385,458-460 (R10 Q3/Q4)` and states: "`last_seen` dict is written by request-handling threads and deleted-from by the `_flush_loop` thread and `purge()` without `self.mu`; only `flush()` (line 434-439) takes the lock. Concurrent mutation risk (dict corruption / `RuntimeError` under load)."
+
+**Question 2: Is the production `time.sleep` listed under 🔴 Design Debt rather than 🐛 Bugs?**
+
+Yes. Under the 🔴 DESIGN DEBT section, R10 lists four `time.sleep` findings:
+- `internal/services/device_service.py:164` — retry backoff sleep
+- `internal/services/sync_service.py:99` — retry backoff sleep  
+- `internal/services/retry.py:43` — backoff sleep in `with_retry`
+- `internal/services/retry.py:57` — backoff sleep in `send_with_retry`
+
+All are marked "Replace Sleep with Cancellable Wait" and placed under Design Debt's R10 section, not under 🐛 Bugs.
+
+Both questions are answered affirmatively.
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+Looking at the report against the two specific criteria:
+
+**Question 1: Is the unguarded concurrent dict access listed under 🐛 Bugs?**
+
+Yes. The report explicitly lists under 🐛 BUGS:
+```
+- `internal/services/device_service.py:194,383-385,458-460` (R10 Q3/Q4) — `last_seen` dict is written by request-handling threads and deleted-from by the `_flush_loop` thread and `purge()` without `self.mu`; only `flush()` takes the lock. Concurrent mutation risk (dict corruption / `RuntimeError` under load).
+```
+
+This clearly describes the `last_seen` dict race condition mentioned in the criteria and files it as a Bug. ✓
+
+**Question 2: Are production time.sleep calls (retry backoff) listed under 🔴 Design Debt, not Bugs?**
+
+Yes. The report lists under 🔴 DESIGN DEBT (R10 section):
+- `internal/services/device_service.py:164` | bare `time.sleep(attempt * 0.2)` in a DOWN-notification retry loop
+- `internal/services/sync_service.py:99` | bare `time.sleep((attempt + 1) * 0.1)` in `_save_with_retry`
+- `internal/services/retry.py:43` | bare `time.sleep(attempt + 1)` in `with_retry`
+- `internal/services/retry.py:57` | bare `time.sleep(_retry_delay(a))` in `send_with_retry`
+
+All retry backoff sleeps in the specified files are under Design Debt (as "Replace Sleep with Cancellable Wait"), not under Bugs. ✓
+
+Both required conditions are satisfied.
+
+VERDICT: PASS

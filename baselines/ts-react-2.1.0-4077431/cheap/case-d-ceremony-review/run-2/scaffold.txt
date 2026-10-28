@@ -1,0 +1,1 @@
+scaffolded ts-react-mini at /var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-d-ceremony-review-3547326662 (1c5efa8; node_modules from /var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T//ts-react-mini-npm-cache)

@@ -1,0 +1,9 @@
+schema_version: "1.1"
+context:
+  scaffold_script: ../scaffold/default.sh
+tier: cheap
+notes: |
+  Neutral variant of case-c-picker-review for the old-vs-new A/B (cases/NEUTRAL.md): the
+  skill is asked for by name, with no slash command and no report contract, so
+  the hand-written 1.x plugin can answer it too. graders/ is a filtered copy of
+  the twin's, written by cases/sync-neutral-graders.sh — never hand-edit it.

@@ -1,0 +1,39 @@
+{
+  "case": "case-b-endpoint-refactor",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": true,
+  "graders": [
+    {
+      "name": "art-judge",
+      "type": "llm",
+      "passed": true,
+      "detail": "judge claude-haiku-4-5: Looking at the code against each rubric criterion:\n\n1. **One box**: The `endpoint` type holds host, port, and tls; the constructor `newEndpoint` owns the port-range rule (`if port \u003c= 0 || port \u003e 65535 { port = defaultPort }`); it answers all its own questions: `scheme()`, `URL(path)`, `HealthURL()`, and `Dial()`. Client methods delegate cleanly to these without branching on tls themselves.\n\n2. **Scheme decided once**: \"https\" and \"http\" appear together only in `endpoint.scheme()`:\n   ```go\n   if e.tls {\n       return \"https\"\n   }\n   return \"http\"\n   ```\n   No duplication elsewhere.\n\n3. **Names speak intent**: Client method bodies read as stories:\n   - `Get`: `url := c.endpoint.URL(path); resp, err := c.http.Get(url)`\n   - `Ping`: `conn, err := c.endpoint.Dial(dialTimeout); conn.Close()`\n   - `HealthURL`: `return c.endpoint.HealthURL()`\n   \n   No sprintf assembly in Client methods; it's delegated to `endpoint.URL()`.\n\n4. **No leftover ceremony**: Port validation happens once in `newEndpoint`; `Dial` doesn't re-check (port is already valid); comments state contracts (\"out-of-range port falls back\", \"endpoint's port is always within range\") rather than restating names.\n\nVERDICT: PASS",
+      "cost_usd": 0.026702000000000004
+    },
+    {
+      "name": "gone-host-port-clump",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?m)^func [a-z][A-Za-z]*\\(host string, port int, tls bool\\) \\(?(net\\.Conn|string) over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "one-https-owner",
+      "type": "regex",
+      "passed": true,
+      "detail": "\"https(://)?\" over files: 1 match(es); want exactly 1"
+    },
+    {
+      "name": "postcheck",
+      "type": "postcheck",
+      "passed": true,
+      "detail": "task test: ok\nPASS  task test green\ntask lint: ok\nPASS  task lint green\nPASS  port range predicate (65535 or a named max port) has one owner (1 \u003c= 1)\nPASS  scheme decided once inside transport (1 \u003c= 1)\nnew constructors: newEndpoint\nPASS  a new constructor for the endpoint value exists in internal/transport (1 \u003e= 1)\nPASS  no //nolint added to internal/transport (0)\n== black-box suite: builds cmd/svc, replays the recorded heartbeats ==\n--- PASS: TestHeartbeatContract (1.20s)\n--- PASS: TestExpectedTSVMatchesTable (0.00s)\nok  \texample.com/heartbeat-blackbox\t1.201s\nblack-box: PASS\nPASS  black-box heartbeat suite\npostcheck: all checks passed"
+    }
+  ],
+  "cost_usd": 1.5206933,
+  "judge_cost_usd": 0.026702000000000004,
+  "duration_ms": 504918,
+  "num_turns": 45,
+  "segments": 1,
+  "scaffold_dir": "/tmp/ldd-eval-case-b-endpoint-refactor-3998597025"
+}

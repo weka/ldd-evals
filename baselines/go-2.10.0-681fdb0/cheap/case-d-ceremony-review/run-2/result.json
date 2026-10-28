@@ -1,0 +1,86 @@
+{
+  "case": "case-d-ceremony-review",
+  "run": 2,
+  "model": "claude-sonnet-5",
+  "passed": true,
+  "graders": [
+    {
+      "name": "cheaper-alternative-int",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i)(keep|use|prefer)( the| a| an)?( plain| bare| raw)? `?\\bint\\b|(delete|remove|drop)( the| both| these| those| all| unused| its| this| ceremony| no-op| trivial| wrapper)* wrappers?\\b|plain int|bare int|unwrap over last_message: 3 match(es); want at least 1"
+    },
+    {
+      "name": "evidence-protocol",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\.go:[0-9]+ over last_message: 13 match(es); want at least 1"
+    },
+    {
+      "name": "no-edit",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Edit called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "no-multiedit",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "MultiEdit called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "no-write",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Write called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "precision-trace-func-clean",
+      "type": "regex",
+      "passed": true,
+      "detail": "handlers/trace\\.go:3[4-7] \\| over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "replica-count-is-ceremony",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i)over-?abstraction|ceremony|\\bQ6\\b|🟢 POLISH|inverse over last_message: 4 match(es); want at least 1"
+    },
+    {
+      "name": "replica-count-named",
+      "type": "regex",
+      "passed": true,
+      "detail": "ReplicaCount over last_message: 3 match(es); want at least 1"
+    },
+    {
+      "name": "rule-cited",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\bR(1[0-2]|[1-9])\\b over last_message: 22 match(es); want at least 1"
+    },
+    {
+      "name": "traceid-never-confirmed",
+      "type": "regex",
+      "passed": true,
+      "detail": "CONFIRMED \\(score[^\\n]*TraceID over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "traceid-not-a-domain-type-fix",
+      "type": "regex",
+      "passed": true,
+      "detail": "Domain Type:? ?`?TraceID over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "traceid-refuted-if-proposed",
+      "type": "llm",
+      "passed": true,
+      "detail": "judge claude-haiku-4-5: Reading through the Design Debt findings, I see three proposals:\n1. Delete `ReplicaCount` and `Name` ceremony types\n2. Copy-on-return for `Grants.All()`\n3. Nil-check for `NewHandler`'s store parameter\n\nThe Readability Debt section lists various comment improvements, none proposing a new type.\n\nThere is no `TraceID` (or equivalently named) domain type proposed anywhere in the report as a Design Debt / Replace Primitive with Domain Type finding. The `trace.go` file appears as a location for readability improvements only. The phrase \"traceID parameter\" in the criteria is not mentioned, and no hunter proposed wrapping it as a domain type.\n\nVERDICT: PASS",
+      "cost_usd": 0.016646
+    }
+  ],
+  "cost_usd": 1.1799818999999998,
+  "judge_cost_usd": 0.016646,
+  "duration_ms": 314631,
+  "num_turns": 30,
+  "segments": 1
+}

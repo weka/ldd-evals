@@ -1,0 +1,82 @@
+{
+  "case": "centerpiece-storify-refactor",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": false,
+  "graders": [
+    {
+      "name": "art-judge",
+      "type": "llm",
+      "passed": false,
+      "detail": "judge claude-haiku-4-5: Looking at the ProcessHeartbeat implementation and the supporting package:\n\n**Strengths:**\n\n1. **The story** ✓ – ProcessHeartbeat reads as chapters: parse (parseHeartbeat), find/register (loadOrCreateDevice), apply transition (dampFlap + status change), notify (notifyDown), score, and persist. Each helper's job is predictable from its name.\n\n2. **Concepts have boxes** ✓ – parsedHeartbeat struct with parser; Status constants (StatusDown, StatusReady, StatusDegraded); domain-named helpers throughout.\n\n3. **Domain names** ✓ – `parseHeartbeat`, `loadOrCreateDevice`, `dampFlap`, `applyVersionAndTags`, `heartbeatScore`, `notifyDown`. All domain verbs on domain nouns.\n\n4. **Comments earned place** ✓ – No \"// parse the line\" markers; function docstrings explain why, not what.\n\n**Critical failures:**\n\n5. **Ugly hid elsewhere** ✗ – The rubric explicitly states: **\"FAIL outright if ... a labeled `continue` ... survives.\"**\n\nIn `heartbeat_parser.go`, the `normalizeTags()` function uses a labeled continue:\n```go\nouter:\n\tfor _, t := range in {\n\t\t...\n\t\tfor _, e := range tags {\n\t\t\tif e == t {\n\t\t\t\tcontinue outer // already added. skip\n\t\t\t}\n\t\t}\n```\n\nThis is a control-flow pattern the rubric flagged for elimination. Additionally, `notifyDown()` in device_service.go embeds retry/backoff with bare `time.Sleep()` instead of using the extracted `withRetry()` helper that exists in retry.go—another example of \"ugly hid elsewhere\" where retry logic wasn't properly extracted.\n\nVERDICT: FAIL",
+      "cost_usd": 0.051145
+    },
+    {
+      "name": "gone-block-comments",
+      "type": "regex",
+      "passed": true,
+      "detail": "// (parse the line|look up or create device|transitions)$ over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-five-results",
+      "type": "regex",
+      "passed": false,
+      "detail": "tags \\[\\]string, err error\\) over files: 2 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-force-saves",
+      "type": "regex",
+      "passed": false,
+      "detail": "changed \\|\\| force over files: 1 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-goto",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\bgoto\\b over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-minus-one-sentinel",
+      "type": "regex",
+      "passed": true,
+      "detail": ", -1, false over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-n-reused-as-score",
+      "type": "regex",
+      "passed": true,
+      "detail": "n = n \\* 10 over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-region-byte-slice",
+      "type": "regex",
+      "passed": false,
+      "detail": "t\\[7:\\] == \"eu\" over files: 1 match(es); want exactly 0"
+    },
+    {
+      "name": "process-heartbeat-kept",
+      "type": "regex",
+      "passed": true,
+      "detail": "func \\(\\w+ \\*DeviceService\\) ProcessHeartbeat\\( over files: 1 match(es); want at least 1"
+    },
+    {
+      "name": "single-altitude",
+      "type": "llm",
+      "passed": false,
+      "detail": "judge claude-haiku-4-5: Looking at the ProcessHeartbeat method in the FOCUS file, I need to verify it matches the single-altitude requirement and contains only named calls, assignments of one, or early error returns.\n\nLet me trace through the body:\n\n1. Parse: `hb, err := parseHeartbeat(raw, force)` + early return ✓\n2. Load/create: `d, err := s.loadOrCreateDevice(tenant, id, tags)` + early return ✓\n3. Apply status transition: `status := s.dampFlap(d, hb.status, force)` ✓\n4. Notify: `s.notifyDown(id)` inside if block ✓\n5. Apply tags: `applyVersionAndTags(\u0026d, hb.version, tags)` ✓\n6. Score: `score = heartbeatScore(status, tags)` ✓\n7. Persist: `s.repo.Save(context.Background(), d)` ✓\n\nHowever, the method violates the stated criterion. Looking at lines that persist to cache:\n\n```go\ns.cache[cacheKey(tenant, id)] = d\n```\n\nand \n\n```go\ns.lastSeen[id] = d.LastSeen\n```\n\nThese are **map indexing operations**, which the CRITERIA explicitly forbids: \"no string, index or byte manipulation in the body.\" The RUBRIC reinforces this, citing \"slice indexing like `parts[0]`\" as forbidden.\n\nMap indexing (`s.cache[key]` and `s.lastSeen[id]`) is index manipulation, which should be delegated to a helper function rather than appearing in the ProcessHeartbeat body itself.\n\nVERDICT: FAIL",
+      "cost_usd": 0.038666
+    },
+    {
+      "name": "postcheck",
+      "type": "postcheck",
+      "passed": false,
+      "detail": "exit status 1\ntask test: ok\nPASS  task test green\ntask lint: ok\nPASS  task lint green\n== complexity ==\nPASS  gocognit(ProcessHeartbeat) (was 76) (10 \u003c= 10)\nFAIL  gocyclo(ProcessHeartbeat) (was 40) (got '9', want \u003c= 8)\nPASS  ProcessHeartbeat still defined in internal/services\nPASS  R1 Q3: no status string-literal comparison inside ProcessHeartbeat (0)\nPASS  R3 Q2: no strings./index manipulation inside ProcessHeartbeat (0)\nFAIL  no //nolint on ProcessHeartbeat (got '1', want '0')\n== services-scoped oracles (baseline = scaffold base commit) ==\nFAIL  R8 Q3: context.Background() gone from internal/services (got '3', want '0')\nPASS  context.TODO() not used as an escape hatch (1 \u003c= 1)\nFAIL  R10 Q5: the retry sleep is gone (time.Sleep count below baseline) (got '5', want \u003c= 4)\nFAIL  R1 Q5: functions returning \u003e3 values (ProcessHeartbeat's gone) (got '2', want \u003c= 1)\nPASS  R1 Q3: \"READY\" literal has one owner on the heartbeat path (3 fewer than baseline) (2 \u003c= 3)\nPASS  R3 Q4: the labeled-continue dedupe left ProcessHeartbeat (1 \u003c= 1)\n== the parse leaf ==\nFAIL  production code CALLS a Parse*Heartbeat* constructor (declarations and comments excluded) (got '0', want \u003e= 1)\nFAIL  R7: an external-package _test.go calls Parse*Heartbeat*( with a literal (got '0', want \u003e= 1)\n== black-box suite: builds cmd/svc, replays the recorded heartbeats ==\n--- PASS: TestHeartbeatContract (1.21s)\n--- PASS: TestExpectedTSVMatchesTable (0.00s)\nok  \texample.com/heartbeat-blackbox\t1.220s\nblack-box: PASS\nPASS  black-box heartbeat suite\npostcheck: 7 check(s) failed"
+    }
+  ],
+  "cost_usd": 2.117537000000001,
+  "judge_cost_usd": 0.089811,
+  "duration_ms": 627264,
+  "num_turns": 59,
+  "segments": 1,
+  "scaffold_dir": "/tmp/ldd-eval-centerpiece-storify-refactor-1052740688"
+}

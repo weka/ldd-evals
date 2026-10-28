@@ -1,0 +1,52 @@
+{
+  "case": "case-f-globals-refactor",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": false,
+  "graders": [
+    {
+      "name": "art-judge",
+      "type": "llm",
+      "passed": false,
+      "detail": "judge claude-haiku-4-5 (FAIL,FAIL): --- vote 1: FAIL ---\n## Analysis\n\nThe code has critical failures against the rubric:\n\n**FAIL outright conditions triggered:**\n\n1. **env.go contains `func init()`** — This violates the explicit requirement: \"FAIL outright if... `env.go` still contains `func init()`.\"\n   ```go\n   func init() { //nolint:gochecknoinits // TODO\n       region = os.Getenv(\"REGION\")\n   }\n   ```\n\n2. **env.go has a mutable package-level `region` variable** — Violates criterion 3: \"The env package only loads. No `init()`, no package-level mutable `Config` or `region`.\"\n\n3. **jobs/registry.go has globals and init()** — The `handlers` map, `store`, and `storeOnce` are package-level globals initialized in `init()`, not passed through the wiring diagram:\n   ```go\n   var handlers = map[string]func(models.Job) error{} //nolint:gochecknoglobals // TODO\n   var store *repository.MemStore //nolint:gochecknoglobals // TODO\n   \n   func init() { //nolint:gochecknoinits // TODO\n       handlers[models.JobKindSnapshot] = runSnapshot\n       handlers[models.JobKindSync] = func(j models.Job) error {\n           return Sync(context.Background(), GetStore(), j)\n       }\n   }\n   ```\n\nThe store should be instantiated in main and passed to the Scheduler/jobs, not lazily created via `sync.Once`.\n\n**What works:**\n- main.go correctly loads config once and extracts specific values\n- pool.Start and scheduler signatures name their dependencies\n\n---\n\nVERDICT: FAIL\n\n--- vote 2: FAIL ---\n## Analysis\n\nThe code fails multiple explicit criteria:\n\n**Automatic Failure #1: env.go contains func init()**\nThe rubric states: \"FAIL outright if `env.go` still contains `func init()`.\" Lines 14–16 of `internal/env/env.go` contain exactly this:\n```go\nfunc init() { //nolint:gochecknoinits // TODO\n\tregion = os.Getenv(\"REGION\")\n}\n```\nThe nolint comment masks but doesn't fix the violation.\n\n**Criterion 3 (env package): env.go contains mutable package-level state**\nLine 12 defines `var region string //n…(truncated)",
+      "cost_usd": 0.0361412
+    },
+    {
+      "name": "gone-config-global",
+      "type": "regex",
+      "passed": true,
+      "detail": "^var Config Configuration over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-nolint-gochecknoglobals-env",
+      "type": "regex",
+      "passed": true,
+      "detail": "nolint:gochecknoglobals // loaded in main over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "load-returns-a-value",
+      "type": "regex",
+      "passed": true,
+      "detail": "^func Load\\(\\) \\(?[A-Z]\\w*(, error)?\\)? \\{ over files: 1 match(es); want at least 1"
+    },
+    {
+      "name": "main-reads-as-a-story",
+      "type": "llm",
+      "passed": false,
+      "detail": "judge claude-haiku-4-5 (FAIL,FAIL): --- vote 1: FAIL ---\nLooking at the FOCUS file against the RUBRIC:\n\n**RUBRIC Point 1 - Configuration obtained once at top:**\nThe code loads configuration through multiple paths:\n- Line 32: `cfg := env.Load()` loads some configuration\n- Line 57: `os.Getenv(\"WEBHOOK_URL\")` reads configuration mid-construction, not at top\n- Line 66 (via `listenAddr()`): `os.Getenv(\"PORT\")` reads configuration in a helper function\n- Flag parsing for `--store`, `--dry-run`, `--read-only`\n\nThis violates the requirement that \"Configuration is obtained once at the top of main... and then individual values are handed to constructors.\" The WEBHOOK_URL should come from cfg, not be read via os.Getenv in the middle of service construction.\n\n**RUBRIC Point 2 - Story at one altitude:**\nThe flow mostly follows the pattern, but is disrupted:\n- Load config ✓\n- Build leaf values (store) ✓\n- Build services (notifier, audit, svc, scheduler) - mostly, but notifier gets WEBHOOK_URL via direct os.Getenv instead of from cfg\n- Build handlers ✓\n- Serve - but listenAddr() reads PORT from environment rather than using a value from cfg\n\n**RUBRIC Point 3 - No business logic:**\nThe code is clean here—no parsing, no status comparisons. Helper functions like `listenAddr()` are appropriate, but they read environment directly instead of accepting configured values.\n\n**Key issue:** The configuration loading is split across `env.Load()` (which returns cfg with some values) and direct `os.Getenv()` calls. The criteria requires env.Load() to be *the* configuration source, with individual values from it handed to constructors.\n\nVERDICT: FAIL\n\n--- vote 2: FAIL ---\n## Analysis\n\nLooking at the FOCUS file against the rubric requirements:\n\n**Requirement 1 - Configuration loaded once at top, values handed to constructors:**\n\nThis is **violated**. The code reads environment configuration in multiple places:\n- Line 20: `defaultStorePath()` calls `os.Getenv(\"STORE_PATH\")` *before* `env.Lo…(truncated)",
+      "cost_usd": 0.0644663
+    },
+    {
+      "name": "postcheck",
+      "type": "postcheck",
+      "passed": false,
+      "detail": "exit status 1\ntask test: ok\nPASS  task test green\ntask lint: ok\nPASS  task lint green\n== the ratchet: env.Config references outside cmd/, per commit ==\nPASS  at least 3 commits after the scaffold base (4 \u003e= 3)\n  5b5949b    7  go-mini: initial import\n  b1c529d    6  pool: take worker count as a parameter instead of reading env.Config\n  51cd100    6  jobs: take batch size and worker count as constructor parameters\n  4497249    2  services: take batch size and flap window as constructor parameters\n  221d1bc    0  env: remove the global Config variable\nPASS  env.Config references outside cmd/ never rise and end at 0\nPASS  no commit touches non-test code in more than 2 packages (island + its caller) (2 \u003c= 2)\n== islands are clean ==\nPASS  pool no longer imports env (0)\nFAIL  jobs no longer imports env (got '1', want '0')\nPASS  shallow fix rejected: env.Configuration is not a param/field type in pool, jobs or handlers (0)\n== end state ==\nFAIL  R8 Q1: no package-level var left in internal/env (got '1', want '0')\nFAIL  R8 Q2: no init() left in internal/env (got '1', want '0')\nFAIL  no //nolint in internal/env (got '2', want '0')\nPASS  no //nolint in internal/pool (0)\nFAIL  no nolint:gochecknoglobals anywhere for the config global (got '1', want '0')\n== test payoff ==\nPASS  R8 Q6: no test mutates env.Config (0)\nFAIL  t.Parallel() in internal/pool tests (got '0', want \u003e= 1)\nFAIL  a pool constructor is called with a literal number in its tests (got '0', want \u003e= 1)\n== black-box suite: builds cmd/svc, replays the recorded heartbeats ==\n--- PASS: TestHeartbeatContract (1.07s)\n--- PASS: TestExpectedTSVMatchesTable (0.00s)\nok  \texample.com/heartbeat-blackbox\t1.074s\nblack-box: PASS\nPASS  black-box heartbeat suite\npostcheck: 7 check(s) failed"
+    }
+  ],
+  "cost_usd": 1.5034074,
+  "judge_cost_usd": 0.1006075,
+  "duration_ms": 308174,
+  "num_turns": 73,
+  "segments": 1,
+  "scaffold_dir": "/tmp/ldd-eval-case-f-globals-refactor-38029153"
+}

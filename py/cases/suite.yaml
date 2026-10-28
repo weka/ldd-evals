@@ -1,0 +1,5 @@
+# The Python suite's defaults, read by the runner for every case below: the
+# globs an llm grader's directory focus filters with (path.Match over the
+# file's base name). A case's case.yaml may override either key.
+src_glob: "*.py"
+test_glob: "test_*.py"

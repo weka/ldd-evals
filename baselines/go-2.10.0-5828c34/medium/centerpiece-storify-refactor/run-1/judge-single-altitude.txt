@@ -1,0 +1,32 @@
+Looking at the `ProcessHeartbeat` method in the file, I need to verify it meets the stated criteria.
+
+**Structure of ProcessHeartbeat:**
+
+The method contains:
+1. `hb, err := parseHeartbeat(raw, force)` — parse (named call) ✓
+2. Error check with early return ✓
+3. `d, err := s.loadOrCreateDevice(...)` — look up/create (named call) ✓
+4. Error check with early return ✓
+5. `d, score, changed := s.applyHeartbeat(d, hb, force)` — apply transition (named call) ✓
+6. `d.LastSeen = time.Now()` — assignment of named call ✓
+7. Conditional persist block:
+   - `s.repo.Save(context.Background(), d)` — persist (named call) ✓
+   - `s.mu.Lock()` and `s.mu.Unlock()` — named calls ✓
+   - `s.cache[cacheKey(tenant, hb.id)] = d` — assignment ✓
+8. `s.lastSeen[hb.id] = d.LastSeen` — assignment ✓
+9. Return result ✓
+
+**Checking prohibited constructs:**
+
+- ✗ `strings.` calls: None
+- ✗ Slice indexing (`parts[0]`, `t[7:]`): None (map access is different)
+- ✗ String literal comparisons (`== "READY"`): None
+- ✗ Labeled `continue`: None
+- ✗ `goto`: None
+- ✗ `time.Sleep`: None (only `time.Now()`)
+- ✗ Hand-rolled retry loop: None
+- ✗ Nested `if` blocks more than 2 levels deep: Max nesting is 2 levels (the `if changed || force` containing `if err := s.repo.Save...`)
+
+Every statement is either a named call, an assignment, or an early return of an error. The body delegates low-level work (notify-on-DOWN, scoring) to `applyHeartbeat` and `parseHeartbeat` helper functions, which the rubric explicitly allows.
+
+VERDICT: PASS

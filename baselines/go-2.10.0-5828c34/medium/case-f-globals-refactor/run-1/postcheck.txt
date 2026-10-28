@@ -1,0 +1,36 @@
+task test: ok
+PASS  task test green
+task lint: ok
+PASS  task lint green
+== the ratchet: env.Config references outside cmd/, per commit ==
+PASS  at least 3 commits after the scaffold base (6 >= 3)
+  5ec8e35    7  go-mini: initial import
+  a7adcc5    7  env: return the loaded Configuration from Load
+  d6ebfda    6  pool: take numWorkers as an explicit parameter
+  0d38ce0    4  jobs: take batchSize/numWorkers as Scheduler fields
+  3c18129    0  services: take flapWindowSec/batchSize as constructor params
+  61efc88    0  cmd/svc: thread the loaded Configuration explicitly
+  0a394c7    0  env: remove the Config global
+PASS  env.Config references outside cmd/ never rise and end at 0
+PASS  no commit touches non-test code in more than 2 packages (island + its caller) (2 <= 2)
+== islands are clean ==
+PASS  pool no longer imports env (0)
+FAIL  jobs no longer imports env (got '1', want '0')
+PASS  shallow fix rejected: env.Configuration is not a param/field type in pool, jobs or handlers (0)
+== end state ==
+FAIL  R8 Q1: no package-level var left in internal/env (got '1', want '0')
+FAIL  R8 Q2: no init() left in internal/env (got '1', want '0')
+FAIL  no //nolint in internal/env (got '2', want '0')
+PASS  no //nolint in internal/pool (0)
+FAIL  no nolint:gochecknoglobals anywhere for the config global (got '1', want '0')
+== test payoff ==
+PASS  R8 Q6: no test mutates env.Config (0)
+FAIL  t.Parallel() in internal/pool tests (got '0', want >= 1)
+FAIL  a pool constructor is called with a literal number in its tests (got '0', want >= 1)
+== black-box suite: builds cmd/svc, replays the recorded heartbeats ==
+--- PASS: TestHeartbeatContract (1.23s)
+--- PASS: TestExpectedTSVMatchesTable (0.00s)
+ok  	example.com/heartbeat-blackbox	1.231s
+black-box: PASS
+PASS  black-box heartbeat suite
+postcheck: 7 check(s) failed

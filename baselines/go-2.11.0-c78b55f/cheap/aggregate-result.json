@@ -1,0 +1,3947 @@
+{
+  "schemaVersion": "1",
+  "suite": "evals",
+  "startedAt": "2026-09-15T13:33:00Z",
+  "finishedAt": "2026-09-15T20:02:35.235215619Z",
+  "cases": [
+    {
+      "name": "case-a-retention-review",
+      "tags": [
+        "cheap",
+        "review",
+        "logic-hunter",
+        "case-a"
+      ],
+      "tier": "cheap",
+      "runs": 2,
+      "passed": 1,
+      "passRate": 0.5,
+      "results": [
+        {
+          "case": "case-a-retention-review",
+          "run": 1,
+          "model": "claude-sonnet-5",
+          "passed": true,
+          "graders": [
+            {
+              "name": "anchor-config",
+              "type": "regex",
+              "passed": true,
+              "detail": "config\\.go:[0-9]+ over last_message: 5 match(es); want at least 1"
+            },
+            {
+              "name": "anchor-policy",
+              "type": "regex",
+              "passed": true,
+              "detail": "policy\\.go:[0-9]+ over last_message: 5 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-retention-r1",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)\\bcluster\\b[^\\n]*[Rr]etention.*\\bR1\\b over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-retention-r2",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)\\bcluster\\b[^\\n]*[Rr]etention.*\\bR2\\b over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "evidence-protocol",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\.go:[0-9]+ over last_message: 12 match(es); want at least 1"
+            },
+            {
+              "name": "fix-domain-type",
+              "type": "regex",
+              "passed": true,
+              "detail": "Replace Primitive with Domain Type over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "fix-sentinel",
+              "type": "regex",
+              "passed": true,
+              "detail": "Replace Sentinel with comma-ok|[Ss]entinel over last_message: 7 match(es); want at least 1"
+            },
+            {
+              "name": "no-edit",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Edit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-multiedit",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "MultiEdit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-write",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Write called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "precision-schedule-clean",
+              "type": "regex",
+              "passed": true,
+              "detail": "schedule(_test)?\\.go:[0-9]+ over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "rule-cited",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\bR(1[0-2]|[1-9])\\b over last_message: 11 match(es); want at least 1"
+            },
+            {
+              "name": "skeptic-confirmed-4plus",
+              "type": "regex",
+              "passed": true,
+              "detail": "CONFIRMED\\W{1,6}score:? ?([4-9]|1[0-9]) over last_message: 2 match(es); want at least 1"
+            }
+          ],
+          "cost_usd": 1.2523990999999999,
+          "judge_cost_usd": 0,
+          "duration_ms": 420812,
+          "num_turns": 24,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-case-a-retention-review-1348706987"
+        },
+        {
+          "case": "case-a-retention-review",
+          "run": 2,
+          "model": "claude-sonnet-5",
+          "passed": false,
+          "graders": [
+            {
+              "name": "anchor-config",
+              "type": "regex",
+              "passed": true,
+              "detail": "config\\.go:[0-9]+ over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "anchor-policy",
+              "type": "regex",
+              "passed": true,
+              "detail": "policy\\.go:[0-9]+ over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-retention-r1",
+              "type": "regex",
+              "passed": false,
+              "detail": "(?i)\\bcluster\\b[^\\n]*[Rr]etention.*\\bR1\\b over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-retention-r2",
+              "type": "regex",
+              "passed": false,
+              "detail": "(?i)\\bcluster\\b[^\\n]*[Rr]etention.*\\bR2\\b over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "evidence-protocol",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\.go:[0-9]+ over last_message: 5 match(es); want at least 1"
+            },
+            {
+              "name": "fix-domain-type",
+              "type": "regex",
+              "passed": true,
+              "detail": "Replace Primitive with Domain Type over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "fix-sentinel",
+              "type": "regex",
+              "passed": true,
+              "detail": "Replace Sentinel with comma-ok|[Ss]entinel over last_message: 7 match(es); want at least 1"
+            },
+            {
+              "name": "no-edit",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Edit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-multiedit",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "MultiEdit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-write",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Write called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "precision-schedule-clean",
+              "type": "regex",
+              "passed": true,
+              "detail": "schedule(_test)?\\.go:[0-9]+ over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "rule-cited",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\bR(1[0-2]|[1-9])\\b over last_message: 5 match(es); want at least 1"
+            },
+            {
+              "name": "skeptic-confirmed-4plus",
+              "type": "regex",
+              "passed": true,
+              "detail": "CONFIRMED\\W{1,6}score:? ?([4-9]|1[0-9]) over last_message: 2 match(es); want at least 1"
+            }
+          ],
+          "cost_usd": 1.0645026,
+          "judge_cost_usd": 0,
+          "duration_ms": 515114,
+          "num_turns": 25,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-case-a-retention-review-3662346619"
+        }
+      ]
+    },
+    {
+      "name": "case-b-endpoint-review",
+      "tags": [
+        "cheap",
+        "review",
+        "logic-hunter",
+        "case-b"
+      ],
+      "tier": "cheap",
+      "runs": 2,
+      "passed": 0,
+      "passRate": 0.0,
+      "results": [
+        {
+          "case": "case-b-endpoint-review",
+          "run": 1,
+          "model": "claude-sonnet-5",
+          "passed": false,
+          "graders": [
+            {
+              "name": "anchor-client",
+              "type": "regex",
+              "passed": true,
+              "detail": "client\\.go:[0-9]+ over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "evidence-dial",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\bdial\\( over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "evidence-healthurl",
+              "type": "regex",
+              "passed": true,
+              "detail": "healthURL over last_message: 6 match(es); want at least 1"
+            },
+            {
+              "name": "evidence-newclient",
+              "type": "regex",
+              "passed": true,
+              "detail": "NewClient over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "evidence-protocol",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\.go:[0-9]+ over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "fix-name-enum",
+              "type": "regex",
+              "passed": false,
+              "detail": "(?i)Name enum strings|type Scheme|Scheme type|named scheme over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "fix-parameter-object",
+              "type": "regex",
+              "passed": true,
+              "detail": "Introduce Parameter Object over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "no-edit",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Edit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-multiedit",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "MultiEdit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-write",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Write called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "precision-test-clean",
+              "type": "regex",
+              "passed": true,
+              "detail": "client_test\\.go:[0-9]+ over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "r1-q5-clump",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?s)client\\.go:[0-9]+.{0,500}\\bQ5\\b over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "rule-cited",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\bR(1[0-2]|[1-9])\\b over last_message: 8 match(es); want at least 1"
+            },
+            {
+              "name": "skeptic-confirmed",
+              "type": "regex",
+              "passed": true,
+              "detail": "CONFIRMED\\W{1,6}score over last_message: 4 match(es); want at least 1"
+            },
+            {
+              "name": "skeptic-travels-together",
+              "type": "regex",
+              "passed": false,
+              "detail": "(?i)travels? together|data clump|clump over last_message: 0 match(es); want at least 1"
+            }
+          ],
+          "cost_usd": 1.1981531,
+          "judge_cost_usd": 0,
+          "duration_ms": 523712,
+          "num_turns": 24,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-case-b-endpoint-review-934383953"
+        },
+        {
+          "case": "case-b-endpoint-review",
+          "run": 2,
+          "model": "claude-sonnet-5",
+          "passed": false,
+          "graders": [
+            {
+              "name": "anchor-client",
+              "type": "regex",
+              "passed": true,
+              "detail": "client\\.go:[0-9]+ over last_message: 8 match(es); want at least 1"
+            },
+            {
+              "name": "evidence-dial",
+              "type": "regex",
+              "passed": false,
+              "detail": "\\bdial\\( over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "evidence-healthurl",
+              "type": "regex",
+              "passed": true,
+              "detail": "healthURL over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "evidence-newclient",
+              "type": "regex",
+              "passed": true,
+              "detail": "NewClient over last_message: 5 match(es); want at least 1"
+            },
+            {
+              "name": "evidence-protocol",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\.go:[0-9]+ over last_message: 9 match(es); want at least 1"
+            },
+            {
+              "name": "fix-name-enum",
+              "type": "regex",
+              "passed": false,
+              "detail": "(?i)Name enum strings|type Scheme|Scheme type|named scheme over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "fix-parameter-object",
+              "type": "regex",
+              "passed": true,
+              "detail": "Introduce Parameter Object over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "no-edit",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Edit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-multiedit",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "MultiEdit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-write",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Write called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "precision-test-clean",
+              "type": "regex",
+              "passed": true,
+              "detail": "client_test\\.go:[0-9]+ over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "r1-q5-clump",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?s)client\\.go:[0-9]+.{0,500}\\bQ5\\b over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "rule-cited",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\bR(1[0-2]|[1-9])\\b over last_message: 18 match(es); want at least 1"
+            },
+            {
+              "name": "skeptic-confirmed",
+              "type": "regex",
+              "passed": true,
+              "detail": "CONFIRMED\\W{1,6}score over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "skeptic-travels-together",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)travels? together|data clump|clump over last_message: 1 match(es); want at least 1"
+            }
+          ],
+          "cost_usd": 1.6955391000000002,
+          "judge_cost_usd": 0,
+          "duration_ms": 536702,
+          "num_turns": 43,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-case-b-endpoint-review-3243496092"
+        }
+      ]
+    },
+    {
+      "name": "case-c-picker-review",
+      "tags": [
+        "cheap",
+        "review",
+        "logic-hunter",
+        "case-c"
+      ],
+      "tier": "cheap",
+      "runs": 2,
+      "passed": 2,
+      "passRate": 1.0,
+      "results": [
+        {
+          "case": "case-c-picker-review",
+          "run": 1,
+          "model": "claude-sonnet-5",
+          "passed": true,
+          "graders": [
+            {
+              "name": "anchor-picker",
+              "type": "regex",
+              "passed": true,
+              "detail": "picker\\.go:[0-9]+ over last_message: 8 match(es); want at least 1"
+            },
+            {
+              "name": "evidence-flags",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)primaryFound|secondaryFound|boolean flag|flag-driven over last_message: 7 match(es); want at least 1"
+            },
+            {
+              "name": "evidence-protocol",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\.go:[0-9]+ over last_message: 8 match(es); want at least 1"
+            },
+            {
+              "name": "fix-extract-leaf-type",
+              "type": "regex",
+              "passed": true,
+              "detail": "Extract (Leaf|Collection) Type over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "no-edit",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Edit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-multiedit",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "MultiEdit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-write",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Write called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "precision-no-concurrency-findings",
+              "type": "regex",
+              "passed": true,
+              "detail": "Replace Sleep|Synchronized Owner|Thread .?ctx over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "r3-q4-flag-loop",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?s)picker\\.go:[0-9]+.{0,500}\\bQ4\\b over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "rule-cited",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\bR(1[0-2]|[1-9])\\b over last_message: 21 match(es); want at least 1"
+            }
+          ],
+          "cost_usd": 1.6658622,
+          "judge_cost_usd": 0,
+          "duration_ms": 560838,
+          "num_turns": 36,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-case-c-picker-review-202134757"
+        },
+        {
+          "case": "case-c-picker-review",
+          "run": 2,
+          "model": "claude-sonnet-5",
+          "passed": true,
+          "graders": [
+            {
+              "name": "anchor-picker",
+              "type": "regex",
+              "passed": true,
+              "detail": "picker\\.go:[0-9]+ over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "evidence-flags",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)primaryFound|secondaryFound|boolean flag|flag-driven over last_message: 8 match(es); want at least 1"
+            },
+            {
+              "name": "evidence-protocol",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\.go:[0-9]+ over last_message: 5 match(es); want at least 1"
+            },
+            {
+              "name": "fix-extract-leaf-type",
+              "type": "regex",
+              "passed": true,
+              "detail": "Extract (Leaf|Collection) Type over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "no-edit",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Edit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-multiedit",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "MultiEdit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-write",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Write called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "precision-no-concurrency-findings",
+              "type": "regex",
+              "passed": true,
+              "detail": "Replace Sleep|Synchronized Owner|Thread .?ctx over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "r3-q4-flag-loop",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?s)picker\\.go:[0-9]+.{0,500}\\bQ4\\b over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "rule-cited",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\bR(1[0-2]|[1-9])\\b over last_message: 29 match(es); want at least 1"
+            }
+          ],
+          "cost_usd": 1.617544,
+          "judge_cost_usd": 0,
+          "duration_ms": 585680,
+          "num_turns": 31,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-case-c-picker-review-2324615155"
+        }
+      ]
+    },
+    {
+      "name": "case-d-ceremony-review",
+      "tags": [
+        "cheap",
+        "review",
+        "logic-hunter",
+        "case-d",
+        "precision"
+      ],
+      "tier": "cheap",
+      "runs": 2,
+      "passed": 2,
+      "passRate": 1.0,
+      "results": [
+        {
+          "case": "case-d-ceremony-review",
+          "run": 1,
+          "model": "claude-sonnet-5",
+          "passed": true,
+          "graders": [
+            {
+              "name": "cheaper-alternative-int",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)(keep|use|prefer)( the| a| an)?( plain| bare| raw)? `?\\bint\\b|(delete|remove|drop)( the| both| these| those| all| unused| its| this| ceremony| no-op| trivial| wrapper)* wrappers?\\b|plain int|bare int|unwrap over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "evidence-protocol",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\.go:[0-9]+ over last_message: 12 match(es); want at least 1"
+            },
+            {
+              "name": "no-edit",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Edit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-multiedit",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "MultiEdit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-write",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Write called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "precision-trace-func-clean",
+              "type": "regex",
+              "passed": true,
+              "detail": "handlers/trace\\.go:3[5-8] \\| over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "replica-count-is-ceremony",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)over-?abstraction|ceremony|\\bQ6\\b|\ud83d\udfe2 POLISH|inverse over last_message: 9 match(es); want at least 1"
+            },
+            {
+              "name": "replica-count-named",
+              "type": "regex",
+              "passed": true,
+              "detail": "ReplicaCount over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "rule-cited",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\bR(1[0-2]|[1-9])\\b over last_message: 19 match(es); want at least 1"
+            },
+            {
+              "name": "traceid-never-confirmed",
+              "type": "regex",
+              "passed": true,
+              "detail": "CONFIRMED\\W{1,6}score[^\\n]*TraceID over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "traceid-not-a-domain-type-fix",
+              "type": "regex",
+              "passed": true,
+              "detail": "Domain Type:? ?`?TraceID over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "traceid-refuted-if-proposed",
+              "type": "llm",
+              "passed": true,
+              "detail": "judge claude-haiku-4-5 (PASS,PASS): --- vote 1: PASS ---\nReading through the report systematically:\n\n**Design Debt findings:** The three findings proposed are:\n1. Delete `ReplicaCount int` (ceremony type)\n2. Delete `Name string` (ceremony type)  \n3. Fix `Grants.All()` to clone the internal slice\n\nNone of these propose creating a `TraceID` domain type. The section explicitly states the Skeptic was not invoked because \"no type/package-extraction proposal in scope\" \u2014 the hunters' findings recommend *removing* unnecessary ceremony types, not creating new ones.\n\n**Readability Debt findings:** These discuss comments, including one on the `trace` variable (a pass-through parameter copied into the X-Trace header). The finding is about trimming the comment's length, not proposing a type.\n\n**Mentions of trace/traceID:** The phrase \"trace id\" appears only in prose describing the `trace` variable's purpose (log correlation) and in a rewritten package doc. Per the rubric, mentions in prose and broader-context notes are fine.\n\n**Conclusion:** The report proposes no `TraceID` type as a Design Debt finding. The Skeptic was not even invoked because no type-extraction proposals survived the hunter phase. The design guidance aligns with the criteria: the raw string pass-through remains a primitive.\n\nVERDICT: PASS\n\n--- vote 2: PASS ---\nLooking at the Design Debt section of the report, I see three findings:\n\n1. `ReplicaCount int` \u2014 recommends deletion (removing over-abstraction)\n2. `Name string` \u2014 recommends deletion (removing over-abstraction)  \n3. `Grants.All()` \u2014 recommends cloning the returned slice (collection encapsulation)\n\nNone of these propose creating a `TraceID` domain type. The parameter `traceID` is mentioned only in the Readability Debt section (at `trace.go:35-36`), where it appears in prose describing why a comment should be kept \u2014 which the rubric explicitly allows.\n\nVERDICT: PASS",
+              "cost_usd": 0.023375900000000005
+            }
+          ],
+          "cost_usd": 1.4274341,
+          "judge_cost_usd": 0.023375900000000005,
+          "duration_ms": 507041,
+          "num_turns": 29,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-case-d-ceremony-review-3500033281"
+        },
+        {
+          "case": "case-d-ceremony-review",
+          "run": 2,
+          "model": "claude-sonnet-5",
+          "passed": true,
+          "graders": [
+            {
+              "name": "cheaper-alternative-int",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)(keep|use|prefer)( the| a| an)?( plain| bare| raw)? `?\\bint\\b|(delete|remove|drop)( the| both| these| those| all| unused| its| this| ceremony| no-op| trivial| wrapper)* wrappers?\\b|plain int|bare int|unwrap over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "evidence-protocol",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\.go:[0-9]+ over last_message: 17 match(es); want at least 1"
+            },
+            {
+              "name": "no-edit",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Edit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-multiedit",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "MultiEdit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-write",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Write called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "precision-trace-func-clean",
+              "type": "regex",
+              "passed": true,
+              "detail": "handlers/trace\\.go:3[5-8] \\| over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "replica-count-is-ceremony",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)over-?abstraction|ceremony|\\bQ6\\b|\ud83d\udfe2 POLISH|inverse over last_message: 7 match(es); want at least 1"
+            },
+            {
+              "name": "replica-count-named",
+              "type": "regex",
+              "passed": true,
+              "detail": "ReplicaCount over last_message: 4 match(es); want at least 1"
+            },
+            {
+              "name": "rule-cited",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\bR(1[0-2]|[1-9])\\b over last_message: 49 match(es); want at least 1"
+            },
+            {
+              "name": "traceid-never-confirmed",
+              "type": "regex",
+              "passed": true,
+              "detail": "CONFIRMED\\W{1,6}score[^\\n]*TraceID over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "traceid-not-a-domain-type-fix",
+              "type": "regex",
+              "passed": true,
+              "detail": "Domain Type:? ?`?TraceID over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "traceid-refuted-if-proposed",
+              "type": "llm",
+              "passed": true,
+              "detail": "judge claude-haiku-4-5 (PASS,PASS): --- vote 1: PASS ---\nReading through the Design Debt section (\ud83d\udd34), the type proposals that survived are:\n\n1. **Drop** `ReplicaCount int` \u2014 unused ceremony wrapper (Score 0)\n2. **Drop** `Name string` \u2014 unused ceremony wrapper (Score 0)\n3. Two data structure fixes to `Grants` (`All()` reference leak, `NewGrants` copy issue) \u2014 not new types\n\nThe report makes no proposal to ship a `TraceID` domain type. While `internal/handlers/trace.go` is in scope and the parameter `traceID` appears in context (e.g., the criteria text itself mentions it being copied into X-Trace headers), there is no hunter finding or skeptic verdict proposing a domain type wrapper for it.\n\nVERDICT: PASS\n\n--- vote 2: PASS ---\nReading through the report systematically:\n\n**Design Debt section:** Lists findings for `ReplicaCount`, `Name`, package layering (R5 advisory), and two `Grants` encapsulation issues. No mention of a `TraceID` type anywhere.\n\n**Readability Debt section:** Comment quality issues across both files (`handlers` and `grants`), but no domain type proposals.\n\n**Not flagged section:** Confirms `Permission`/`PermRead`/`PermWrite`/`PermAdmin` passed as legitimate; no other primitive-wrapping types mentioned.\n\nThe report correctly avoids proposing a `TraceID` domain type. The only ceremony types flagged\u2014`ReplicaCount` and `Name`\u2014are marked for *dropping* as unused wrappers, which is the right call per the criteria. The `traceID` parameter mentioned in the file scope (`internal/handlers/trace.go`) is not reified into a typed proposal.\n\nVERDICT: PASS",
+              "cost_usd": 0.0243828
+            }
+          ],
+          "cost_usd": 1.4382524,
+          "judge_cost_usd": 0.0243828,
+          "duration_ms": 565933,
+          "num_turns": 30,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-case-d-ceremony-review-1247871151"
+        }
+      ]
+    },
+    {
+      "name": "case-e-nils-review",
+      "tags": [
+        "cheap",
+        "review",
+        "logic-hunter",
+        "case-e"
+      ],
+      "tier": "cheap",
+      "runs": 2,
+      "passed": 1,
+      "passRate": 0.5,
+      "results": [
+        {
+          "case": "case-e-nils-review",
+          "run": 1,
+          "model": "claude-sonnet-5",
+          "passed": false,
+          "graders": [
+            {
+              "name": "cluster-find",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)\\bcluster\\b[^\\n]*Find over last_message: 6 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-reporter",
+              "type": "regex",
+              "passed": false,
+              "detail": "(?i)\\bcluster\\b[^\\n]*Reporter over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "evidence-protocol",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\.go:[0-9]+ over last_message: 30 match(es); want at least 1"
+            },
+            {
+              "name": "fix-comma-ok",
+              "type": "regex",
+              "passed": true,
+              "detail": "Replace nil returns|comma-ok|Device, bool\\) over last_message: 9 match(es); want at least 1"
+            },
+            {
+              "name": "fix-constructor",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)validating constructor|hoist[^\\n]{0,40}(check|default)|null[- ]?object|privati[sz]e|private the|fields private|unexport over last_message: 8 match(es); want at least 1"
+            },
+            {
+              "name": "fix-null-object",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)null[- ]?object over last_message: 5 match(es); want at least 1"
+            },
+            {
+              "name": "no-edit",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Edit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-multiedit",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "MultiEdit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-write",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Write called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "precision-newcatalog-clean",
+              "type": "regex",
+              "passed": true,
+              "detail": "report/catalog\\.go:2[1-4] \\| over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "r2-q2-field-recheck",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?s)(reporter|catalog|wire)\\.go:[0-9]+.{0,500}\\bQ2\\b over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "r2-q5-nil-return",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?s)(reporter|catalog|wire)\\.go:[0-9]+.{0,500}\\bQ5\\b over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "r2-q6-nil-args",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?s)(reporter|catalog|wire)\\.go:[0-9]+.{0,500}\\bQ6\\b over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "rule-cited",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\bR(1[0-2]|[1-9])\\b over last_message: 24 match(es); want at least 1"
+            }
+          ],
+          "cost_usd": 1.2988771,
+          "judge_cost_usd": 0,
+          "duration_ms": 513406,
+          "num_turns": 22,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-case-e-nils-review-2104573158"
+        },
+        {
+          "case": "case-e-nils-review",
+          "run": 2,
+          "model": "claude-sonnet-5",
+          "passed": true,
+          "graders": [
+            {
+              "name": "cluster-find",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)\\bcluster\\b[^\\n]*Find over last_message: 4 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-reporter",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)\\bcluster\\b[^\\n]*Reporter over last_message: 6 match(es); want at least 1"
+            },
+            {
+              "name": "evidence-protocol",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\.go:[0-9]+ over last_message: 26 match(es); want at least 1"
+            },
+            {
+              "name": "fix-comma-ok",
+              "type": "regex",
+              "passed": true,
+              "detail": "Replace nil returns|comma-ok|Device, bool\\) over last_message: 4 match(es); want at least 1"
+            },
+            {
+              "name": "fix-constructor",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)validating constructor|hoist[^\\n]{0,40}(check|default)|null[- ]?object|privati[sz]e|private the|fields private|unexport over last_message: 8 match(es); want at least 1"
+            },
+            {
+              "name": "fix-null-object",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)null[- ]?object over last_message: 5 match(es); want at least 1"
+            },
+            {
+              "name": "no-edit",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Edit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-multiedit",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "MultiEdit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-write",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Write called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "precision-newcatalog-clean",
+              "type": "regex",
+              "passed": true,
+              "detail": "report/catalog\\.go:2[1-4] \\| over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "r2-q2-field-recheck",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?s)(reporter|catalog|wire)\\.go:[0-9]+.{0,500}\\bQ2\\b over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "r2-q5-nil-return",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?s)(reporter|catalog|wire)\\.go:[0-9]+.{0,500}\\bQ5\\b over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "r2-q6-nil-args",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?s)(reporter|catalog|wire)\\.go:[0-9]+.{0,500}\\bQ6\\b over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "rule-cited",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\bR(1[0-2]|[1-9])\\b over last_message: 36 match(es); want at least 1"
+            }
+          ],
+          "cost_usd": 1.7992829000000001,
+          "judge_cost_usd": 0,
+          "duration_ms": 672802,
+          "num_turns": 31,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-case-e-nils-review-2890761026"
+        }
+      ]
+    },
+    {
+      "name": "case-f-globals-review",
+      "tags": [
+        "cheap",
+        "review",
+        "logic-hunter",
+        "case-f"
+      ],
+      "tier": "cheap",
+      "runs": 2,
+      "passed": 2,
+      "passRate": 1.0,
+      "results": [
+        {
+          "case": "case-f-globals-review",
+          "run": 1,
+          "model": "claude-sonnet-5",
+          "passed": true,
+          "graders": [
+            {
+              "name": "anchor-env-global",
+              "type": "regex",
+              "passed": true,
+              "detail": "env\\.go:[0-9]+ over last_message: 4 match(es); want at least 1"
+            },
+            {
+              "name": "evidence-protocol",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\.go:[0-9]+ over last_message: 40 match(es); want at least 1"
+            },
+            {
+              "name": "fix-clean-island",
+              "type": "regex",
+              "passed": true,
+              "detail": "Extract Clean Island|Push the Global Up over last_message: 6 match(es); want at least 1"
+            },
+            {
+              "name": "no-edit",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Edit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-multiedit",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "MultiEdit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-write",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Write called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "nolint-is-a-finding",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)nolint over last_message: 4 match(es); want at least 1"
+            },
+            {
+              "name": "precision-drain-clean",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\bdrain\\(\\) over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "r8-q2-init",
+              "type": "regex",
+              "passed": true,
+              "detail": "init\\(\\) over last_message: 6 match(es); want at least 1"
+            },
+            {
+              "name": "r8-q5-jobs-read",
+              "type": "regex",
+              "passed": true,
+              "detail": "scheduler\\.go:[0-9]+ over last_message: 15 match(es); want at least 1"
+            },
+            {
+              "name": "r8-q5-pool-read",
+              "type": "regex",
+              "passed": true,
+              "detail": "workers\\.go:[0-9]+ over last_message: 5 match(es); want at least 1"
+            },
+            {
+              "name": "r8-q6-test-mutates-global",
+              "type": "regex",
+              "passed": true,
+              "detail": "workers_test\\.go:[0-9]+ over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "refuted-carries-alternative",
+              "type": "llm",
+              "passed": true,
+              "detail": "judge claude-haiku-4-5 (PASS,PASS): --- vote 1: PASS ---\n# Analysis\n\nThe report addresses worker count and batch size handling at multiple points (R8 findings on `pool.Start` and `Scheduler.Run`, plus test injection at `workers_test.go:11`). \n\nThe skeptic's recommendations in all cases are to **reject the dependency upward by passing the values as plain `int` parameters**: \n- `Start(numWorkers int, jobs <-chan Job)` \n- `NewScheduler(batchSize int, ...)`\n\nNo wrapper type such as `WorkerCount`, `NumWorkers`, `BatchSize`, or similar is proposed anywhere in the report. The remedy is parameter injection of the primitive `int` type, not a new nominal type.\n\nThe RUBRIC explicitly states: \"If the report proposes NO wrapper type for the worker count / batch size, PASS.\"\n\nVERDICT: PASS\n\n--- vote 2: PASS ---\nLooking for wrapper type proposals (WorkerCount, NumWorkers, etc.) in the report:\n\nThe report does **not** propose any wrapper type for worker count or batch size. \n\nUnder **DESIGN DEBT**, the findings are explicit:\n- `internal/pool/workers.go:18` (R8 Q5): proposes `Start(numWorkers int, ...)` \u2014 a primitive `int` parameter, not a wrapper type\n- `internal/jobs/scheduler.go:44` (R8 Q5): proposes `NewScheduler(batchSize int, ...)` \u2014 again, primitive `int`, not a wrapper\n\nThe only type-wrapper finding in the report is about `JobKind` (a discriminator for job kinds), which is unrelated to worker count. That finding is properly handled: the skeptic CONFIRMED it with a score (2) and offered a cheaper alternative (skip the type, fix literal drift with constants + linter).\n\nPer the RUBRIC: \"If the report proposes NO wrapper type for the worker count / batch size, PASS.\"\n\nVERDICT: PASS",
+              "cost_usd": 0.0322124
+            },
+            {
+              "name": "rule-cited",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\bR(1[0-2]|[1-9])\\b over last_message: 67 match(es); want at least 1"
+            }
+          ],
+          "cost_usd": 2.5723686000000003,
+          "judge_cost_usd": 0.0322124,
+          "duration_ms": 816753,
+          "num_turns": 41,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-case-f-globals-review-983837455"
+        },
+        {
+          "case": "case-f-globals-review",
+          "run": 2,
+          "model": "claude-sonnet-5",
+          "passed": true,
+          "graders": [
+            {
+              "name": "anchor-env-global",
+              "type": "regex",
+              "passed": true,
+              "detail": "env\\.go:[0-9]+ over last_message: 6 match(es); want at least 1"
+            },
+            {
+              "name": "evidence-protocol",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\.go:[0-9]+ over last_message: 50 match(es); want at least 1"
+            },
+            {
+              "name": "fix-clean-island",
+              "type": "regex",
+              "passed": true,
+              "detail": "Extract Clean Island|Push the Global Up over last_message: 6 match(es); want at least 1"
+            },
+            {
+              "name": "no-edit",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Edit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-multiedit",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "MultiEdit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-write",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Write called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "nolint-is-a-finding",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)nolint over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "precision-drain-clean",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\bdrain\\(\\) over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "r8-q2-init",
+              "type": "regex",
+              "passed": true,
+              "detail": "init\\(\\) over last_message: 5 match(es); want at least 1"
+            },
+            {
+              "name": "r8-q5-jobs-read",
+              "type": "regex",
+              "passed": true,
+              "detail": "scheduler\\.go:[0-9]+ over last_message: 19 match(es); want at least 1"
+            },
+            {
+              "name": "r8-q5-pool-read",
+              "type": "regex",
+              "passed": true,
+              "detail": "workers\\.go:[0-9]+ over last_message: 5 match(es); want at least 1"
+            },
+            {
+              "name": "r8-q6-test-mutates-global",
+              "type": "regex",
+              "passed": true,
+              "detail": "workers_test\\.go:[0-9]+ over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "refuted-carries-alternative",
+              "type": "llm",
+              "passed": true,
+              "detail": "judge claude-haiku-4-5 (PASS,PASS): --- vote 1: PASS ---\nLooking at the report for any wrapper type proposals related to worker count or batch size:\n\n**Worker Count/NumWorkers findings:**\n- R8 Q5 proposes: \"add numWorkers int as a parameter to Start\" \u2014 this is passing an int, not proposing a wrapper type\n- The cluster on pool.Start recommends: \"give Start a `numWorkers int` parameter\" \u2014 raw int, not a type wrapper\n\n**Batch Size findings:**\n- R8 Q5 proposes: \"add batchSize int to NewScheduler\" \u2014 again, raw int parameter, not a wrapper type\n- \ud83d\udc1b Bugs section explicitly states: \"Skeptic: N/A \u2014 no new type proposed; apply as written\" \u2014 the skeptic confirms no wrapper type was proposed\n\n**JobKind finding (for reference):**\nThe only wrapper type consideration in the report is for JobKind, unrelated to worker count. The skeptic gives it a CONFIRMED verdict with a cheaper alternative.\n\nThe report proposes passing worker count and batch size as plain `int` parameters to constructors/functions, not as wrapper types like `WorkerCount` or `NumWorkers` (as a type). The skeptic explicitly confirms no new type is proposed for BatchSize.\n\nVERDICT: PASS\n\n--- vote 2: PASS ---\nReading through the report to identify any proposals for wrapper types (WorkerCount, NumWorkers, etc.) for worker count or batch size:\n\n**Worker count references:**\n- `internal/pool/workers.go:18` \u2014 Design Debt recommends \"add `numWorkers int` as a parameter to Start\" (raw `int`, not a wrapper type)\n- `internal/pool/workers_test.go:11` \u2014 test fix follows from the parameter injection above\n\n**Batch size references:**\n- Under \ud83d\udc1b Bugs, the `internal/jobs/scheduler.go:44` finding includes: \"Skeptic: N/A \u2014 no new type proposed; apply as written | Validate BatchSize once in Load()\"\n- Recommendations are to validate as `int`, not wrap it\n\n**Search result:** The report proposes **no wrapper type** for worker count or batch size anywhere. All recommendations use raw `int` parameters passed through con\u2026(truncated)",
+              "cost_usd": 0.0394333
+            },
+            {
+              "name": "rule-cited",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\bR(1[0-2]|[1-9])\\b over last_message: 71 match(es); want at least 1"
+            }
+          ],
+          "cost_usd": 3.5368837000000006,
+          "judge_cost_usd": 0.0394333,
+          "duration_ms": 1103903,
+          "num_turns": 45,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-case-f-globals-review-909150678"
+        }
+      ]
+    },
+    {
+      "name": "centerpiece-storify-review",
+      "tags": [
+        "cheap",
+        "review",
+        "logic-hunter",
+        "centerpiece"
+      ],
+      "tier": "cheap",
+      "runs": 2,
+      "passed": 2,
+      "passRate": 1.0,
+      "results": [
+        {
+          "case": "centerpiece-storify-review",
+          "run": 1,
+          "model": "claude-sonnet-5",
+          "passed": true,
+          "graders": [
+            {
+              "name": "cluster-status-r1",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?is)\\bcluster\\b[^\\n]*status.{0,500}\\bR1\\b over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-status-r11",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?is)\\bcluster\\b[^\\n]*status.{0,500}\\bR11\\b over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "critic-ran",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)\\bcritic\\b over last_message: 15 match(es); want at least 1"
+            },
+            {
+              "name": "evidence-protocol",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\.go:[0-9]+ over last_message: 51 match(es); want at least 1"
+            },
+            {
+              "name": "no-edit",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Edit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-multiedit",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "MultiEdit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-write",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Write called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "precision-no-version-wrapper-confirmed",
+              "type": "regex",
+              "passed": true,
+              "detail": "CONFIRMED\\W{1,6}score[^\\n]*(type Version\\b|Version type|Version wrapper|Domain Type:? ?`?Version\\b) over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "r3-q1-linter-numbers",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?s)(device_service\\.go:[0-9]+|ProcessHeartbeat).{0,700}(gocognit|cognitive|gocyclo|cyclomatic|funlen|nestif|nesting levels|\\bLOC\\b|\\bQ1\\b) over last_message: 7 match(es); want at least 1"
+            },
+            {
+              "name": "r3-q3-block-comments",
+              "type": "regex",
+              "passed": true,
+              "detail": "parse the line|look up or create device|transitions over last_message: 5 match(es); want at least 1"
+            },
+            {
+              "name": "race-found",
+              "type": "regex",
+              "passed": true,
+              "detail": "lastSeen|race over last_message: 15 match(es); want at least 1"
+            },
+            {
+              "name": "rule-cited",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\bR(1[0-2]|[1-9])\\b over last_message: 68 match(es); want at least 1"
+            }
+          ],
+          "cost_usd": 4.0789805999999995,
+          "judge_cost_usd": 0,
+          "duration_ms": 1193500,
+          "num_turns": 57,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-centerpiece-storify-review-3014850070"
+        },
+        {
+          "case": "centerpiece-storify-review",
+          "run": 2,
+          "model": "claude-sonnet-5",
+          "passed": true,
+          "graders": [
+            {
+              "name": "cluster-status-r1",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?is)\\bcluster\\b[^\\n]*status.{0,500}\\bR1\\b over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-status-r11",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?is)\\bcluster\\b[^\\n]*status.{0,500}\\bR11\\b over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "critic-ran",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)\\bcritic\\b over last_message: 23 match(es); want at least 1"
+            },
+            {
+              "name": "evidence-protocol",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\.go:[0-9]+ over last_message: 39 match(es); want at least 1"
+            },
+            {
+              "name": "no-edit",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Edit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-multiedit",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "MultiEdit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-write",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Write called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "precision-no-version-wrapper-confirmed",
+              "type": "regex",
+              "passed": true,
+              "detail": "CONFIRMED\\W{1,6}score[^\\n]*(type Version\\b|Version type|Version wrapper|Domain Type:? ?`?Version\\b) over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "r3-q1-linter-numbers",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?s)(device_service\\.go:[0-9]+|ProcessHeartbeat).{0,700}(gocognit|cognitive|gocyclo|cyclomatic|funlen|nestif|nesting levels|\\bLOC\\b|\\bQ1\\b) over last_message: 9 match(es); want at least 1"
+            },
+            {
+              "name": "r3-q3-block-comments",
+              "type": "regex",
+              "passed": true,
+              "detail": "parse the line|look up or create device|transitions over last_message: 4 match(es); want at least 1"
+            },
+            {
+              "name": "race-found",
+              "type": "regex",
+              "passed": true,
+              "detail": "lastSeen|race over last_message: 6 match(es); want at least 1"
+            },
+            {
+              "name": "rule-cited",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\bR(1[0-2]|[1-9])\\b over last_message: 65 match(es); want at least 1"
+            }
+          ],
+          "cost_usd": 3.7108165,
+          "judge_cost_usd": 0,
+          "duration_ms": 1079697,
+          "num_turns": 43,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-centerpiece-storify-review-2174224435"
+        }
+      ]
+    },
+    {
+      "name": "quickfix-clean-tree",
+      "tags": [
+        "cheap",
+        "quickfix",
+        "control"
+      ],
+      "tier": "cheap",
+      "runs": 3,
+      "passed": 3,
+      "passRate": 1.0,
+      "results": [
+        {
+          "case": "quickfix-clean-tree",
+          "run": 1,
+          "model": "claude-sonnet-5",
+          "passed": true,
+          "graders": [
+            {
+              "name": "names-all-form",
+              "type": "regex",
+              "passed": true,
+              "detail": "--all over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "no-agents-spawned",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Agent called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-edits",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Edit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-writes",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Write called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "nothing-in-scope",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)nothing (in scope )?to (fix|quick-?fix|clean up)|no files? (in scope|to fix)|scope[^\\n]{0,40}\\b(empty|none)\\b over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "postcheck",
+              "type": "postcheck",
+              "passed": true,
+              "detail": "PASS  no commit after the scaffold base (0)\nPASS  working tree clean (nothing edited) (0)\npostcheck: all checks passed"
+            }
+          ],
+          "cost_usd": 0.0759098,
+          "judge_cost_usd": 0,
+          "duration_ms": 19325,
+          "num_turns": 3,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-quickfix-clean-tree-4103193792"
+        },
+        {
+          "case": "quickfix-clean-tree",
+          "run": 2,
+          "model": "claude-sonnet-5",
+          "passed": true,
+          "graders": [
+            {
+              "name": "names-all-form",
+              "type": "regex",
+              "passed": true,
+              "detail": "--all over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "no-agents-spawned",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Agent called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-edits",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Edit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-writes",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Write called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "nothing-in-scope",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)nothing (in scope )?to (fix|quick-?fix|clean up)|no files? (in scope|to fix)|scope[^\\n]{0,40}\\b(empty|none)\\b over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "postcheck",
+              "type": "postcheck",
+              "passed": true,
+              "detail": "PASS  no commit after the scaffold base (0)\nPASS  working tree clean (nothing edited) (0)\npostcheck: all checks passed"
+            }
+          ],
+          "cost_usd": 0.0704376,
+          "judge_cost_usd": 0,
+          "duration_ms": 13953,
+          "num_turns": 3,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-quickfix-clean-tree-4087462380"
+        },
+        {
+          "case": "quickfix-clean-tree",
+          "run": 3,
+          "model": "claude-sonnet-5",
+          "passed": true,
+          "graders": [
+            {
+              "name": "names-all-form",
+              "type": "regex",
+              "passed": true,
+              "detail": "--all over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "no-agents-spawned",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Agent called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-edits",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Edit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-writes",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Write called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "nothing-in-scope",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)nothing (in scope )?to (fix|quick-?fix|clean up)|no files? (in scope|to fix)|scope[^\\n]{0,40}\\b(empty|none)\\b over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "postcheck",
+              "type": "postcheck",
+              "passed": true,
+              "detail": "PASS  no commit after the scaffold base (0)\nPASS  working tree clean (nothing edited) (0)\npostcheck: all checks passed"
+            }
+          ],
+          "cost_usd": 0.07153459999999999,
+          "judge_cost_usd": 0,
+          "duration_ms": 15419,
+          "num_turns": 3,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-quickfix-clean-tree-3874215900"
+        }
+      ]
+    },
+    {
+      "name": "review-clean-tree",
+      "tags": [
+        "cheap",
+        "review",
+        "control"
+      ],
+      "tier": "cheap",
+      "runs": 3,
+      "passed": 3,
+      "passRate": 1.0,
+      "results": [
+        {
+          "case": "review-clean-tree",
+          "run": 1,
+          "model": "claude-sonnet-5",
+          "passed": true,
+          "graders": [
+            {
+              "name": "names-all-form",
+              "type": "regex",
+              "passed": true,
+              "detail": "--all over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "no-agents-spawned",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Agent called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-whole-repo-review",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)\\bcluster\\b|\\bR[0-9]{1,2}: [0-9]+ finding over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "nothing-to-review",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)nothing (to|in scope to) (review|analy[sz]e)|no files? (in scope|to review)|scope[^\\n]{0,40}\\b(empty|none)\\b over last_message: 2 match(es); want at least 1"
+            }
+          ],
+          "cost_usd": 0.11692980000000001,
+          "judge_cost_usd": 0,
+          "duration_ms": 43632,
+          "num_turns": 6,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-review-clean-tree-1291119431"
+        },
+        {
+          "case": "review-clean-tree",
+          "run": 2,
+          "model": "claude-sonnet-5",
+          "passed": true,
+          "graders": [
+            {
+              "name": "names-all-form",
+              "type": "regex",
+              "passed": true,
+              "detail": "--all over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "no-agents-spawned",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Agent called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-whole-repo-review",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)\\bcluster\\b|\\bR[0-9]{1,2}: [0-9]+ finding over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "nothing-to-review",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)nothing (to|in scope to) (review|analy[sz]e)|no files? (in scope|to review)|scope[^\\n]{0,40}\\b(empty|none)\\b over last_message: 1 match(es); want at least 1"
+            }
+          ],
+          "cost_usd": 0.07690720000000001,
+          "judge_cost_usd": 0,
+          "duration_ms": 23637,
+          "num_turns": 3,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-review-clean-tree-2895643513"
+        },
+        {
+          "case": "review-clean-tree",
+          "run": 3,
+          "model": "claude-sonnet-5",
+          "passed": true,
+          "graders": [
+            {
+              "name": "names-all-form",
+              "type": "regex",
+              "passed": true,
+              "detail": "--all over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "no-agents-spawned",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Agent called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-whole-repo-review",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)\\bcluster\\b|\\bR[0-9]{1,2}: [0-9]+ finding over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "nothing-to-review",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)nothing (to|in scope to) (review|analy[sz]e)|no files? (in scope|to review)|scope[^\\n]{0,40}\\b(empty|none)\\b over last_message: 1 match(es); want at least 1"
+            }
+          ],
+          "cost_usd": 0.0775942,
+          "judge_cost_usd": 0,
+          "duration_ms": 15854,
+          "num_turns": 4,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-review-clean-tree-4268578482"
+        }
+      ]
+    },
+    {
+      "name": "review-full",
+      "tags": [
+        "cheap",
+        "review"
+      ],
+      "tier": "cheap",
+      "runs": 3,
+      "passed": 0,
+      "passRate": 0.0,
+      "results": [
+        {
+          "case": "review-full",
+          "run": 1,
+          "model": "claude-sonnet-5",
+          "passed": false,
+          "graders": [
+            {
+              "name": "bugs-section",
+              "type": "regex",
+              "passed": true,
+              "detail": "\ud83d\udc1b over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-alert-channel",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i:\\bcluster\\b)[^\\n]*\\b(Alert\\.Channel|Channel)\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*\u2022]|[0-9]+[.)])[ \\t]*\\**\\x60?(Alert\\.Channel|Channel)\\b over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-catalog-find",
+              "type": "regex",
+              "passed": false,
+              "detail": "(?i:\\bcluster\\b)[^\\n]*\\b(Catalog\\.Find|Find)\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*\u2022]|[0-9]+[.)])[ \\t]*\\**\\x60?(Catalog\\.Find|Find)\\b over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-device-status",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i:\\bcluster\\b)[^\\n]*\\b(Device\\.Status|Status)\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*\u2022]|[0-9]+[.)])[ \\t]*\\**\\x60?(Device\\.Status|Status)\\b over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-device",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i:\\bcluster\\b)[^\\n]*\\bDevice\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*\u2022]|[0-9]+[.)])[ \\t]*\\**\\x60?Device\\b over last_message: 4 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-job-kind",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i:\\bcluster\\b)[^\\n]*\\b(Job\\.Kind|Kind)\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*\u2022]|[0-9]+[.)])[ \\t]*\\**\\x60?(Job\\.Kind|Kind)\\b over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-processheartbeat",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i:\\bcluster\\b)[^\\n]*\\bProcessHeartbeat\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*\u2022]|[0-9]+[.)])[ \\t]*\\**\\x60?ProcessHeartbeat\\b over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-reporter",
+              "type": "regex",
+              "passed": false,
+              "detail": "(?i:\\bcluster\\b)[^\\n]*\\bReporter\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*\u2022]|[0-9]+[.)])[ \\t]*\\**\\x60?Reporter\\b over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-retention",
+              "type": "regex",
+              "passed": false,
+              "detail": "(?i:\\bcluster\\b)[^\\n]*\\bretention\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*\u2022]|[0-9]+[.)])[ \\t]*\\**\\x60?retention\\b over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-role-packages",
+              "type": "regex",
+              "passed": false,
+              "detail": "CLUSTER[^\\n]*(role packages|common\\b[^\\n]*utils|utils\\b[^\\n]*common) over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "evidence-protocol",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\.go:[0-9]+ over last_message: 121 match(es); want at least 1"
+            },
+            {
+              "name": "hunters-spawned",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Agent(rule-hunter) called 12 time(s); want >= 3"
+            },
+            {
+              "name": "judge-categories",
+              "type": "llm",
+              "passed": true,
+              "detail": "judge claude-haiku-4-5 (PASS,PASS): --- vote 1: PASS ---\nChecking both criteria against the report:\n\n**Question 1: Is the unguarded concurrent map write listed under \ud83d\udc1b Bugs?**\n\nYes. In the Bugs section:\n```\n| `internal/services/device_service.go:218,572-576` | R10 Q3: `s.lastSeen` (a plain map) \nis written unlocked in `ProcessHeartbeat` (one goroutine per HTTP request) and read/deleted \nunlocked in the concurrent `flushLoop` goroutine \u2014 unsynchronized concurrent map access...\n```\n\nThis explicitly identifies the `lastSeen` map race condition and files it as a Bug. \u2705\n\n**Question 2: Is the production time.Sleep listed under \ud83d\udd34 Design Debt (not Bugs)?**\n\nYes. In the Design Debt section under R10 \u2014 Concurrency Safety:\n```\n| `internal/services/device_service.go:181` | Q5: `ProcessHeartbeat` (no `ctx`) sleeps \nup to ~600ms in a down-notification retry...\n| `internal/services/retry.go:40,52` | Q5: `withRetry`/`SendWithRetry` take no `ctx`...\n| `internal/services/sync_service.go:122` | Q5: `Run` receives a `ctx` but never passes \nit down to `saveWithRetry`'s sleep...\n```\n\nAll three time.Sleep instances (retry backoff in ProcessHeartbeat, retry.go, sync_service.go) are filed under Design Debt, not Bugs. They do not appear in the Bugs section. \u2705\n\nBoth criteria satisfied.\n\nVERDICT: PASS\n\n--- vote 2: PASS ---\nLooking at the report against the two criteria:\n\n**Question 1: Is the unguarded concurrent map write listed under \ud83d\udc1b Bugs?**\n\nYes. In the Bugs section:\n```\n| `internal/services/device_service.go:218,572-576` | R10 Q3: `s.lastSeen` (a plain map) \nis written unlocked in `ProcessHeartbeat` (one goroutine per HTTP request) and read/deleted \nunlocked in the concurrent `flushLoop` goroutine...\n```\nThis clearly describes the exact race condition (concurrent unguarded map access) in the Bugs section.\n\n**Question 2: Is the production time.Sleep (retry backoff) listed under \ud83d\udd34 Design Debt?**\n\nYes. Under the **Design Debt** section, specifically **R10 \u2014 Concurrency \u2026(truncated)",
+              "cost_usd": 0.06171209999999999
+            },
+            {
+              "name": "no-edit",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Edit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-write",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Write called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "nolint-finding",
+              "type": "regex",
+              "passed": true,
+              "detail": "nolint over last_message: 5 match(es); want at least 1"
+            },
+            {
+              "name": "precision-CTRL.R1.named-const",
+              "type": "regex",
+              "passed": true,
+              "detail": "maxLen|minutesPerDay over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R1.tenant-type",
+              "type": "regex",
+              "passed": false,
+              "detail": "ParseTenant over last_message: 1 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R1.trace-id-string",
+              "type": "regex",
+              "passed": true,
+              "detail": "TraceID over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R10.main-jitter-sleep",
+              "type": "regex",
+              "passed": true,
+              "detail": "rand\\.IntN over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R10.repo-mutex",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\b[rm]\\.mu\\.Lock\\(\\) over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R10.worker-range",
+              "type": "regex",
+              "passed": true,
+              "detail": "range jobs over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R11.region-zone-switch",
+              "type": "regex",
+              "passed": true,
+              "detail": "Zone\\(\\) over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R11.value-conditional",
+              "type": "regex",
+              "passed": true,
+              "detail": "w\\.start < w\\.end over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R12.honest-mutator",
+              "type": "regex",
+              "passed": true,
+              "detail": "drain\\(\\) over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R2.snapshot-repository",
+              "type": "regex",
+              "passed": true,
+              "detail": "NewRepository\\(|now == nil over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R2.window-plan",
+              "type": "regex",
+              "passed": true,
+              "detail": "ParseWindow over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R3.guard-clauses",
+              "type": "regex",
+              "passed": true,
+              "detail": "ctx\\.Err\\(\\) over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R3.orchestrator",
+              "type": "regex",
+              "passed": true,
+              "detail": "Prune over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R4.private-helper",
+              "type": "regex",
+              "passed": true,
+              "detail": "parseClock over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R6.store-interface",
+              "type": "regex",
+              "passed": true,
+              "detail": "Store interface over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R7.split-tables",
+              "type": "regex",
+              "passed": true,
+              "detail": "TestParse\\w+_(Success|Error) over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R8.compile-time-check",
+              "type": "regex",
+              "passed": true,
+              "detail": "_ Store = \\(\\*FileRepo\\) over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R9.why-comments",
+              "type": "regex",
+              "passed": true,
+              "detail": "store behind|can be joined later|races a manual cleanup over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "recall-CASE-A.defensive-recheck",
+              "type": "regex",
+              "passed": true,
+              "detail": "policy\\.go over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-A.retention-range-twice",
+              "type": "regex",
+              "passed": true,
+              "detail": "(policy\\.go|config\\.go) over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-A.zero-sentinel",
+              "type": "regex",
+              "passed": false,
+              "detail": "config\\.go over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-B.host-port-tls-clump",
+              "type": "regex",
+              "passed": true,
+              "detail": "client\\.go over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-C.flag-loop",
+              "type": "regex",
+              "passed": true,
+              "detail": "picker\\.go over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-D.replica-count",
+              "type": "regex",
+              "passed": true,
+              "detail": "grants\\.go over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-E.nil-field-rechecked",
+              "type": "regex",
+              "passed": true,
+              "detail": "reporter\\.go over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-E.nil-parameters",
+              "type": "regex",
+              "passed": true,
+              "detail": "(wire\\.go|reporter\\.go) over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-E.nil-return",
+              "type": "regex",
+              "passed": true,
+              "detail": "catalog\\.go over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-F.deep-reads",
+              "type": "regex",
+              "passed": true,
+              "detail": "(workers\\.go|scheduler\\.go) over last_message: 8 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-F.env-config-global",
+              "type": "regex",
+              "passed": true,
+              "detail": "env\\.go|env\\.Config over last_message: 5 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-F.test-mutates-global",
+              "type": "regex",
+              "passed": true,
+              "detail": "workers_test\\.go over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.Q1.handler-inline-checks",
+              "type": "regex",
+              "passed": true,
+              "detail": "devices\\.go over last_message: 8 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.Q1.settings-blob",
+              "type": "regex",
+              "passed": true,
+              "detail": "(job\\.go|scheduler\\.go|device_service\\.go|snapshot_service\\.go) over last_message: 44 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.Q2.email-contains-twice",
+              "type": "regex",
+              "passed": true,
+              "detail": "(devices\\.go|validate\\.go) over last_message: 12 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.Q3.raw-channel-string",
+              "type": "regex",
+              "passed": true,
+              "detail": "(alert\\.go|channel\\.go) over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.Q3.region-byte-slices",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|heartbeat_parser\\.go|tags\\.go) over last_message: 36 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.Q3.status-enum-goconst",
+              "type": "regex",
+              "passed": true,
+              "detail": "(alert_service\\.go|device_service\\.go|status\\.go) over last_message: 33 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.Q3.tags-loop",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|heartbeat_parser\\.go|tags\\.go|sync_service\\.go) over last_message: 42 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.Q5.heartbeat-clump",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|heartbeat\\.go) over last_message: 37 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.Q5.new-sync-service-six-params",
+              "type": "regex",
+              "passed": true,
+              "detail": "sync_service\\.go over last_message: 6 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.Q5.tenant-id-clump",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|store\\.go|file_repo\\.go|mem_store\\.go) over last_message: 30 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.lint.run-loop-dupl",
+              "type": "regex",
+              "passed": true,
+              "detail": "(snapshot_service\\.go|sync_service\\.go) over last_message: 15 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R10.Q4.split-guard",
+              "type": "regex",
+              "passed": true,
+              "detail": "cache\\.go over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R10.Q5.production-sleep",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|retry\\.go|sync_service\\.go) over last_message: 37 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R11.Q1.channel-switch",
+              "type": "regex",
+              "passed": true,
+              "detail": "(notify\\.go|validate\\.go|retry\\.go) over last_message: 10 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R11.Q1.job-kind-if",
+              "type": "regex",
+              "passed": true,
+              "detail": "(scheduler\\.go|snapshot_service\\.go|job\\.go) over last_message: 16 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R11.Q1.priority-switch-not-exhaustive",
+              "type": "regex",
+              "passed": true,
+              "detail": "retry\\.go over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R11.Q1.status-switch",
+              "type": "regex",
+              "passed": true,
+              "detail": "(status\\.go|alert_service\\.go|device_service\\.go) over last_message: 33 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R11.Q3.default-unknown-channel",
+              "type": "regex",
+              "passed": true,
+              "detail": "notify\\.go over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R11.Q4.flag-arguments",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|sync_service\\.go) over last_message: 34 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R12.Q1.leaked-internals",
+              "type": "regex",
+              "passed": true,
+              "detail": "(cache\\.go|grants\\.go|schedule\\.go|snapshot_service\\.go) over last_message: 17 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R12.Q2.stored-parameter",
+              "type": "regex",
+              "passed": true,
+              "detail": "(schedule\\.go|grants\\.go) over last_message: 5 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R12.Q5.n-reused",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|cache\\.go) over last_message: 31 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R2.Q1.alert-exported-fields",
+              "type": "regex",
+              "passed": true,
+              "detail": "(alert\\.go|alert_service\\.go) over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R2.Q1.device-exported-fields",
+              "type": "regex",
+              "passed": true,
+              "detail": "device\\.go over last_message: 5 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R2.Q1.device-literal-in-service",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|devices\\.go) over last_message: 36 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R2.Q2.method-nil-checks",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|notify\\.go) over last_message: 31 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R3.Q1.normalize-tags",
+              "type": "regex",
+              "passed": true,
+              "detail": "heartbeat_parser\\.go over last_message: 5 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R3.Q1.process-heartbeat",
+              "type": "regex",
+              "passed": true,
+              "detail": "device_service\\.go over last_message: 28 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R3.Q2.parse-beside-decision",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|heartbeat_parser\\.go) over last_message: 33 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R4.Q1.exported-for-tests",
+              "type": "regex",
+              "passed": true,
+              "detail": "(heartbeat_parser\\.go|service_test\\.go) over last_message: 10 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R4.Q2.private-tested-directly",
+              "type": "regex",
+              "passed": true,
+              "detail": "service_test\\.go over last_message: 5 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R4.Q3.role-named-packages",
+              "type": "regex",
+              "passed": true,
+              "detail": "(strings\\.go|time\\.go|constants\\.go) over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R4.Q4.single-noun-package",
+              "type": "regex",
+              "passed": true,
+              "detail": "deviceid\\.go over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R4.Q5.feature-literal-in-common",
+              "type": "regex",
+              "passed": true,
+              "detail": "constants\\.go over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R5.Q1.models-red-zone",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device\\.go|alert\\.go|job\\.go) over last_message: 6 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R5.Q1.role-layers",
+              "type": "regex",
+              "passed": true,
+              "detail": "(trace\\.go|device_service\\.go|device\\.go|store\\.go) over last_message: 36 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R5.Q2.snapshot-spread",
+              "type": "regex",
+              "passed": true,
+              "detail": "(snapshot_service\\.go|snapshot\\.go|registry\\.go) over last_message: 18 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R5.Q4.two-snapshot-homes",
+              "type": "regex",
+              "passed": true,
+              "detail": "(snapshot_service\\.go|snapshot\\.go) over last_message: 11 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R5.Q5.no-migration-doc",
+              "type": "regex",
+              "passed": true,
+              "detail": "(snapshot\\.go|README\\.md) over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R6.Q1.device-repository",
+              "type": "regex",
+              "passed": false,
+              "detail": "device_repository\\.go over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R6.Q1.formatter-ireturn",
+              "type": "regex",
+              "passed": true,
+              "detail": "alert_service\\.go over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R6.Q2.mock-repo-double",
+              "type": "regex",
+              "passed": true,
+              "detail": "repo\\.go over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R6.Q3.import-cycle-claim",
+              "type": "regex",
+              "passed": true,
+              "detail": "(notifier\\.go|device_repository\\.go) over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R6.Q4.sync-service-takes-interface",
+              "type": "regex",
+              "passed": true,
+              "detail": "(sync_service\\.go|snapshot_service\\.go) over last_message: 15 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R6.Q5.notifier-api",
+              "type": "regex",
+              "passed": true,
+              "detail": "notifier\\.go over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R7.Q1.wanterr-tables",
+              "type": "regex",
+              "passed": true,
+              "detail": "(service_test\\.go|picker_test\\.go) over last_message: 6 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R7.Q3.big-object-leaf-test",
+              "type": "regex",
+              "passed": true,
+              "detail": "heartbeat_test\\.go over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R7.Q5.call-count-assertions",
+              "type": "regex",
+              "passed": true,
+              "detail": "(heartbeat_test\\.go|scheduler_test\\.go) over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R7.Q6.sleep-then-assert",
+              "type": "regex",
+              "passed": true,
+              "detail": "(service_test\\.go|heartbeat_test\\.go) over last_message: 7 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R8.Q1.registry-globals",
+              "type": "regex",
+              "passed": true,
+              "detail": "registry\\.go over last_message: 7 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R8.Q2.init-registration",
+              "type": "regex",
+              "passed": true,
+              "detail": "(registry\\.go|env\\.go) over last_message: 11 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R8.Q3.context-background-in-service",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|sync_service\\.go|registry\\.go) over last_message: 41 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R8.Q5.flap-window-from-service",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|snapshot_service\\.go) over last_message: 37 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R8.Q5.getenv-in-method",
+              "type": "regex",
+              "passed": true,
+              "detail": "(sync_service\\.go|notify\\.go) over last_message: 9 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R9.Q1.orphan-doc",
+              "type": "regex",
+              "passed": true,
+              "detail": "heartbeat-protocol\\.md over last_message: 5 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R9.Q2.missing-doc-edge",
+              "type": "regex",
+              "passed": true,
+              "detail": "heartbeat\\.go over last_message: 9 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R9.Q3.unwired-root",
+              "type": "regex",
+              "passed": true,
+              "detail": "CLAUDE\\.md over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R9.Q4.creates-a-new",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|notify\\.go|mem_store\\.go|file_repo\\.go) over last_message: 33 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R9.Q4.what-comments",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device\\.go|heartbeat\\.go|schedule\\.go|device_service\\.go|notify\\.go|cache\\.go|trace\\.go|reporter\\.go|env\\.go) over last_message: 60 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R9.Q5.naked-exports",
+              "type": "regex",
+              "passed": true,
+              "detail": "(alert\\.go|job\\.go|snapshot\\.go|tags\\.go|job_kind\\.go|validate\\.go) over last_message: 11 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R9.critic.caller-must",
+              "type": "regex",
+              "passed": true,
+              "detail": "(heartbeat\\.go|device_service\\.go) over last_message: 37 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R9.critic.restated-idiom",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|snapshot_service\\.go|sync_service\\.go) over last_message: 43 match(es); want at least 1"
+            },
+            {
+              "name": "report-header",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)CODE REVIEW REPORT|Commit Readiness Report over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "rule-cited",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\bR(1[0-2]|[1-9])\\b over last_message: 68 match(es); want at least 1"
+            },
+            {
+              "name": "skeptic-refuted",
+              "type": "regex",
+              "passed": true,
+              "detail": "REFUTED over last_message: 7 match(es); want at least 1"
+            }
+          ],
+          "cost_usd": 6.856488799999996,
+          "judge_cost_usd": 0.06171209999999999,
+          "duration_ms": 1639654,
+          "num_turns": 54,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-review-full-2100298782"
+        },
+        {
+          "case": "review-full",
+          "run": 2,
+          "model": "claude-sonnet-5",
+          "passed": false,
+          "graders": [
+            {
+              "name": "bugs-section",
+              "type": "regex",
+              "passed": true,
+              "detail": "\ud83d\udc1b over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-alert-channel",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i:\\bcluster\\b)[^\\n]*\\b(Alert\\.Channel|Channel)\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*\u2022]|[0-9]+[.)])[ \\t]*\\**\\x60?(Alert\\.Channel|Channel)\\b over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-catalog-find",
+              "type": "regex",
+              "passed": false,
+              "detail": "(?i:\\bcluster\\b)[^\\n]*\\b(Catalog\\.Find|Find)\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*\u2022]|[0-9]+[.)])[ \\t]*\\**\\x60?(Catalog\\.Find|Find)\\b over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-device-status",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i:\\bcluster\\b)[^\\n]*\\b(Device\\.Status|Status)\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*\u2022]|[0-9]+[.)])[ \\t]*\\**\\x60?(Device\\.Status|Status)\\b over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-device",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i:\\bcluster\\b)[^\\n]*\\bDevice\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*\u2022]|[0-9]+[.)])[ \\t]*\\**\\x60?Device\\b over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-job-kind",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i:\\bcluster\\b)[^\\n]*\\b(Job\\.Kind|Kind)\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*\u2022]|[0-9]+[.)])[ \\t]*\\**\\x60?(Job\\.Kind|Kind)\\b over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-processheartbeat",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i:\\bcluster\\b)[^\\n]*\\bProcessHeartbeat\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*\u2022]|[0-9]+[.)])[ \\t]*\\**\\x60?ProcessHeartbeat\\b over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-reporter",
+              "type": "regex",
+              "passed": false,
+              "detail": "(?i:\\bcluster\\b)[^\\n]*\\bReporter\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*\u2022]|[0-9]+[.)])[ \\t]*\\**\\x60?Reporter\\b over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-retention",
+              "type": "regex",
+              "passed": false,
+              "detail": "(?i:\\bcluster\\b)[^\\n]*\\bretention\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*\u2022]|[0-9]+[.)])[ \\t]*\\**\\x60?retention\\b over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-role-packages",
+              "type": "regex",
+              "passed": false,
+              "detail": "CLUSTER[^\\n]*(role packages|common\\b[^\\n]*utils|utils\\b[^\\n]*common) over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "evidence-protocol",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\.go:[0-9]+ over last_message: 112 match(es); want at least 1"
+            },
+            {
+              "name": "hunters-spawned",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Agent(rule-hunter) called 13 time(s); want >= 3"
+            },
+            {
+              "name": "judge-categories",
+              "type": "llm",
+              "passed": false,
+              "detail": "judge claude-haiku-4-5 (FAIL,FAIL): --- vote 1: FAIL ---\nLooking at the report structure, I need to verify two specific categorizations:\n\n**Question 1: Is the `lastSeen` concurrent map write under \ud83d\udc1b Bugs?**\n\nYes. Under the **\ud83d\udc1b BUGS** section, the first entry clearly identifies the race:\n> \"internal/services/device_service.go:218,463-467,568-578 | R10 Q3 (mandatory \u2014 confirmed with `go test -race ./...`: real DATA RACE between ProcessHeartbeat:218 and flushLoop:574) | s.lastSeen is written/deleted from 3 independent, unguarded sites (ProcessHeartbeat, Purge, flushLoop)...\"\n\nThis explicitly categorizes the unguarded concurrent map write as a bug. \u2713\n\n**Question 2: Is the production `time.Sleep` listed under \ud83d\udd34 Design Debt \"rather than\" under \ud83d\udc1b Bugs?**\n\nNo. The production `time.Sleep` calls appear in **both** sections:\n- Under **\ud83d\udc1b BUGS** (entries 3-5): device_service.go:181, retry.go:34-55, sync_service.go:115-126 are all listed as bugs\n- Under **\ud83d\udd34 DESIGN DEBT**: the same three entries also appear\n\nThe RUBRIC asks if they're listed \"rather than\" under Bugs\u2014this phrasing indicates exclusivity (Design Debt, not Bugs). Since these entries are categorized under both sections, they fail this criterion. They should be purely under Design Debt if the categorization is correct per the CRITERIA.\n\nBrief reasoning: The report misclassifies the production sleep backoff issues by listing them under \ud83d\udc1b Bugs when they should only appear under \ud83d\udd34 Design Debt.\n\nVERDICT: FAIL\n\n--- vote 2: FAIL ---\nLooking at the report:\n\n**Question 1: Is the unguarded concurrent map write listed under \ud83d\udc1b Bugs?**\n\nYes. The report lists under Bugs:\n```\ninternal/services/device_service.go:218,463-467,568-578 | R10 Q3 (mandatory \u2014\n  confirmed with `go test -race ./...`: real DATA RACE between\n  ProcessHeartbeat:218 and flushLoop:574) | s.lastSeen is written/deleted from\n  3 independent, unguarded sites...\n```\n\n**Question 2: Is the production time.Sleep filed under \ud83d\udd34 Design D\u2026(truncated)",
+              "cost_usd": 0.084737
+            },
+            {
+              "name": "no-edit",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Edit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-write",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Write called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "nolint-finding",
+              "type": "regex",
+              "passed": true,
+              "detail": "nolint over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "precision-CTRL.R1.named-const",
+              "type": "regex",
+              "passed": true,
+              "detail": "maxLen|minutesPerDay over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R1.tenant-type",
+              "type": "regex",
+              "passed": false,
+              "detail": "ParseTenant over last_message: 1 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R1.trace-id-string",
+              "type": "regex",
+              "passed": true,
+              "detail": "TraceID over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R10.main-jitter-sleep",
+              "type": "regex",
+              "passed": true,
+              "detail": "rand\\.IntN over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R10.repo-mutex",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\b[rm]\\.mu\\.Lock\\(\\) over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R10.worker-range",
+              "type": "regex",
+              "passed": true,
+              "detail": "range jobs over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R11.region-zone-switch",
+              "type": "regex",
+              "passed": true,
+              "detail": "Zone\\(\\) over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R11.value-conditional",
+              "type": "regex",
+              "passed": true,
+              "detail": "w\\.start < w\\.end over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R12.honest-mutator",
+              "type": "regex",
+              "passed": true,
+              "detail": "drain\\(\\) over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R2.snapshot-repository",
+              "type": "regex",
+              "passed": true,
+              "detail": "NewRepository\\(|now == nil over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R2.window-plan",
+              "type": "regex",
+              "passed": true,
+              "detail": "ParseWindow over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R3.guard-clauses",
+              "type": "regex",
+              "passed": true,
+              "detail": "ctx\\.Err\\(\\) over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R3.orchestrator",
+              "type": "regex",
+              "passed": true,
+              "detail": "Prune over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R4.private-helper",
+              "type": "regex",
+              "passed": true,
+              "detail": "parseClock over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R6.store-interface",
+              "type": "regex",
+              "passed": true,
+              "detail": "Store interface over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R7.split-tables",
+              "type": "regex",
+              "passed": true,
+              "detail": "TestParse\\w+_(Success|Error) over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R8.compile-time-check",
+              "type": "regex",
+              "passed": true,
+              "detail": "_ Store = \\(\\*FileRepo\\) over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R9.why-comments",
+              "type": "regex",
+              "passed": true,
+              "detail": "store behind|can be joined later|races a manual cleanup over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "recall-CASE-A.defensive-recheck",
+              "type": "regex",
+              "passed": true,
+              "detail": "policy\\.go over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-A.retention-range-twice",
+              "type": "regex",
+              "passed": true,
+              "detail": "(policy\\.go|config\\.go) over last_message: 5 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-A.zero-sentinel",
+              "type": "regex",
+              "passed": true,
+              "detail": "config\\.go over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-B.host-port-tls-clump",
+              "type": "regex",
+              "passed": true,
+              "detail": "client\\.go over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-C.flag-loop",
+              "type": "regex",
+              "passed": true,
+              "detail": "picker\\.go over last_message: 4 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-D.replica-count",
+              "type": "regex",
+              "passed": true,
+              "detail": "grants\\.go over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-E.nil-field-rechecked",
+              "type": "regex",
+              "passed": true,
+              "detail": "reporter\\.go over last_message: 4 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-E.nil-parameters",
+              "type": "regex",
+              "passed": true,
+              "detail": "(wire\\.go|reporter\\.go) over last_message: 5 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-E.nil-return",
+              "type": "regex",
+              "passed": true,
+              "detail": "catalog\\.go over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-F.deep-reads",
+              "type": "regex",
+              "passed": true,
+              "detail": "(workers\\.go|scheduler\\.go) over last_message: 8 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-F.env-config-global",
+              "type": "regex",
+              "passed": true,
+              "detail": "env\\.go|env\\.Config over last_message: 7 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-F.test-mutates-global",
+              "type": "regex",
+              "passed": true,
+              "detail": "workers_test\\.go over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.Q1.handler-inline-checks",
+              "type": "regex",
+              "passed": true,
+              "detail": "devices\\.go over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.Q1.settings-blob",
+              "type": "regex",
+              "passed": true,
+              "detail": "(job\\.go|scheduler\\.go|device_service\\.go|snapshot_service\\.go) over last_message: 29 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.Q2.email-contains-twice",
+              "type": "regex",
+              "passed": true,
+              "detail": "(devices\\.go|validate\\.go) over last_message: 8 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.Q3.raw-channel-string",
+              "type": "regex",
+              "passed": false,
+              "detail": "(alert\\.go|channel\\.go) over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.Q3.region-byte-slices",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|heartbeat_parser\\.go|tags\\.go) over last_message: 20 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.Q3.status-enum-goconst",
+              "type": "regex",
+              "passed": true,
+              "detail": "(alert_service\\.go|device_service\\.go|status\\.go) over last_message: 26 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.Q3.tags-loop",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|heartbeat_parser\\.go|tags\\.go|sync_service\\.go) over last_message: 25 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.Q5.heartbeat-clump",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|heartbeat\\.go) over last_message: 20 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.Q5.new-sync-service-six-params",
+              "type": "regex",
+              "passed": true,
+              "detail": "sync_service\\.go over last_message: 5 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.Q5.tenant-id-clump",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|store\\.go|file_repo\\.go|mem_store\\.go) over last_message: 18 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.lint.run-loop-dupl",
+              "type": "regex",
+              "passed": true,
+              "detail": "(snapshot_service\\.go|sync_service\\.go) over last_message: 12 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R10.Q4.split-guard",
+              "type": "regex",
+              "passed": true,
+              "detail": "cache\\.go over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R10.Q5.production-sleep",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|retry\\.go|sync_service\\.go) over last_message: 23 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R11.Q1.channel-switch",
+              "type": "regex",
+              "passed": true,
+              "detail": "(notify\\.go|validate\\.go|retry\\.go) over last_message: 11 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R11.Q1.job-kind-if",
+              "type": "regex",
+              "passed": true,
+              "detail": "(scheduler\\.go|snapshot_service\\.go|job\\.go) over last_message: 14 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R11.Q1.priority-switch-not-exhaustive",
+              "type": "regex",
+              "passed": true,
+              "detail": "retry\\.go over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R11.Q1.status-switch",
+              "type": "regex",
+              "passed": true,
+              "detail": "(status\\.go|alert_service\\.go|device_service\\.go) over last_message: 26 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R11.Q3.default-unknown-channel",
+              "type": "regex",
+              "passed": true,
+              "detail": "notify\\.go over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R11.Q4.flag-arguments",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|sync_service\\.go) over last_message: 20 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R12.Q1.leaked-internals",
+              "type": "regex",
+              "passed": true,
+              "detail": "(cache\\.go|grants\\.go|schedule\\.go|snapshot_service\\.go) over last_message: 15 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R12.Q2.stored-parameter",
+              "type": "regex",
+              "passed": true,
+              "detail": "(schedule\\.go|grants\\.go) over last_message: 5 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R12.Q5.n-reused",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|cache\\.go) over last_message: 18 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R2.Q1.alert-exported-fields",
+              "type": "regex",
+              "passed": true,
+              "detail": "(alert\\.go|alert_service\\.go) over last_message: 6 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R2.Q1.device-exported-fields",
+              "type": "regex",
+              "passed": true,
+              "detail": "device\\.go over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R2.Q1.device-literal-in-service",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|devices\\.go) over last_message: 18 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R2.Q2.method-nil-checks",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|notify\\.go) over last_message: 18 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R3.Q1.normalize-tags",
+              "type": "regex",
+              "passed": true,
+              "detail": "heartbeat_parser\\.go over last_message: 4 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R3.Q1.process-heartbeat",
+              "type": "regex",
+              "passed": true,
+              "detail": "device_service\\.go over last_message: 15 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R3.Q2.parse-beside-decision",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|heartbeat_parser\\.go) over last_message: 19 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R4.Q1.exported-for-tests",
+              "type": "regex",
+              "passed": true,
+              "detail": "(heartbeat_parser\\.go|service_test\\.go) over last_message: 7 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R4.Q2.private-tested-directly",
+              "type": "regex",
+              "passed": true,
+              "detail": "service_test\\.go over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R4.Q3.role-named-packages",
+              "type": "regex",
+              "passed": true,
+              "detail": "(strings\\.go|time\\.go|constants\\.go) over last_message: 6 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R4.Q4.single-noun-package",
+              "type": "regex",
+              "passed": true,
+              "detail": "deviceid\\.go over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R4.Q5.feature-literal-in-common",
+              "type": "regex",
+              "passed": true,
+              "detail": "constants\\.go over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R5.Q1.models-red-zone",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device\\.go|alert\\.go|job\\.go) over last_message: 4 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R5.Q1.role-layers",
+              "type": "regex",
+              "passed": true,
+              "detail": "(trace\\.go|device_service\\.go|device\\.go|store\\.go) over last_message: 21 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R5.Q2.snapshot-spread",
+              "type": "regex",
+              "passed": true,
+              "detail": "(snapshot_service\\.go|snapshot\\.go|registry\\.go) over last_message: 13 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R5.Q4.two-snapshot-homes",
+              "type": "regex",
+              "passed": true,
+              "detail": "(snapshot_service\\.go|snapshot\\.go) over last_message: 8 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R5.Q5.no-migration-doc",
+              "type": "regex",
+              "passed": true,
+              "detail": "(snapshot\\.go|README\\.md) over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R6.Q1.device-repository",
+              "type": "regex",
+              "passed": false,
+              "detail": "device_repository\\.go over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R6.Q1.formatter-ireturn",
+              "type": "regex",
+              "passed": true,
+              "detail": "alert_service\\.go over last_message: 6 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R6.Q2.mock-repo-double",
+              "type": "regex",
+              "passed": true,
+              "detail": "repo\\.go over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R6.Q3.import-cycle-claim",
+              "type": "regex",
+              "passed": true,
+              "detail": "(notifier\\.go|device_repository\\.go) over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R6.Q4.sync-service-takes-interface",
+              "type": "regex",
+              "passed": true,
+              "detail": "(sync_service\\.go|snapshot_service\\.go) over last_message: 12 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R6.Q5.notifier-api",
+              "type": "regex",
+              "passed": true,
+              "detail": "notifier\\.go over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R7.Q1.wanterr-tables",
+              "type": "regex",
+              "passed": true,
+              "detail": "(service_test\\.go|picker_test\\.go) over last_message: 4 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R7.Q3.big-object-leaf-test",
+              "type": "regex",
+              "passed": true,
+              "detail": "heartbeat_test\\.go over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R7.Q5.call-count-assertions",
+              "type": "regex",
+              "passed": true,
+              "detail": "(heartbeat_test\\.go|scheduler_test\\.go) over last_message: 4 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R7.Q6.sleep-then-assert",
+              "type": "regex",
+              "passed": true,
+              "detail": "(service_test\\.go|heartbeat_test\\.go) over last_message: 6 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R8.Q1.registry-globals",
+              "type": "regex",
+              "passed": true,
+              "detail": "registry\\.go over last_message: 5 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R8.Q2.init-registration",
+              "type": "regex",
+              "passed": true,
+              "detail": "(registry\\.go|env\\.go) over last_message: 8 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R8.Q3.context-background-in-service",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|sync_service\\.go|registry\\.go) over last_message: 25 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R8.Q5.flap-window-from-service",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|snapshot_service\\.go) over last_message: 22 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R8.Q5.getenv-in-method",
+              "type": "regex",
+              "passed": true,
+              "detail": "(sync_service\\.go|notify\\.go) over last_message: 8 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R9.Q1.orphan-doc",
+              "type": "regex",
+              "passed": true,
+              "detail": "heartbeat-protocol\\.md over last_message: 3 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R9.Q2.missing-doc-edge",
+              "type": "regex",
+              "passed": true,
+              "detail": "heartbeat\\.go over last_message: 5 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R9.Q3.unwired-root",
+              "type": "regex",
+              "passed": true,
+              "detail": "CLAUDE\\.md over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R9.Q4.creates-a-new",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|notify\\.go|mem_store\\.go|file_repo\\.go) over last_message: 21 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R9.Q4.what-comments",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device\\.go|heartbeat\\.go|schedule\\.go|device_service\\.go|notify\\.go|cache\\.go|trace\\.go|reporter\\.go|env\\.go) over last_message: 41 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R9.Q5.naked-exports",
+              "type": "regex",
+              "passed": true,
+              "detail": "(alert\\.go|job\\.go|snapshot\\.go|tags\\.go|job_kind\\.go|validate\\.go) over last_message: 10 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R9.critic.caller-must",
+              "type": "regex",
+              "passed": true,
+              "detail": "(heartbeat\\.go|device_service\\.go) over last_message: 20 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R9.critic.restated-idiom",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|snapshot_service\\.go|sync_service\\.go) over last_message: 27 match(es); want at least 1"
+            },
+            {
+              "name": "report-header",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i)CODE REVIEW REPORT|Commit Readiness Report over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "rule-cited",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\bR(1[0-2]|[1-9])\\b over last_message: 132 match(es); want at least 1"
+            },
+            {
+              "name": "skeptic-refuted",
+              "type": "regex",
+              "passed": true,
+              "detail": "REFUTED over last_message: 6 match(es); want at least 1"
+            }
+          ],
+          "cost_usd": 9.2723537,
+          "judge_cost_usd": 0.084737,
+          "duration_ms": 1860813,
+          "num_turns": 63,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-review-full-4065863494"
+        },
+        {
+          "case": "review-full",
+          "run": 3,
+          "model": "claude-sonnet-5",
+          "passed": false,
+          "graders": [
+            {
+              "name": "bugs-section",
+              "type": "regex",
+              "passed": false,
+              "detail": "\ud83d\udc1b over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-alert-channel",
+              "type": "regex",
+              "passed": false,
+              "detail": "(?i:\\bcluster\\b)[^\\n]*\\b(Alert\\.Channel|Channel)\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*\u2022]|[0-9]+[.)])[ \\t]*\\**\\x60?(Alert\\.Channel|Channel)\\b over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-catalog-find",
+              "type": "regex",
+              "passed": false,
+              "detail": "(?i:\\bcluster\\b)[^\\n]*\\b(Catalog\\.Find|Find)\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*\u2022]|[0-9]+[.)])[ \\t]*\\**\\x60?(Catalog\\.Find|Find)\\b over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-device-status",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i:\\bcluster\\b)[^\\n]*\\b(Device\\.Status|Status)\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*\u2022]|[0-9]+[.)])[ \\t]*\\**\\x60?(Device\\.Status|Status)\\b over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-device",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i:\\bcluster\\b)[^\\n]*\\bDevice\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*\u2022]|[0-9]+[.)])[ \\t]*\\**\\x60?Device\\b over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-job-kind",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i:\\bcluster\\b)[^\\n]*\\b(Job\\.Kind|Kind)\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*\u2022]|[0-9]+[.)])[ \\t]*\\**\\x60?(Job\\.Kind|Kind)\\b over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-processheartbeat",
+              "type": "regex",
+              "passed": true,
+              "detail": "(?i:\\bcluster\\b)[^\\n]*\\bProcessHeartbeat\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*\u2022]|[0-9]+[.)])[ \\t]*\\**\\x60?ProcessHeartbeat\\b over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-reporter",
+              "type": "regex",
+              "passed": false,
+              "detail": "(?i:\\bcluster\\b)[^\\n]*\\bReporter\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*\u2022]|[0-9]+[.)])[ \\t]*\\**\\x60?Reporter\\b over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-retention",
+              "type": "regex",
+              "passed": false,
+              "detail": "(?i:\\bcluster\\b)[^\\n]*\\bretention\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*\u2022]|[0-9]+[.)])[ \\t]*\\**\\x60?retention\\b over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "cluster-role-packages",
+              "type": "regex",
+              "passed": false,
+              "detail": "CLUSTER[^\\n]*(role packages|common\\b[^\\n]*utils|utils\\b[^\\n]*common) over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "evidence-protocol",
+              "type": "regex",
+              "passed": false,
+              "detail": "\\.go:[0-9]+ over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "hunters-spawned",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Agent(rule-hunter) called 14 time(s); want >= 3"
+            },
+            {
+              "name": "judge-categories",
+              "type": "llm",
+              "passed": false,
+              "detail": "judge claude-haiku-4-5 (FAIL,FAIL): --- vote 1: FAIL ---\n## Reasoning\n\nThe FOCUS text is a summary that references a separate detailed report (\"in the report I just sent you\"). \n\n**Question 1 (concurrent map write under \ud83d\udc1b Bugs):** \u2705 Satisfied. Item #4 in the \"6 bugs to fix immediately\" section explicitly describes the `lastSeen` map as \"written both under lock (`Flush`) and unguarded (`ProcessHeartbeat`, `Purge`, `flushLoop`) \u2014 concurrent-map-write crash risk.\" This is clearly categorized as a bug.\n\n**Question 2 (time.Sleep under \ud83d\udd34 Design Debt):** \u274c Cannot verify. The FOCUS text mentions ProcessHeartbeat as an oversized function (\"ProcessHeartbeat (5 rules) \u2014 oversized, un-storified, un-ctx'd, duplicate tag-parsing logic\") but does **not explicitly mention production `time.Sleep` calls or their categorization under Design Debt**. The detailed sections with \ud83d\udc1b Bugs and \ud83d\udd34 Design Debt categorizations are not shown in this summary text.\n\nThe FOCUS is a summary pointing to a separate report; the actual detailed categorization needed to verify criterion 2 is not present in the text provided for grading.\n\nVERDICT: FAIL\n\n--- vote 2: FAIL ---\nLooking at the FOCUS text against the CRITERIA:\n\n**Question 1: Is the unguarded concurrent map write listed under \ud83d\udc1b Bugs?**\n\u2713 YES \u2014 Bug #4 explicitly states: \"`lastSeen` map is written both under lock (`Flush`) and unguarded (`ProcessHeartbeat`, `Purge`, `flushLoop`) \u2014 concurrent-map-write crash risk.\" This is listed under \"6 bugs to fix immediately.\"\n\n**Question 2: Is the production `time.Sleep` listed under \ud83d\udd34 Design Debt?**\n\u2717 NO \u2014 The report text does not mention `time.Sleep`, retry backoff, or production sleep calls anywhere in the provided summary. While the report discusses various design issues (ProcessHeartbeat being oversized, DeviceService as a god object, etc.), there is no explicit mention of production `time.Sleep` calls being filed under Design Debt.\n\nSince both questions must be answered \u2026(truncated)",
+              "cost_usd": 0.0245281
+            },
+            {
+              "name": "no-edit",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Edit called 0 time(s); want exactly 0"
+            },
+            {
+              "name": "no-write",
+              "type": "tool_used",
+              "passed": false,
+              "detail": "Write called 1 time(s); want exactly 0"
+            },
+            {
+              "name": "nolint-finding",
+              "type": "regex",
+              "passed": true,
+              "detail": "nolint over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "precision-CTRL.R1.named-const",
+              "type": "regex",
+              "passed": true,
+              "detail": "maxLen|minutesPerDay over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R1.tenant-type",
+              "type": "regex",
+              "passed": true,
+              "detail": "ParseTenant over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R1.trace-id-string",
+              "type": "regex",
+              "passed": true,
+              "detail": "TraceID over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R10.main-jitter-sleep",
+              "type": "regex",
+              "passed": true,
+              "detail": "rand\\.IntN over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R10.repo-mutex",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\b[rm]\\.mu\\.Lock\\(\\) over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R10.worker-range",
+              "type": "regex",
+              "passed": true,
+              "detail": "range jobs over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R11.region-zone-switch",
+              "type": "regex",
+              "passed": true,
+              "detail": "Zone\\(\\) over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R11.value-conditional",
+              "type": "regex",
+              "passed": true,
+              "detail": "w\\.start < w\\.end over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R12.honest-mutator",
+              "type": "regex",
+              "passed": true,
+              "detail": "drain\\(\\) over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R2.snapshot-repository",
+              "type": "regex",
+              "passed": true,
+              "detail": "NewRepository\\(|now == nil over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R2.window-plan",
+              "type": "regex",
+              "passed": true,
+              "detail": "ParseWindow over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R3.guard-clauses",
+              "type": "regex",
+              "passed": true,
+              "detail": "ctx\\.Err\\(\\) over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R3.orchestrator",
+              "type": "regex",
+              "passed": true,
+              "detail": "Prune over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R4.private-helper",
+              "type": "regex",
+              "passed": true,
+              "detail": "parseClock over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R6.store-interface",
+              "type": "regex",
+              "passed": true,
+              "detail": "Store interface over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R7.split-tables",
+              "type": "regex",
+              "passed": true,
+              "detail": "TestParse\\w+_(Success|Error) over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R8.compile-time-check",
+              "type": "regex",
+              "passed": true,
+              "detail": "_ Store = \\(\\*FileRepo\\) over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "precision-CTRL.R9.why-comments",
+              "type": "regex",
+              "passed": true,
+              "detail": "store behind|can be joined later|races a manual cleanup over last_message: 0 match(es); want 0"
+            },
+            {
+              "name": "recall-CASE-A.defensive-recheck",
+              "type": "regex",
+              "passed": false,
+              "detail": "policy\\.go over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-A.retention-range-twice",
+              "type": "regex",
+              "passed": false,
+              "detail": "(policy\\.go|config\\.go) over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-A.zero-sentinel",
+              "type": "regex",
+              "passed": false,
+              "detail": "config\\.go over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-B.host-port-tls-clump",
+              "type": "regex",
+              "passed": true,
+              "detail": "client\\.go over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-C.flag-loop",
+              "type": "regex",
+              "passed": false,
+              "detail": "picker\\.go over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-D.replica-count",
+              "type": "regex",
+              "passed": false,
+              "detail": "grants\\.go over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-E.nil-field-rechecked",
+              "type": "regex",
+              "passed": false,
+              "detail": "reporter\\.go over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-E.nil-parameters",
+              "type": "regex",
+              "passed": false,
+              "detail": "(wire\\.go|reporter\\.go) over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-E.nil-return",
+              "type": "regex",
+              "passed": false,
+              "detail": "catalog\\.go over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-F.deep-reads",
+              "type": "regex",
+              "passed": false,
+              "detail": "(workers\\.go|scheduler\\.go) over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-F.env-config-global",
+              "type": "regex",
+              "passed": false,
+              "detail": "env\\.go|env\\.Config over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-CASE-F.test-mutates-global",
+              "type": "regex",
+              "passed": false,
+              "detail": "workers_test\\.go over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.Q1.handler-inline-checks",
+              "type": "regex",
+              "passed": false,
+              "detail": "devices\\.go over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.Q1.settings-blob",
+              "type": "regex",
+              "passed": true,
+              "detail": "(job\\.go|scheduler\\.go|device_service\\.go|snapshot_service\\.go) over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.Q2.email-contains-twice",
+              "type": "regex",
+              "passed": true,
+              "detail": "(devices\\.go|validate\\.go) over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.Q3.raw-channel-string",
+              "type": "regex",
+              "passed": false,
+              "detail": "(alert\\.go|channel\\.go) over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.Q3.region-byte-slices",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|heartbeat_parser\\.go|tags\\.go) over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.Q3.status-enum-goconst",
+              "type": "regex",
+              "passed": true,
+              "detail": "(alert_service\\.go|device_service\\.go|status\\.go) over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.Q3.tags-loop",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|heartbeat_parser\\.go|tags\\.go|sync_service\\.go) over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.Q5.heartbeat-clump",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|heartbeat\\.go) over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.Q5.new-sync-service-six-params",
+              "type": "regex",
+              "passed": false,
+              "detail": "sync_service\\.go over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.Q5.tenant-id-clump",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|store\\.go|file_repo\\.go|mem_store\\.go) over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R1.lint.run-loop-dupl",
+              "type": "regex",
+              "passed": false,
+              "detail": "(snapshot_service\\.go|sync_service\\.go) over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R10.Q4.split-guard",
+              "type": "regex",
+              "passed": true,
+              "detail": "cache\\.go over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R10.Q5.production-sleep",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|retry\\.go|sync_service\\.go) over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R11.Q1.channel-switch",
+              "type": "regex",
+              "passed": true,
+              "detail": "(notify\\.go|validate\\.go|retry\\.go) over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R11.Q1.job-kind-if",
+              "type": "regex",
+              "passed": false,
+              "detail": "(scheduler\\.go|snapshot_service\\.go|job\\.go) over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R11.Q1.priority-switch-not-exhaustive",
+              "type": "regex",
+              "passed": false,
+              "detail": "retry\\.go over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R11.Q1.status-switch",
+              "type": "regex",
+              "passed": true,
+              "detail": "(status\\.go|alert_service\\.go|device_service\\.go) over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R11.Q3.default-unknown-channel",
+              "type": "regex",
+              "passed": false,
+              "detail": "notify\\.go over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R11.Q4.flag-arguments",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|sync_service\\.go) over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R12.Q1.leaked-internals",
+              "type": "regex",
+              "passed": true,
+              "detail": "(cache\\.go|grants\\.go|schedule\\.go|snapshot_service\\.go) over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R12.Q2.stored-parameter",
+              "type": "regex",
+              "passed": false,
+              "detail": "(schedule\\.go|grants\\.go) over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R12.Q5.n-reused",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|cache\\.go) over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R2.Q1.alert-exported-fields",
+              "type": "regex",
+              "passed": false,
+              "detail": "(alert\\.go|alert_service\\.go) over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R2.Q1.device-exported-fields",
+              "type": "regex",
+              "passed": false,
+              "detail": "device\\.go over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R2.Q1.device-literal-in-service",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|devices\\.go) over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R2.Q2.method-nil-checks",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|notify\\.go) over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R3.Q1.normalize-tags",
+              "type": "regex",
+              "passed": false,
+              "detail": "heartbeat_parser\\.go over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R3.Q1.process-heartbeat",
+              "type": "regex",
+              "passed": true,
+              "detail": "device_service\\.go over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R3.Q2.parse-beside-decision",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|heartbeat_parser\\.go) over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R4.Q1.exported-for-tests",
+              "type": "regex",
+              "passed": false,
+              "detail": "(heartbeat_parser\\.go|service_test\\.go) over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R4.Q2.private-tested-directly",
+              "type": "regex",
+              "passed": false,
+              "detail": "service_test\\.go over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R4.Q3.role-named-packages",
+              "type": "regex",
+              "passed": false,
+              "detail": "(strings\\.go|time\\.go|constants\\.go) over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R4.Q4.single-noun-package",
+              "type": "regex",
+              "passed": false,
+              "detail": "deviceid\\.go over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R4.Q5.feature-literal-in-common",
+              "type": "regex",
+              "passed": false,
+              "detail": "constants\\.go over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R5.Q1.models-red-zone",
+              "type": "regex",
+              "passed": false,
+              "detail": "(device\\.go|alert\\.go|job\\.go) over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R5.Q1.role-layers",
+              "type": "regex",
+              "passed": true,
+              "detail": "(trace\\.go|device_service\\.go|device\\.go|store\\.go) over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R5.Q2.snapshot-spread",
+              "type": "regex",
+              "passed": false,
+              "detail": "(snapshot_service\\.go|snapshot\\.go|registry\\.go) over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R5.Q4.two-snapshot-homes",
+              "type": "regex",
+              "passed": false,
+              "detail": "(snapshot_service\\.go|snapshot\\.go) over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R5.Q5.no-migration-doc",
+              "type": "regex",
+              "passed": false,
+              "detail": "(snapshot\\.go|README\\.md) over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R6.Q1.device-repository",
+              "type": "regex",
+              "passed": false,
+              "detail": "device_repository\\.go over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R6.Q1.formatter-ireturn",
+              "type": "regex",
+              "passed": false,
+              "detail": "alert_service\\.go over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R6.Q2.mock-repo-double",
+              "type": "regex",
+              "passed": false,
+              "detail": "repo\\.go over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R6.Q3.import-cycle-claim",
+              "type": "regex",
+              "passed": false,
+              "detail": "(notifier\\.go|device_repository\\.go) over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R6.Q4.sync-service-takes-interface",
+              "type": "regex",
+              "passed": false,
+              "detail": "(sync_service\\.go|snapshot_service\\.go) over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R6.Q5.notifier-api",
+              "type": "regex",
+              "passed": false,
+              "detail": "notifier\\.go over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R7.Q1.wanterr-tables",
+              "type": "regex",
+              "passed": false,
+              "detail": "(service_test\\.go|picker_test\\.go) over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R7.Q3.big-object-leaf-test",
+              "type": "regex",
+              "passed": false,
+              "detail": "heartbeat_test\\.go over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R7.Q5.call-count-assertions",
+              "type": "regex",
+              "passed": false,
+              "detail": "(heartbeat_test\\.go|scheduler_test\\.go) over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R7.Q6.sleep-then-assert",
+              "type": "regex",
+              "passed": false,
+              "detail": "(service_test\\.go|heartbeat_test\\.go) over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R8.Q1.registry-globals",
+              "type": "regex",
+              "passed": false,
+              "detail": "registry\\.go over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R8.Q2.init-registration",
+              "type": "regex",
+              "passed": false,
+              "detail": "(registry\\.go|env\\.go) over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R8.Q3.context-background-in-service",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|sync_service\\.go|registry\\.go) over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R8.Q5.flap-window-from-service",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|snapshot_service\\.go) over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R8.Q5.getenv-in-method",
+              "type": "regex",
+              "passed": false,
+              "detail": "(sync_service\\.go|notify\\.go) over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R9.Q1.orphan-doc",
+              "type": "regex",
+              "passed": false,
+              "detail": "heartbeat-protocol\\.md over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R9.Q2.missing-doc-edge",
+              "type": "regex",
+              "passed": false,
+              "detail": "heartbeat\\.go over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R9.Q3.unwired-root",
+              "type": "regex",
+              "passed": false,
+              "detail": "CLAUDE\\.md over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R9.Q4.creates-a-new",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|notify\\.go|mem_store\\.go|file_repo\\.go) over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R9.Q4.what-comments",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device\\.go|heartbeat\\.go|schedule\\.go|device_service\\.go|notify\\.go|cache\\.go|trace\\.go|reporter\\.go|env\\.go) over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R9.Q5.naked-exports",
+              "type": "regex",
+              "passed": true,
+              "detail": "(alert\\.go|job\\.go|snapshot\\.go|tags\\.go|job_kind\\.go|validate\\.go) over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R9.critic.caller-must",
+              "type": "regex",
+              "passed": true,
+              "detail": "(heartbeat\\.go|device_service\\.go) over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "recall-R9.critic.restated-idiom",
+              "type": "regex",
+              "passed": true,
+              "detail": "(device_service\\.go|snapshot_service\\.go|sync_service\\.go) over last_message: 1 match(es); want at least 1"
+            },
+            {
+              "name": "report-header",
+              "type": "regex",
+              "passed": false,
+              "detail": "(?i)CODE REVIEW REPORT|Commit Readiness Report over last_message: 0 match(es); want at least 1"
+            },
+            {
+              "name": "rule-cited",
+              "type": "regex",
+              "passed": true,
+              "detail": "\\bR(1[0-2]|[1-9])\\b over last_message: 2 match(es); want at least 1"
+            },
+            {
+              "name": "skeptic-refuted",
+              "type": "regex",
+              "passed": false,
+              "detail": "REFUTED over last_message: 0 match(es); want at least 1"
+            }
+          ],
+          "cost_usd": 8.699708000000001,
+          "judge_cost_usd": 0.0245281,
+          "duration_ms": 1839966,
+          "num_turns": 68,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-review-full-4290005473"
+        }
+      ]
+    },
+    {
+      "name": "trigger-go",
+      "tags": [
+        "cheap",
+        "trigger"
+      ],
+      "tier": "cheap",
+      "runs": 3,
+      "passed": 3,
+      "passRate": 1.0,
+      "results": [
+        {
+          "case": "trigger-go",
+          "run": 1,
+          "model": "claude-sonnet-5",
+          "passed": true,
+          "graders": [
+            {
+              "name": "announcement",
+              "type": "regex",
+              "passed": true,
+              "detail": "Using go-ldd workflow over trace: 2 match(es); want at least 1"
+            },
+            {
+              "name": "skill-invoked",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Skill([:\"]linter-driven-development\") called 1 time(s); want >= 1"
+            },
+            {
+              "name": "stopped-after-preflight",
+              "type": "regex",
+              "passed": true,
+              "detail": "DONE over last_message: 1 match(es); want at least 1"
+            }
+          ],
+          "cost_usd": 0.0965368,
+          "judge_cost_usd": 0,
+          "duration_ms": 16760,
+          "num_turns": 4,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-trigger-go-2472345648"
+        },
+        {
+          "case": "trigger-go",
+          "run": 2,
+          "model": "claude-sonnet-5",
+          "passed": true,
+          "graders": [
+            {
+              "name": "announcement",
+              "type": "regex",
+              "passed": true,
+              "detail": "Using go-ldd workflow over trace: 2 match(es); want at least 1"
+            },
+            {
+              "name": "skill-invoked",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Skill([:\"]linter-driven-development\") called 1 time(s); want >= 1"
+            },
+            {
+              "name": "stopped-after-preflight",
+              "type": "regex",
+              "passed": true,
+              "detail": "DONE over last_message: 1 match(es); want at least 1"
+            }
+          ],
+          "cost_usd": 0.09213579999999999,
+          "judge_cost_usd": 0,
+          "duration_ms": 17783,
+          "num_turns": 4,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-trigger-go-3007018399"
+        },
+        {
+          "case": "trigger-go",
+          "run": 3,
+          "model": "claude-sonnet-5",
+          "passed": true,
+          "graders": [
+            {
+              "name": "announcement",
+              "type": "regex",
+              "passed": true,
+              "detail": "Using go-ldd workflow over trace: 2 match(es); want at least 1"
+            },
+            {
+              "name": "skill-invoked",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Skill([:\"]linter-driven-development\") called 1 time(s); want >= 1"
+            },
+            {
+              "name": "stopped-after-preflight",
+              "type": "regex",
+              "passed": true,
+              "detail": "DONE over last_message: 1 match(es); want at least 1"
+            }
+          ],
+          "cost_usd": 0.08984600000000001,
+          "judge_cost_usd": 0,
+          "duration_ms": 16627,
+          "num_turns": 4,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-trigger-go-3445117763"
+        }
+      ]
+    },
+    {
+      "name": "trigger-non-go",
+      "tags": [
+        "cheap",
+        "trigger"
+      ],
+      "tier": "cheap",
+      "runs": 3,
+      "passed": 3,
+      "passRate": 1.0,
+      "results": [
+        {
+          "case": "trigger-non-go",
+          "run": 1,
+          "model": "claude-sonnet-5",
+          "passed": true,
+          "graders": [
+            {
+              "name": "no-announcement",
+              "type": "regex",
+              "passed": true,
+              "detail": "Using go-ldd workflow over trace: 0 match(es); want 0"
+            },
+            {
+              "name": "skill-not-invoked",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Skill([:\"]linter-driven-development\") called 0 time(s); want exactly 0"
+            }
+          ],
+          "cost_usd": 0.0424398,
+          "judge_cost_usd": 0,
+          "duration_ms": 3522,
+          "num_turns": 1,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-trigger-non-go-3639590422"
+        },
+        {
+          "case": "trigger-non-go",
+          "run": 2,
+          "model": "claude-sonnet-5",
+          "passed": true,
+          "graders": [
+            {
+              "name": "no-announcement",
+              "type": "regex",
+              "passed": true,
+              "detail": "Using go-ldd workflow over trace: 0 match(es); want 0"
+            },
+            {
+              "name": "skill-not-invoked",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Skill([:\"]linter-driven-development\") called 0 time(s); want exactly 0"
+            }
+          ],
+          "cost_usd": 0.0374752,
+          "judge_cost_usd": 0,
+          "duration_ms": 3542,
+          "num_turns": 1,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-trigger-non-go-1200448058"
+        },
+        {
+          "case": "trigger-non-go",
+          "run": 3,
+          "model": "claude-sonnet-5",
+          "passed": true,
+          "graders": [
+            {
+              "name": "no-announcement",
+              "type": "regex",
+              "passed": true,
+              "detail": "Using go-ldd workflow over trace: 0 match(es); want 0"
+            },
+            {
+              "name": "skill-not-invoked",
+              "type": "tool_used",
+              "passed": true,
+              "detail": "Skill([:\"]linter-driven-development\") called 0 time(s); want exactly 0"
+            }
+          ],
+          "cost_usd": 0.0372752,
+          "judge_cost_usd": 0,
+          "duration_ms": 3453,
+          "num_turns": 1,
+          "segments": 1,
+          "scaffold_dir": "/tmp/ldd-eval-trigger-non-go-3278450280"
+        }
+      ]
+    }
+  ],
+  "aggregates": {
+    "passRate": 0.7586206896551724,
+    "averageScore": 0.9603586534621018,
+    "totalCostUSD": 54.36085010000001
+  }
+}

@@ -1,0 +1,47 @@
+--- vote 1: PASS ---
+Looking at the report to answer the two required questions:
+
+**Question 1: Is the unguarded concurrent map write listed under Bugs?**
+
+Yes. Under the 🐛 Bugs section, finding #3 explicitly states:
+> `internal/services/device_service.go:218,463-467,572-576` | R10 Q3 | `s.lastSeen` written/read/deleted from 3 places (`ProcessHeartbeat`, `Purge`, `flushLoop`) with inconsistent locking — real "concurrent map writes" panic risk under load
+
+This directly describes the concurrent map write issue (lastSeen map written from ProcessHeartbeat while flushLoop reads it) and it's clearly in the Bugs section.
+
+**Question 2: Is the production time.Sleep listed under Design Debt rather than Bugs?**
+
+Yes. Under the 🔴 Design Debt section (R10 — Concurrency), the report lists:
+- Finding #50: `time.Sleep` inside `ProcessHeartbeat`'s notifier-retry loop
+- Finding #51: `withRetry`'s sleep in retry.go
+- Finding #52: `saveWithRetry`'s sleep in sync_service.go
+- Finding #53: `SendWithRetry`'s uncancellable sleeps in retry.go
+
+All the production time.Sleep calls related to retry backoff are filed under Design Debt, not Bugs. None of the 8 Bugs are primarily categorized around time.Sleep itself.
+
+Both required conditions are satisfied.
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+Looking at the report against the two rubric questions:
+
+**Question 1: Is the unguarded concurrent map write listed under 🐛 Bugs?**
+
+YES. Finding #3 under the 🐛 Bugs section explicitly addresses this:
+> "`s.lastSeen` written/read/deleted from 3 places (`ProcessHeartbeat`, `Purge`, `flushLoop`) with inconsistent locking — real "concurrent map writes" panic risk under load"
+
+This correctly identifies the concurrent map write issue and places it in the Bugs section.
+
+**Question 2: Is the production `time.Sleep` listed under 🔴 Design Debt rather than 🐛 Bugs?**
+
+YES. The production time.Sleep calls appear as findings #50–#53 in the 🔴 Design Debt section under "R10 — Concurrency (non-crash)":
+- Finding #50: `time.Sleep` inside `ProcessHeartbeat`'s notifier-retry loop
+- Finding #51: `withRetry`'s sleep 
+- Finding #52: `saveWithRetry`'s sleep
+- Finding #53: `SendWithRetry` sleeps
+
+These are correctly categorized as Design Debt, not Bugs, and no time.Sleep findings appear in the Bugs section.
+
+Both questions are answered affirmatively. The report correctly distinguishes between the concurrent map race (a true crash bug) and the uncancellable sleeps (design issues that degrade behavior under cancellation).
+
+VERDICT: PASS

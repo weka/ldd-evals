@@ -1,0 +1,93 @@
+{
+  "case": "case-f-globals-review",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": false,
+  "graders": [
+    {
+      "name": "anchor-env-global",
+      "type": "regex",
+      "passed": true,
+      "detail": "env\\.ts:[0-9]+ over last_message: 5 match(es); want at least 1"
+    },
+    {
+      "name": "evidence-protocol",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\.tsx?:[0-9]+ over last_message: 13 match(es); want at least 1"
+    },
+    {
+      "name": "fix-clean-island",
+      "type": "regex",
+      "passed": true,
+      "detail": "Extract Clean Island|Push the Global Up over last_message: 3 match(es); want at least 1"
+    },
+    {
+      "name": "no-edit",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Edit called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "no-multiedit",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "MultiEdit called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "no-write",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Write called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "nolint-is-a-finding",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i)eslint-disable|ts-expect-error|ts-ignore|suppression over last_message: 3 match(es); want at least 1"
+    },
+    {
+      "name": "r8-q2-init",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i)\\bregion\\b[^\\n]{0,80}(import|module|top[- ]level)|import[- ]time|at import|module (import|scope|load)|top[- ]level|when the module (is )?(loads|loaded|imported|evaluated) over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "r8-q5-jobs-read",
+      "type": "regex",
+      "passed": true,
+      "detail": "useSnapshotScheduler\\.tsx?:[0-9]+ over last_message: 5 match(es); want at least 1"
+    },
+    {
+      "name": "r8-q5-pool-read",
+      "type": "regex",
+      "passed": true,
+      "detail": "workers\\.ts:[0-9]+ over last_message: 3 match(es); want at least 1"
+    },
+    {
+      "name": "r8-q6-test-mutates-global",
+      "type": "regex",
+      "passed": false,
+      "detail": "workers\\.test\\.tsx?:[0-9]+ over last_message: 0 match(es); want at least 1"
+    },
+    {
+      "name": "refuted-carries-alternative",
+      "type": "llm",
+      "passed": true,
+      "detail": "judge claude-haiku-4-5 (PASS,PASS): --- vote 1: PASS ---\nLooking at the FOCUS text for any proposals about wrapper types for worker count:\n\nThe report addresses `CONFIG.numWorkers` and `CONFIG.batchSize` throughout (in R2, R8, R10 findings). However, **no new wrapper type** (like `WorkerCount`, `NumWorkers`, or similar wrapper class/interface) is proposed anywhere in the review. \n\nThe suggested fixes are all about:\n- Validating the existing int values in `load()`\n- Injecting the existing `CONFIG` singleton instead of reaching it globally\n- Migrating the duplicate polling hook\n- Fixing comments\n\nThe skeptic section explicitly states \"N/A\" for the relevant clusters — R2 is noted as \"mechanism, not an extraction\" and R5's \"Slice out a feature\" is out of skeptic scope.\n\nSince no wrapper type is proposed, the first RUBRIC condition applies: \"If the report proposes NO wrapper type for the worker count / batch size, PASS.\"\n\nVERDICT: PASS\n\n--- vote 2: PASS ---\nThe report discusses validation and injection of `CONFIG.numWorkers` and `CONFIG.batchSize` throughout, but proposes no wrapper type (WorkerCount, NumWorkers, or similar) for these values. The design suggestions are:\n- Validate the raw numeric values in `load()`'s constructor\n- Inject `CONFIG` as a parameter instead of reaching it globally\n- Add an `AbortController` signal for lifecycle management\n\nNone of these changes wrap the worker count in a new type — they treat it as a plain number passed or read directly. Since the RUBRIC passes when the report proposes NO wrapper type, this satisfies the criterion.\n\nVERDICT: PASS",
+      "cost_usd": 0.0830056
+    },
+    {
+      "name": "rule-cited",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\bR(1[0-2]|[1-9])\\b over last_message: 46 match(es); want at least 1"
+    }
+  ],
+  "cost_usd": 2.37118,
+  "judge_cost_usd": 0.0830056,
+  "duration_ms": 729446,
+  "num_turns": 14,
+  "segments": 1,
+  "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-f-globals-review-2562227106"
+}

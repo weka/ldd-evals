@@ -1,0 +1,70 @@
+{
+  "case": "case-e-nils-refactor",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": false,
+  "graders": [
+    {
+      "name": "art-judge",
+      "type": "llm",
+      "passed": false,
+      "detail": "judge claude-haiku-4-5: Looking at the code against each rubric condition:\n\n**1. Absence has a name:** ✓\n- `Find` returns `(Device, bool)`, not nil\n- \"No sink\" is explicitly `DiscardSink()` or `NopSink{}`\n- `Record` has no nil checks\n- Default clock set in constructor (`clock: time.Now`), never re-defaulted in methods\n\n**2. Constructor owns invariants:** ✓\n- `Reporter.sink` and `Reporter.clock` are unexported\n- `NewReporter(sink Sink, opts ...Option)` takes what it needs; no positional nils\n- `wire.go` reads as `NewReporter(NewSink(w))` — clean\n\n**3. Methods read as sentences:** ✓\n- `Record` is one line: `r.sink.Write(ev.At(r.clock()))`\n- `Announce` uses comma-ok pattern: `if d, ok := catalog.Find(name); ok {`\n\n**4. Comments earn their place:** ✗\n- `// Sink is where events are written.` — This comment is explicitly listed in the rubric as something that should be gone. The name `Sink` already conveys this; the comment adds no contract.\n- `// Record records the event.` — Follows the same self-referential pattern as `// Reporter is a reporter.`, which the rubric forbids.\n- `// Event is a reported event.` — Also somewhat self-evident.\n\nThe rubric states \"PASS only if all four hold\" and explicitly calls out `// Sink is where events are written.` as something that must not survive.\n\nVERDICT: FAIL",
+      "cost_usd": 0.02391
+    },
+    {
+      "name": "default-constructor-exists",
+      "type": "regex",
+      "passed": true,
+      "detail": "func (Default|System|Discard|Nop|Noop|Null)\\w*\\(\\) over files: 1 match(es); want at least 1"
+    },
+    {
+      "name": "find-callsite-comma-ok",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\w+, \\w+ := \\w+\\.Find\\( over files: 3 match(es); want at least 1"
+    },
+    {
+      "name": "find-returns-comma-ok-or-error",
+      "type": "regex",
+      "passed": true,
+      "detail": "func \\(\\w+ \\*?Catalog\\) Find\\(\\w+ string\\) \\(\\*?\\w+, (bool|error)\\) over files: 1 match(es); want at least 1"
+    },
+    {
+      "name": "gone-exported-nilable-fields",
+      "type": "regex",
+      "passed": true,
+      "detail": "^\\s+(Sink\\s+\\*Sink|Clock\\s+func\\(\\) time\\.Time) over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-nil-args-to-newreporter",
+      "type": "regex",
+      "passed": true,
+      "detail": "NewReporter\\([^)]*\\bnil\\b over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-opts-clock-nil-checks",
+      "type": "regex",
+      "passed": true,
+      "detail": "if (opts|clock) == nil over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "nil-unrepresentable",
+      "type": "llm",
+      "passed": false,
+      "detail": "judge claude-haiku-4-5: Looking at the code against the RUBRIC requirements:\n\n**Requirement 1 (unexported fields)**: ✓ PASS\n- `sink`, `clock`, and `flushEvery` are all lowercase/unexported. No struct literal can build an invalid Reporter directly.\n\n**Requirement 2 (not nil-able, real defaults)**: ✗ FAIL\n- The `sink` field is `Sink` (an interface), which can still hold a nil value. The constructor accepts `sink Sink` directly with no validation, so `NewReporter(nil)` is valid syntax that produces a Reporter with nil sink.\n- The `clock` can still be set to nil: `WithClock(nil)` passes nil through without validation, allowing `clock` to become nil after construction.\n- While `time.Now` is the default, the `WithClock` option doesn't prevent nil, so nil remains representable through options.\n\n**Requirement 3 (no nil re-checks)**: ✓ PASS\n- `Record` has no nil checks; neither does the constructor. No branching to turn nil into defaults.\n\n**Requirement 4 (no error return)**: ✓ PASS\n- `NewReporter` returns only `*Reporter`, not an error.\n\nThe code meets the syntactic structure (unexported fields, no nil handling), but fails the semantic requirement: nil is still *representable* in both `sink` and `clock` (just not *handled* — it would panic at runtime instead). The criteria demands nil is \"no longer representable,\" which requires either validation in options, concrete non-nil parameter types, or mandatory use of Null Object defaults.\n\nVERDICT: FAIL",
+      "cost_usd": 0.024058999999999997
+    },
+    {
+      "name": "postcheck",
+      "type": "postcheck",
+      "passed": false,
+      "detail": "exit status 1\ntask test: ok\nPASS  task test green\ntask lint: ok\nPASS  task lint green\nPASS  R2 Q2: no receiver-field nil re-check inside internal/report methods (0)\nPASS  R2 Q5: no 'return nil' in catalog.go (0)\nPASS  R2 Q1: Reporter built by literal only inside its constructor (1 \u003c= 1)\nPASS  a Default*/System*/Discard* constructor is CALLED (not just declared) in internal/report (1 \u003e= 1)\nFAIL  R6 Q1: no interface introduced in internal/report (got '1', want '0')\nPASS  no //nolint added to internal/report (0)\n== black-box suite: builds cmd/svc, replays the recorded heartbeats ==\n--- PASS: TestHeartbeatContract (1.18s)\n--- PASS: TestExpectedTSVMatchesTable (0.00s)\nok  \texample.com/heartbeat-blackbox\t1.184s\nblack-box: PASS\nPASS  black-box heartbeat suite\npostcheck: 1 check(s) failed"
+    }
+  ],
+  "cost_usd": 3.0247399000000006,
+  "judge_cost_usd": 0.047969,
+  "duration_ms": 887282,
+  "num_turns": 82,
+  "segments": 1,
+  "scaffold_dir": "/tmp/ldd-eval-case-e-nils-refactor-2049646083"
+}

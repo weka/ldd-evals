@@ -1,0 +1,29 @@
+--- vote 1: PASS ---
+Looking at the FOCUS text for the specific findings:
+
+**Question 1: Are the concurrency bugs in Bugs?**
+- ✓ `src/hooks/useDeviceFeed.ts:13-22` listed under 🐛 Bugs: "setInterval inside useEffect with no cleanup"
+- ✓ `src/hooks/useDeviceSearch.ts:17-19,30` listed under 🐛 Bugs: "no AbortController/ignore flag — an older response can overwrite a newer one"
+
+Both real concurrency bugs are correctly filed under 🐛 Bugs.
+
+**Question 2: Are the production sleeps in Design Debt?**
+- ✓ `src/pages/Heartbeats/heartbeatFeed.ts:667, src/services/retry.ts:49,64, src/services/syncService.ts:144` listed under 🔴 Design Debt: "bounded retry loops `await new Promise(setTimeout(...))` with no cancellation signal"
+
+The production sleeps from retry.ts, syncService.ts, and the heartbeat feed are correctly filed under 🔴 Design Debt.
+
+Both criteria are satisfied.
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+**Question 1:** The two real concurrency bugs are both filed under 🐛 Bugs:
+- `src/hooks/useDeviceSearch.ts:17-19,30` — raw fetch in effect, no AbortController/ignore flag, older response overwrites newer one ✓
+- `src/hooks/useDeviceFeed.ts:13-22` — setInterval with no cleanup returned, interval outlives component ✓
+
+**Question 2:** Production sleeps are filed under 🔴 Design Debt:
+- `src/pages/Heartbeats/heartbeatFeed.ts:667, src/services/retry.ts:49,64, src/services/syncService.ts:144` — `await new Promise(setTimeout(...))` retry/polling delays listed as R10 Q5 Design Debt, not Bugs ✓
+
+Both criteria satisfied.
+
+VERDICT: PASS

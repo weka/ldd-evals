@@ -1,0 +1,52 @@
+{
+  "case": "case-f-globals-refactor",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": false,
+  "graders": [
+    {
+      "name": "art-judge",
+      "type": "llm",
+      "passed": false,
+      "detail": "judge claude-haiku-4-5: # Analysis\n\nLooking at the code against the criteria and rubric:\n\n**Requirement 1 (Root reads like wiring diagram):** ✓ Main loads config once via `cfg := env.Load()`, extracts specific values (`cfg.FlapWindowSec`, `cfg.BatchSize`, `cfg.NumWorkers`), and passes them individually to collaborators. No scattered `env.Config` reads outside main.\n\n**Requirement 2 (Islands are clean):** ✗ Critical issue here. The `jobs` package has package-level mutable state:\n- `var handlers`, `var store`, `var storeOnce` initialized in `init()`\n- `GetStore()` provides lazy access to a hidden global store\n\nMore problematically: **the store/repo dependency is not declared in any signature**. In `main.go`, a repository is created based on flags:\n```go\nif *dryRun {\n    mem := repository.NewMemStore()\n    store, repo = mem, mem\n} else {\n    fileRepo := mustOpenFileRepo(*storePath)\n    store, repo = fileRepo, fileRepo\n}\n```\nThis repo is passed to `services.NewDeviceService(repo, ...)`, but when `NewScheduler(cfg.BatchSize, cfg.NumWorkers)` is called, the repo is not passed. Later, when job handlers run, they call `GetStore()` which creates a *separate, independent* `MemStore`, completely ignoring the repo main decided to use. This means the DeviceService and Sync jobs operate on different stores.\n\nThe rubric requires: \"constructors or `Start` functions name the dependency in the signature.\" `NewScheduler` should take a repository parameter: `NewScheduler(batchSize, numWorkers int, repo repository.DeviceRepository)`, but it doesn't.\n\n**Requirement 3 (Env only loads):** ✓ No `init()`, no mutable package state, `Load()` returns a value, defaults colocated.\n\n**Requirement 4 (Names carry meaning):** ✓ Parameters are specific (`batchSize`, `numWorkers`, `flapWindow`), not generic.\n\nThe criteria states \"every layer below it now states, in its signature, exactly what it depends on.\" The Scheduler depends on a repository (via dispatch → handlers → Sync → GetStore)…(truncated)",
+      "cost_usd": 0.048705
+    },
+    {
+      "name": "gone-config-global",
+      "type": "regex",
+      "passed": true,
+      "detail": "^var Config Configuration over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-nolint-gochecknoglobals-env",
+      "type": "regex",
+      "passed": true,
+      "detail": "nolint:gochecknoglobals // loaded in main over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "load-returns-a-value",
+      "type": "regex",
+      "passed": true,
+      "detail": "^func Load\\(\\) \\(?[A-Z]\\w*(, error)?\\)? \\{ over files: 1 match(es); want at least 1"
+    },
+    {
+      "name": "main-reads-as-a-story",
+      "type": "llm",
+      "passed": false,
+      "detail": "judge claude-haiku-4-5: ## Analysis\n\nChecking against the rubric:\n\n**Criterion 1 - Configuration obtained once at top, values handed to constructors:**\nISSUE: While `cfg := env.Load()` is called at the top, subsequent code reads configuration values directly from the environment instead of extracting them from `cfg`:\n- `notifier := services.NewNotifier(os.Getenv(\"WEBHOOK_URL\"))` reads directly from environment\n- `listenAddr()` function calls `os.Getenv(\"PORT\")` \n- `defaultStorePath()` calls `os.Getenv(\"STORE_PATH\")`\n\nConfiguration is being obtained from multiple sources (cfg object *and* direct environment reads), violating the \"once at the top\" principle. These should come from cfg.\n\n**Criterion 2 - Story at one altitude:**\nISSUE: The flow is interrupted by multiple environment reads scattered after the initial config load, breaking the clean narrative of \"load config → build leaves → build services → serve.\"\n\n**Criterion 3 - No business logic:**\nThis is satisfied — helpers are minimal and appropriate.\n\nThe design violates the requirement that main.go be the *only* reader of configuration, consolidated at one point via `env.Load()`. All configuration values should be extracted from the loaded `cfg` object and passed to constructors, not retrieved ad-hoc from the environment later.\n\n`VERDICT: FAIL`",
+      "cost_usd": 0.031793
+    },
+    {
+      "name": "postcheck",
+      "type": "postcheck",
+      "passed": false,
+      "detail": "exit status 1\ntask test: ok\nPASS  task test green\ntask lint: ok\nPASS  task lint green\n== the ratchet: env.Config references outside cmd/, per commit ==\nPASS  at least 3 commits after the scaffold base (5 \u003e= 3)\n  d5e53c5    7  go-mini: initial import\n  b706dae    6  pool: take numWorkers as a parameter instead of reading env.Config\n  918cdad    6  jobs: inject batch size and worker count into Scheduler\n  87ee743    4  services: inject batch size into SnapshotService\n  231200e    2  services: inject flap window into DeviceService\n  f93ceb8    0  env: remove the global Config, region and init in favor of Load()'s return value\nPASS  env.Config references outside cmd/ never rise and end at 0\nPASS  no commit touches non-test code in more than 2 packages (island + its caller) (2 \u003c= 2)\n== islands are clean ==\nPASS  pool no longer imports env (0)\nFAIL  jobs no longer imports env (got '1', want '0')\nPASS  shallow fix rejected: env.Configuration is not a param/field type in pool, jobs or handlers (0)\n== end state ==\nPASS  R8 Q1: no package-level var left in internal/env (0)\nPASS  R8 Q2: no init() left in internal/env (0)\nPASS  no //nolint in internal/env (0)\nPASS  no //nolint in internal/pool (0)\nPASS  no nolint:gochecknoglobals anywhere for the config global (0)\n== test payoff ==\nPASS  R8 Q6: no test mutates env.Config (0)\nFAIL  t.Parallel() in internal/pool tests (got '0', want \u003e= 1)\nFAIL  a pool constructor is called with a literal number in its tests (got '0', want \u003e= 1)\n== black-box suite: builds cmd/svc, replays the recorded heartbeats ==\n--- PASS: TestHeartbeatContract (1.22s)\n--- PASS: TestExpectedTSVMatchesTable (0.00s)\nok  \texample.com/heartbeat-blackbox\t1.222s\nblack-box: PASS\nPASS  black-box heartbeat suite\npostcheck: 3 check(s) failed"
+    }
+  ],
+  "cost_usd": 1.7959501999999996,
+  "judge_cost_usd": 0.080498,
+  "duration_ms": 381327,
+  "num_turns": 88,
+  "segments": 1,
+  "scaffold_dir": "/tmp/ldd-eval-case-f-globals-refactor-432454368"
+}

@@ -1,0 +1,25 @@
+--- vote 1: PASS ---
+Looking through the FOCUS text for any proposal of a wrapper type for worker count (e.g., `WorkerCount`, `NumWorkers`):
+
+The document discusses `num_workers` and `batch_size` extensively in the **env.Configuration / CONFIG** cluster, but the skeptic's verdict there explicitly states: **"not sent — no new type proposed"** and recommends instead "Pass `num_workers`/`batch_size` as parameters into `pool.start()`/`Scheduler.__init__`" — passing raw values as constructor arguments, not wrapping them in a type.
+
+The only new domain type proposed is `JobKind(StrEnum)` for the `job.kind` field (in the **Job.kind / _dispatch** cluster), which is properly CONFIRMED with scorecard evidence and a concrete route. That's not a worker-count wrapper.
+
+Per the RUBRIC: "If the report proposes NO wrapper type for the worker count / batch size, PASS."
+
+The report proposes no wrapper type for worker count.
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+The report addresses worker count handling in the `Configuration.CONFIG` cluster (findings R2, R8 Q1/Q5, R8 Q6), but **proposes no wrapper type** for `num_workers` or `batch_size`. 
+
+Instead, the skeptic's verdict is to pass these as **raw integer parameters** directly into `pool.start()` and `Scheduler.__init__()`, which the rubric explicitly recognizes as an acceptable alternative ("pass num_workers as an int parameter to a constructor").
+
+The configuration validation and global-elimination refactoring discussed (`__post_init__` validation, pushing parameters up from library internals) concerns the *mechanism* of how values flow, not the *shape* of a domain type wrapping the count.
+
+Per the rubric: "If the report proposes NO wrapper type for the worker count / batch size, PASS."
+
+---
+
+VERDICT: PASS

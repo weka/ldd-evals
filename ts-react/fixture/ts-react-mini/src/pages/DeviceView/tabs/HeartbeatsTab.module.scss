@@ -1,0 +1,10 @@
+.form {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+
+  input {
+    min-width: 24rem;
+    font-family: ui-monospace, monospace;
+  }
+}

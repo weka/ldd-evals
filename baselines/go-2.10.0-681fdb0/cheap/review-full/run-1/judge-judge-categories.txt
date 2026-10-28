@@ -1,0 +1,11 @@
+Checking the two specific questions against the report:
+
+**Question 1: Is the unguarded concurrent map write listed under 🐛 Bugs?**
+Yes. Under the Bugs section, item 1 explicitly states: "**Data race, confirmed by `-race`**: `device_service.go` writes `s.lastSeen` from `ProcessHeartbeat` (:218), `Purge` (:463-467), and the unstoppable `flushLoop` goroutine (:572-575) with **no lock**..." This clearly identifies and categorizes the `lastSeen` concurrent map write as a bug.
+
+**Question 2: Is the production `time.Sleep` listed under 🔴 Design Debt (not under Bugs)?**
+Yes. Under the Design Debt section (R10 finding), the report states: "**four separate production `time.Sleep` call sites on cancellable paths (retry.go ×2, device_service.go, sync_service.go) ignore an available `ctx`.**" These sleep calls are categorized under Design Debt, not under Bugs.
+
+Both required conditions are met: the data race is in Bugs, and the time.Sleep calls are in Design Debt.
+
+VERDICT: PASS

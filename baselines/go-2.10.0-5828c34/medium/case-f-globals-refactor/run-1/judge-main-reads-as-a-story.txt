@@ -1,0 +1,11 @@
+Analyzing the FOCUS file against the RUBRIC requirements:
+
+**Requirement 1 Analysis:** Configuration is obtained once (`cfg := env.Load()` on line 28), but individual values are NOT consistently handed to constructors. While `cfg.FlapWindowSec`, `cfg.BatchSize`, `cfg.NumWorkers`, and `cfg.Region` are properly extracted and passed (lines 54, 56, 65), the `WEBHOOK_URL` is read directly inline (line 52: `os.Getenv("WEBHOOK_URL")`). This violates the stated principle that "individual values are handed to constructors" after being obtained once—it should either be part of `cfg` or extracted into a named variable first like the `listenAddr()` and `defaultStorePath()` helpers.
+
+**Requirement 2 Analysis:** The flow mostly reads as a narrative (load config → build store → build services → serve), but has interruptions. The random jitter sleep (lines 31–33) is an unnamed side effect that doesn't fit the story. The store validation (lines 48–50) happens after services are partially constructed, adding a non-standard step. The story is roughly there but not cleanly at one altitude.
+
+**Requirement 3 Analysis:** No problematic business logic is present—the wiring helpers (`listenAddr`, `defaultStorePath`, `mustOpenFileRepo`, `routes`, `healthz`) are appropriately scoped. This requirement is satisfied.
+
+**Critical Issue:** The code fails requirement 1 because `WEBHOOK_URL` is obtained via `os.Getenv()` inline rather than being obtained once and handed explicitly, breaking the pattern established by other config values.
+
+VERDICT: FAIL

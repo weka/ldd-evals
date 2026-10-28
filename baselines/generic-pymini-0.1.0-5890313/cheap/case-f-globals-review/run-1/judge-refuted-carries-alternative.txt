@@ -1,0 +1,31 @@
+--- vote 1: PASS ---
+Looking through the FOCUS text for any proposed wrapper types for worker count or batch size:
+
+The report identifies findings around `num_workers` and `batch_size` (in the env.CONFIG, pool.start(), and Scheduler clusters), but in each case:
+
+- **pool.start()** → proposed fix: "parameterize `start(jobs, num_workers)`, caller supplies the value" — passing as a plain `int` parameter
+- **Scheduler** → proposed fix: "accept `batch_size` in `Scheduler.__init__`" — passing as a plain constructor argument
+- **env.CONFIG** → proposed fix: fold into `load()` alongside other config values — no wrapper type proposed
+
+The skeptic's two verdicts (CONFIRMED for JobKind enum, REFUTED for strategy map) address the Job.kind dispatch cluster, not worker count.
+
+**No wrapper type** (e.g., `WorkerCount`, `NumWorkers`, `BatchSize`) is proposed anywhere in this report. All findings route to plain parameter injection of integer values.
+
+Per the rubric: "If the report proposes NO wrapper type for the worker count / batch size, PASS."
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+Looking at the report for wrapper types proposed for the worker count (e.g., `WorkerCount`, `NumWorkers`):
+
+**Findings:**
+- The **pool.start()** cluster recommends parameterizing `start(jobs, num_workers)` to accept the count as a plain `int`, not wrapping it in a type.
+- The **Scheduler** cluster recommends accepting `batch_size` as a plain `int` in `__init__`, not wrapping it.
+- The **env.CONFIG** cluster discusses moving `NUM_WORKERS` to `load()` as a parameter value, with no wrapper type proposed.
+- The one wrapper type the skeptic reviewed—`JobKind` enum in the Job.kind cluster—is for the job kind field, not the worker count, and received a clear REFUTED verdict with a concrete alternative (use existing `JOB_KIND_*` string constants).
+
+No wrapper type specifically for the worker count or batch size (such as `WorkerCount`, `NumWorkers`, or similar) is proposed anywhere in this report. All recommendations route worker/batch counts through constructor parameters as plain `int` values.
+
+Per the rubric: "If the report proposes NO wrapper type for the worker count / batch size, PASS."
+
+VERDICT: PASS

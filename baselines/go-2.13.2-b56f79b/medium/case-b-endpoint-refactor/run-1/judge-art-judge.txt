@@ -1,0 +1,29 @@
+--- vote 1: PASS ---
+**Rubric assessment:**
+
+1. **One box** — ✓ `Endpoint` type holds host, port, tls. `NewEndpoint` owns the port-range rule once: `if port <= 0 || port > 65535 { port = defaultPort }`. Methods answer own questions: `Addr()`, `URL(path)`, `HealthURL()`. `dial` takes `Endpoint`, not separate params. No branching on `c.tls` in Client methods; scheme logic centralized in `schemeFor()`.
+
+2. **Scheme decided once** — ✓ Constants `schemeHTTP` and `schemeHTTPS` defined once. Single decision point: `schemeFor(tls bool)` in endpoint.go. No other "http"/"https" branches in the codebase.
+
+3. **Names speak intent** — ✓ `Get`: `url := c.endpoint.URL(path); resp, err := c.http.Get(url)` reads as "get URL, then GET it". `Ping`: `conn, err := dial(c.endpoint); conn.Close()` reads as "dial endpoint, close it". `HealthURL`: delegates to `c.endpoint.HealthURL()`. No `fmt.Sprintf` assembly inside.
+
+4. **No leftover ceremony** — ✓ Port validation only in `NewEndpoint()` constructor. `dial()` assumes port valid (no re-check), uses `e.Addr()` directly. Comments describe contracts and intent ("A zero-value Endpoint is never used directly", "performs a GET against path"), not names.
+
+Bonus (not required): `Ping` on TLS endpoint wraps with `cryptotls.Client()` but closes immediately without forcing handshake.
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+Reading the code against the rubric:
+
+1. **One box.** `Endpoint` holds host, port, tls. `NewEndpoint()` owns the port-range rule: `if port <= 0 || port > 65535 { port = defaultPort }`. Methods answer questions: `Addr()` (dial address), `URL(path)` (full URL), `HealthURL()` (health check URL), and `schemeFor()` determines scheme. No free functions taking raw `(host, port, tls)` triplets remain. **PASS:** `type Endpoint struct { host string; port int; tls bool }` with constructor and methods.
+
+2. **Scheme decided once.** `"http"` and `"https"` appear only in the const block, and the decision logic lives in one place: `func schemeFor(tls bool)`. **PASS:** Constants `schemeHTTP`, `schemeHTTPS` and the single decision function.
+
+3. **Names speak intent.** `Get()` reads `c.endpoint.URL(path)` with no string assembly. `Ping()` reads `dial(c.endpoint)`, `conn.Close()`. `HealthURL()` reads `c.endpoint.HealthURL()`. The `URL()` method itself uses `schemeFor()` and `e.Addr()` as semantic pieces, not raw sprintf. **PASS:** Client methods are clean sentences.
+
+4. **No leftover ceremony.** Port validation in `NewEndpoint()` only. `dial()` takes `Endpoint` and calls `e.Addr()` (no re-validation). Comments state behavior and contract, not just names. **PASS:** Single port check; clean dial; no redundant narration.
+
+No bonus: `Ping()` on TLS endpoints calls `cryptotls.Client()` but closes immediately without triggering the handshake.
+
+VERDICT: PASS

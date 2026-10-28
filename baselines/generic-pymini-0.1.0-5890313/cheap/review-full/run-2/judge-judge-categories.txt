@@ -1,0 +1,48 @@
+--- vote 1: PASS ---
+Looking at the two required findings in the report:
+
+**Question 1: Unguarded concurrent dict access under 🐛 Bugs?**
+
+In the Bugs section, I find:
+```
+`internal/services/device_service.py:194,383-385,458-460` | R10 Q3: `self.last_seen[device_id] = ...` 
+(line 194, inside a per-HTTP-request-thread call path...) and two more iterate-and-delete sites on the same dict 
+(`purge()` at 383-385, `_flush_loop` at 458-460) all run outside the `self.mu` lock
+```
+
+This is correctly filed under 🐛 Bugs and describes exactly the data race on the `last_seen` dict (written from request thread, iterated from flush thread, no lock). ✓
+
+**Question 2: Production `time.sleep` calls under 🔴 Design Debt (not Bugs)?**
+
+Under 🔴 Design Debt, R10 includes:
+```
+`internal/services/retry.py:43,57`, `device_service.py:164`, `sync_service.py:99` | Q5: four bare `time.sleep(...)` 
+backoff/retry loops on cancellable paths (per-request-reachable), with no cancellation mechanism anywhere
+```
+
+This covers the retry backoff (including at `device_service.py:164` in `process_heartbeat` per the cluster description: "bare `time.sleep(attempt * 0.2)` on the DOWN-notification retry loop at :164") and polling sleeps, all filed under Design Debt. The flush-loop sleep mentioned in Bugs is a separate issue (about thread joinability), not the retry backoff specified in the criteria. ✓
+
+Both questions are answered affirmatively.
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+Looking at the report:
+
+**Question 1 — Unguarded concurrent dict access under Bugs?**
+
+Under the 🐛 Bugs section, the second bug explicitly states:
+> `internal/services/device_service.py:194,383-385,458-460` | R10 Q3: `self.last_seen[device_id] = ...` (line 194, inside a per-HTTP-request-thread call path...) and two more iterate-and-delete sites on the same dict (`purge()` at 383-385, `_flush_loop` at 458-460) all run outside the `self.mu` lock...
+
+This is the unguarded concurrent dict access (last_seen written from request thread, iterated/deleted in flush thread), clearly filed under Bugs. ✓
+
+**Question 2 — Production time.sleep under Design Debt?**
+
+Under 🔴 Design Debt, section "R10 — Concurrency Safety, non-crash findings":
+> `internal/services/retry.py:43,57`, `device_service.py:164`, `sync_service.py:99` | Q5: four bare `time.sleep(...)` backoff/retry loops on cancellable paths...
+
+The production time.sleep calls (retry backoff, polling sleep) are filed under Design Debt (R10), not under Bugs. ✓
+
+Both conditions met.
+
+VERDICT: PASS

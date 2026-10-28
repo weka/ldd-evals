@@ -1,0 +1,66 @@
+--- vote 1: FAIL ---
+Looking at the `ProcessHeartbeat` method body, I need to check if every statement is either a named call, an assignment of one, or an early return — with no string, index, or byte manipulation.
+
+**Violations found:**
+
+1. **Line 14**: `s.cache[cacheKey(tenant, parsed.ID)] = d` — map indexing (index manipulation)
+2. **Line 15**: `s.lastSeen[parsed.ID] = d.LastSeen` — map indexing (index manipulation)
+
+The criteria explicitly forbids "index or byte manipulation in the body." Map indexing assignments like these are index manipulations. While the rubric's specific FAIL list mentions "slice indexing like `parts[0]`", the criteria is stricter and prohibits *all* index manipulation, which includes map updates via subscript notation.
+
+These statements do not fit the allowed patterns (named calls or assignments of single values from function calls).
+
+VERDICT: FAIL
+
+--- vote 2: PASS ---
+Looking at the `ProcessHeartbeat` method, I need to verify it meets the altitude criteria: every statement is a named call or assignment of one, with no string/index/byte manipulation.
+
+Checking the explicit failure conditions from the rubric:
+- **`strings.` calls**: None in the body ✓
+- **Slice indexing** (`parts[0]`, `t[7:]`): None ✓
+- **String comparisons against status literals** (`== "READY"`): None (only `!= ""` check) ✓
+- **Labeled `continue`**: None ✓
+- **`goto`**: None ✓
+- **`time.Sleep`**: None ✓
+- **Hand-rolled retry loop**: None ✓
+- **Nested `if` blocks more than two levels deep**: The deepest nesting is `if changed || force { if err := ... { } }` = 2 levels ✓
+
+Examining the "short story":
+1. **Parse the line**: `ParseHeartbeatLine(raw, force)` ✓
+2. **Look up/create device**: `s.loadOrCreateDevice(...)` ✓
+3. **Apply status transition**: `s.applyStatusTransition(...)` (includes notifyDown internally) ✓
+4. **Score**: `scoreForStatus(status, len(parsed.Tags))` in return ✓
+5. **Persist**: `s.repo.Save(context.Background(), d)` ✓
+
+All statements are either:
+- Named calls (`ParseHeartbeatLine`, `s.loadOrCreateDevice`, `s.applyStatusTransition`, `s.repo.Save`, `s.mu.Lock()`, etc.) ✓
+- Assignments of one value (`d.Version = parsed.Version`, `changed = true`, `d.LastSeen = time.Now()`, `s.cache[...] = d`) ✓
+- Early error returns ✓
+
+No string/index/byte manipulation present.
+
+VERDICT: PASS
+
+--- vote 3: PASS ---
+Looking at the `ProcessHeartbeat` method body (lines starting at `func (s *DeviceService) ProcessHeartbeat`):
+
+**Checking the "short story" structure:**
+1. Parse line: `ParseHeartbeatLine(raw, force)` ✓ named call
+2. Load/create device: `s.loadOrCreateDevice(tenant, parsed.ID, parsed.Tags)` ✓ named call
+3. Apply status transition: `s.applyStatusTransition(&d, parsed.Status, force)` ✓ named call (notifyDown happens inside this)
+4. Persist: `s.repo.Save(context.Background(), d)` ✓ named call
+5. Score: `scoreForStatus(status, len(parsed.Tags))` ✓ named call (in return)
+
+**Checking for forbidden constructs:**
+- `strings.` calls: none ✓
+- Slice indexing (`parts[0]`, `t[7:]`): none ✓
+- Status literal comparisons (`== "READY"`): none (only `parsed.Version != ""` which checks emptiness, not a status) ✓
+- Labeled continue: none ✓
+- goto: none ✓
+- time.Sleep: none ✓
+- Hand-rolled retry loop: none ✓
+- Nested if > 2 levels deep: The deepest is 2 levels (`if changed || force` then `if err :=`) ✓
+
+**All statements are:** named calls, simple assignments, field assignments, or early error returns. The map assignments (`s.cache[cacheKey(...)] = d` and `s.lastSeen[parsed.ID] = ...`) are straightforward map assignments, not the slice indexing the rubric forbids.
+
+VERDICT: PASS

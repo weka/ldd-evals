@@ -1,0 +1,38 @@
+task: Task "build" is up to date
+task: [go:cases] mkdir -p /home/user/ldd-evals/../ai-coding-rules/go-linter-driven-development/evals
+task: [go:cases] rsync -a --delete --exclude=/README.md go/cases/ go/scaffold go/postcheck go/fixture /home/user/ldd-evals/../ai-coding-rules/go-linter-driven-development/evals/
+task: [go:run] bin/ldd-eval run --tag medium --model claude-sonnet-5 --max-cost-usd 35 --keep-temp --plugin-dir /home/user/ldd-evals/../ai-coding-rules/go-linter-driven-development --out results/go-rebaseline-5828c34-m2/medium  --resume /home/user/ldd-evals/../ai-coding-rules/go-linter-driven-development/evals
+ldd-eval: 10 case(s) -> results/go-rebaseline-5828c34-m2/medium
+case-a-retention-refactor run 1/1: passed=true cost=$0.9795 turns=43 
+case-b-endpoint-refactor run 1/1: passed=true cost=$3.4202 turns=74 
+case-c-picker-refactor run 1/1: passed=false cost=$1.6401 turns=50 
+case-d-ceremony-refactor run 1/1: passed=false cost=$0.3433 turns=25 
+case-e-nils-refactor run 1/1: passed=false cost=$1.7882 turns=47 
+case-f-globals-refactor run 1/1: passed=false cost=$1.8827 turns=88 
+centerpiece-storify-refactor run 1/1: passed=false cost=$2.2440 turns=59 
+prepare-sms run 1/1: passed=false cost=$2.1562 turns=72 
+quickfix-red-lint run 1/1: passed=false cost=$27.2943 turns=302 
+budget $35.00 exceeded after $41.7486; stopping
+aggregate: passRate=0.22 averageScore=0.71 totalCostUSD=41.7486 -> results/go-rebaseline-5828c34-m2/medium/aggregate-result.json
+ldd-eval: cumulative cost $41.7486 exceeded --max-cost-usd $35.00
+task: Failed to run task "go:run": exit status 2
+exit=201
+task: Task "build" is up to date
+task: [go:cases] mkdir -p /home/user/ldd-evals/../ai-coding-rules/go-linter-driven-development/evals
+task: [go:cases] rsync -a --delete --exclude=/README.md go/cases/ go/scaffold go/postcheck go/fixture /home/user/ldd-evals/../ai-coding-rules/go-linter-driven-development/evals/
+task: [go:run] bin/ldd-eval run --tag medium --model claude-sonnet-5 --max-cost-usd 45 --keep-temp --plugin-dir /home/user/ldd-evals/../ai-coding-rules/go-linter-driven-development --out results/go-rebaseline-5828c34-m2/medium  --resume /home/user/ldd-evals/../ai-coding-rules/go-linter-driven-development/evals
+ldd-eval: 10 case(s) -> results/go-rebaseline-5828c34-m2/medium
+case-a-retention-refactor resumed 1/1: passed=true cost=$0.9795 turns=43 
+case-b-endpoint-refactor resumed 1/1: passed=true cost=$3.4202 turns=74 
+case-c-picker-refactor resumed 1/1: passed=false cost=$1.6401 turns=50 
+case-d-ceremony-refactor resumed 1/1: passed=false cost=$0.3433 turns=25 
+case-e-nils-refactor resumed 1/1: passed=false cost=$1.7882 turns=47 
+case-f-globals-refactor resumed 1/1: passed=false cost=$1.8827 turns=88 
+centerpiece-storify-refactor resumed 1/1: passed=false cost=$2.2440 turns=59 
+prepare-sms resumed 1/1: passed=false cost=$2.1562 turns=72 
+quickfix-red-lint resumed 1/1: passed=false cost=$27.2943 turns=302 
+wire-repo-brain run 1/1: passed=true cost=$0.9643 turns=34 
+aggregate: passRate=0.30 averageScore=0.74 totalCostUSD=42.7130 -> results/go-rebaseline-5828c34-m2/medium/aggregate-result.json
+ldd-eval: some cases fell below the pass-rate threshold 1.00
+task: Failed to run task "go:run": exit status 1
+exit=201

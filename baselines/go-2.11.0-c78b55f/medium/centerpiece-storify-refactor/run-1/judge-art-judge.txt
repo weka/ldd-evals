@@ -1,0 +1,63 @@
+--- vote 1: FAIL ---
+Looking at the `ProcessHeartbeat` method and related helpers against the rubric criteria:
+
+**1. The story (PARTIAL):** ProcessHeartbeat flows well through parse → lookup/create → transition → score → persist, but there's a broken chapter: inline version and tags updates that should be extracted:
+```go
+if d.Version != fields.version && fields.version != "" {
+    d.Version = fields.version
+    changed = true
+}
+if len(tags) > 0 {
+    d.Tags = tags
+    changed = true
+}
+```
+These deserve their own named helper like `applyHeartbeatUpdates`.
+
+**2. Concepts have boxes (FAIL):** Status remains a bare string with hard-coded string literals in `Score()` ("READY", "DEGRADED", "DOWN") while other code uses `models.StatusReady` constants. There's no `Status` type with `IsDown()`, `Score()`, or `Weight()` methods. Retry logic is scattered across `notifyDown` (inline), `withRetry`, `retryDelay`, and `SendWithRetry`. The public `ParseHeartbeatLine` in heartbeat_parser.go still returns five values as a tuple—exactly the pattern flagged for refactoring.
+
+**3. Names (PASS):** Names read well: `parseHeartbeatFields`, `getOrCreateHeartbeatDevice`, `applyStatusTransition`, `notifyDown`, `heartbeatScore`.
+
+**4. Comments (PASS):** Unnecessary comments are gone. Remaining comments (lints, the cacheKey rationale) earn their place.
+
+**5. Nothing ugly hid elsewhere (FAIL):** The `normalizeTags` function in heartbeat_parser.go has a labeled `continue outer` statement—explicitly flagged as ugly in the rubric. The `notifyDown` method duplicates a retry loop with hard-coded backoff instead of using the `withRetry` abstraction elsewhere. Duplicate scoring logic appears in both `heartbeatScore` and `Score`.
+
+The refactoring moved code but didn't fully transform it: labeled continues and inline retries survived by moving into helpers, not by being eliminated. Status should be a type, not a string.
+
+`VERDICT: FAIL`
+
+--- vote 2: PASS ---
+# Analysis
+
+Examining ProcessHeartbeat (device_service.go:107-148) and its supporting cast against the PASS criteria:
+
+**1. The story:** ProcessHeartbeat reads as five named chapters—parseHeartbeatFields, getOrCreateHeartbeatDevice, applyStatusTransition (which includes notifyDown), heartbeatScore, and persist. A reader can predict each step's job from its name.
+
+**2. Concepts have boxes:** The wire format became heartbeatFields with its parser ✓; status transitions live in applyStatusTransition ✓; retry/backoff for notifications lives in notifyDown ✓; tenant/region lookup is in getOrCreateHeartbeatDevice ✓. Status itself is string-based with constants (models.StatusDown, etc.) rather than a full type with IsDown()/Weight() methods, which is a slight weakness, but the core abstraction is sound.
+
+**3. Names are domain words:** parseHeartbeatFields, getOrCreateHeartbeatDevice, applyStatusTransition, heartbeatScore, notifyDown, cacheKey—all express domain logic, not mechanics. No helper/step1/process2 naming.
+
+**4. Comments earned their place:** "// bounds-checked: map access never panics" explains a subtle invariant; "// the heartbeat response surfaces this error text verbatim" explains a contract. The old comment-markers ("// parse the line", "// look up or create") are gone because the function calls now say it.
+
+**5. Nothing ugly hid elsewhere:** Helpers are legitimately factored (notifyDown's manual retry with backoff is intentionally different from withRetry's fixed schedule, not a blind move). The labeled continue in normalizeTags (heartbeat_parser.go) is a minor code smell but solves tag deduplication specifically and isn't just the old pattern moved unchanged. The version/tag inline updates in ProcessHeartbeat are light and reasonable.
+
+No FAIL conditions present: no goto, no gocognit nolint on ProcessHeartbeat, no numbered/helper-named functions.
+
+VERDICT: PASS
+
+--- vote 3: FAIL ---
+Looking at `ProcessHeartbeat` and the package systematically:
+
+**Criterion 1 — The story:** ProcessHeartbeat reads top-down with named chapters: `parseHeartbeatFields`, `getOrCreateHeartbeatDevice`, `applyStatusTransition`, `heartbeatScore`, `repo.Save`. However, version and tags updates happen inline in the middle without their own named step, muddying the narrative slightly.
+
+**Criterion 2 — Concepts have boxes:** Heartbeat wire data is extracted into `heartbeatFields` with parser—good. But status remains a string with constants (`models.StatusDown`) rather than a Type with methods (`IsDown()`, `Score()`), and retry/backoff logic is inconsistent: `notifyDown` inline-loops with `time.Sleep`, while the identical `Retry` method exists in the same file and uses the generic `withRetry()` helper. The pattern should have been unified.
+
+**Criterion 3 — Domain names:** Strong. `parseHeartbeatFields`, `getOrCreateHeartbeatDevice`, `applyStatusTransition`, `notifyDown`, `heartbeatScore` all read as verbs on domain nouns.
+
+**Criterion 4 — Comments earned place:** Passes. The old `// parse the line`, `// look up or create device` markers are gone; remaining comments explain contract.
+
+**Criterion 5 — Nothing ugly hid elsewhere:** Fails. In `internal/services/heartbeat_parser.go`, `normalizeTags` uses a labeled `continue outer` — explicitly mentioned in the rubric as ugly code that should not survive refactoring. Additionally, it carries three nolints (`//nolint:gocognit,gocyclo,nestif`), signaling the refactoring left complexity behind rather than eliminating it.
+
+The code is partial. ProcessHeartbeat itself is reasonably clean, but the full package still harbors the labeled-continue pattern and inconsistent retry handling that the rubric disallows.
+
+**VERDICT: FAIL**

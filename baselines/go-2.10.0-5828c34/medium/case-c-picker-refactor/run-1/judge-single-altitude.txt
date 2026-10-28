@@ -1,0 +1,11 @@
+Looking at the code structure:
+
+The `Pick` method is clean—it's a single delegated call to `pickReplicas` with error handling.
+
+However, `pickReplicas` contains a direct `for _, n := range nodes` loop that iterates over the node slice (lines 35-40). The rubric explicitly forbids this: "NO loop over the node slice" and "Loops... are not allowed in the orchestrator."
+
+While `pickReplicas` delegates the decision-making to `sel.offer()` and `usable()`, the loop itself remains in the orchestrator method. The rubric expects this loop to be encapsulated inside a method on a collection type (like `type Nodes []Node` with a method that performs the iteration and delegation), not exposed in the orchestrator itself.
+
+The refactored pattern would move the loop into a `Nodes` collection method, leaving `pickReplicas` with only named calls: something like `primary, secondary, err := nodes.selectReplicas(zone)`.
+
+VERDICT: FAIL

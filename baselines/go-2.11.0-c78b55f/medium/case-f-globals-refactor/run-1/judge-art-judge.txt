@@ -1,0 +1,67 @@
+--- vote 1: FAIL ---
+## Analysis
+
+The code has critical failures against the rubric:
+
+**FAIL outright conditions triggered:**
+
+1. **env.go contains `func init()`** — This violates the explicit requirement: "FAIL outright if... `env.go` still contains `func init()`."
+   ```go
+   func init() { //nolint:gochecknoinits // TODO
+       region = os.Getenv("REGION")
+   }
+   ```
+
+2. **env.go has a mutable package-level `region` variable** — Violates criterion 3: "The env package only loads. No `init()`, no package-level mutable `Config` or `region`."
+
+3. **jobs/registry.go has globals and init()** — The `handlers` map, `store`, and `storeOnce` are package-level globals initialized in `init()`, not passed through the wiring diagram:
+   ```go
+   var handlers = map[string]func(models.Job) error{} //nolint:gochecknoglobals // TODO
+   var store *repository.MemStore //nolint:gochecknoglobals // TODO
+   
+   func init() { //nolint:gochecknoinits // TODO
+       handlers[models.JobKindSnapshot] = runSnapshot
+       handlers[models.JobKindSync] = func(j models.Job) error {
+           return Sync(context.Background(), GetStore(), j)
+       }
+   }
+   ```
+
+The store should be instantiated in main and passed to the Scheduler/jobs, not lazily created via `sync.Once`.
+
+**What works:**
+- main.go correctly loads config once and extracts specific values
+- pool.Start and scheduler signatures name their dependencies
+
+---
+
+VERDICT: FAIL
+
+--- vote 2: FAIL ---
+## Analysis
+
+The code fails multiple explicit criteria:
+
+**Automatic Failure #1: env.go contains func init()**
+The rubric states: "FAIL outright if `env.go` still contains `func init()`." Lines 14–16 of `internal/env/env.go` contain exactly this:
+```go
+func init() { //nolint:gochecknoinits // TODO
+	region = os.Getenv("REGION")
+}
+```
+The nolint comment masks but doesn't fix the violation.
+
+**Criterion 3 (env package): env.go contains mutable package-level state**
+Line 12 defines `var region string //nolint:gochecknoglobals // TODO`, a mutable global initialized by `init()`. The criterion requires "No `init()`, no package-level mutable `Config` or `region`." This package-level `region` variable is exactly what must not exist.
+
+**Criterion 2 (islands): jobs package has its own globals**
+`internal/jobs/registry.go` contains:
+- Line 23: `var handlers = map[string]func(models.Job) error{}` — mutable package-level state
+- Line 27: `var store *repository.MemStore` — mutable package-level state
+- Lines 29–34: `func init()` populates the handlers map
+
+These dependencies are not passed through function signatures; they're hidden in package globals. In `scheduler.go` line 91, `dispatch()` silently reads `handlers`, and line 34 shows the sync handler calling `GetStore()` which lazily initializes a global store. This violates "Islands are clean" and "A package-level `var` that main sets from the outside is a global with extra steps: FAIL."
+
+The main wiring in `cmd/svc/main.go` looks clean (criterion 1), but the jobs package defeats the whole dependency injection pattern.
+
+VERDICT: FAIL

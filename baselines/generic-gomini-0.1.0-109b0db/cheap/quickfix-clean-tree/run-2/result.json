@@ -1,0 +1,50 @@
+{
+  "case": "quickfix-clean-tree",
+  "run": 2,
+  "model": "claude-sonnet-5",
+  "passed": true,
+  "graders": [
+    {
+      "name": "names-all-form",
+      "type": "regex",
+      "passed": true,
+      "detail": "--all over last_message: 3 match(es); want at least 1"
+    },
+    {
+      "name": "no-agents-spawned",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Agent called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "no-edits",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Edit called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "no-writes",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Write called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "nothing-in-scope",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i)nothing (in scope )?to (fix|quick-?fix|clean up)|no files? (in scope|to fix)|scope[^\\n]{0,40}\\b(empty|none)\\b over last_message: 1 match(es); want at least 1"
+    },
+    {
+      "name": "postcheck",
+      "type": "postcheck",
+      "passed": true,
+      "detail": "PASS  no commit after the scaffold base (0)\nPASS  working tree clean (nothing edited) (0)\npostcheck: all checks passed"
+    }
+  ],
+  "cost_usd": 0.07638719999999999,
+  "judge_cost_usd": 0,
+  "duration_ms": 16273,
+  "num_turns": 3,
+  "segments": 1,
+  "scaffold_dir": "/tmp/ldd-eval-quickfix-clean-tree-816255836"
+}

@@ -1,0 +1,47 @@
+--- vote 1: FAIL ---
+Looking at the four required conditions:
+
+**1. One box — FAIL**
+The retention concept splits across a bare package-level function and the type. `parseRetentionDays` is a standalone helper—the rubric explicitly rejects this shape: "A bare `parseRetentionDays(raw) (int, error)` helper shared by both callers is a dedupe, not a box: FAIL." The code has exactly this: a lowercase package function that multiple callers use. The range check and parsing live in the function, not on a type with methods.
+Quote: `func parseRetentionDays(raw map[string]string) (retentionDays, error)` in config.go—function wraps the type; the type has no behavior.
+
+**2. Names speak intent — FAIL**
+`applyPolicy` asks the mechanical question, not the domain question. It extracts days and compares age directly: `if age > int(days)`. The rubric wants domain language like `retention.Expired(age)` or `Covers(...)`.
+Quote: `if age > int(days) { expired = append(expired, sn) }` in policy.go reads as a ledger of mechanics, not intent.
+
+**3. One altitude per function — FAIL**
+`applyPolicy` contains arithmetic and unit conversion in its body: `age := int(s.now().Sub(sn.CreatedAt).Hours() / 24)`. The rubric forbids unit conversion in this function.
+Quote: `Hours() / 24` in policy.go violates "no arithmetic, strconv, strings or unit conversion in that body."
+
+**4. No leftover ceremony — PASS**
+No `0` sentinel, no defensive re-checks.
+
+VERDICT: FAIL
+
+--- vote 2: FAIL ---
+**Analysis:**
+
+Checking against the four conditions:
+
+1. **One box** ✓ — `retentionDays` is a named type with `parseRetentionDays` wrapping parsing and the 1–365 range check.
+
+2. **Names speak intent** ✗ — In `applyPolicy`, the loop compares `age > int(days)` — mechanical arithmetic, not domain language. Should ask the retention type a question like `retention.Expired(age)` or `Covers(...)`.
+
+3. **One altitude per function** ✗ — `applyPolicy` mixes altitudes:
+   - Obtains retention ✓
+   - Calculates age with unit conversion: `int(s.now().Sub(sn.CreatedAt).Hours() / 24)` ✗
+   - Compares: `age > int(days)` ✗
+   
+   The time arithmetic and comparison should be in the retention type, not in this function.
+
+4. **No leftover ceremony** ✓ — No `0` sentinel, no defensive comments.
+
+The retention box exists but is hollow — parsing lives there, but the decision logic (what is expired?) stays outside in raw mechanics. `applyPolicy` should read: "get retention, tell it which snapshots expired, return those" — not "calculate days, compare numbers."
+
+**Quote for condition 2 failure:**
+`if age > int(days)` — reads mechanically, not as domain intent.
+
+**Quote for condition 3 failure:**
+`age := int(s.now().Sub(sn.CreatedAt).Hours() / 24)` — unit conversion and arithmetic in the policy body, not delegated.
+
+VERDICT: FAIL

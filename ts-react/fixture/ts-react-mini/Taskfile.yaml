@@ -1,0 +1,31 @@
+version: '3'
+
+tasks:
+  build:
+    desc: Type-check the tree and build the production bundle
+    cmds:
+      - npx tsc -b
+      - npx vite build
+
+  test:
+    desc: Run the unit tests once
+    cmds:
+      - npx vitest run
+
+  test:coverage:
+    desc: Run the unit tests with coverage
+    cmds:
+      - npx vitest run --coverage
+
+  lint:
+    desc: Type-check, lint and check formatting
+    cmds:
+      - npx tsc -b
+      - npx eslint .
+      - npx prettier --check .
+
+  lintwithfix:
+    desc: Apply the automatic lint fixes, then format
+    cmds:
+      - npx eslint . --fix
+      - npx prettier --write .

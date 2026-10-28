@@ -1,0 +1,26 @@
+version: '3'
+
+tasks:
+  build:
+    desc: Byte-compile every module and type-check the tree
+    cmds:
+      - python -m compileall -q internal svc
+      - mypy
+
+  test:
+    desc: Run the unit tests
+    cmds:
+      - pytest -q
+
+  lint:
+    desc: Run ruff (lint and format) and mypy
+    cmds:
+      - ruff check .
+      - ruff format --check .
+      - mypy
+
+  lintwithfix:
+    desc: Run ruff and apply automatic fixes, then format
+    cmds:
+      - ruff check --fix .
+      - ruff format .

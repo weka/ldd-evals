@@ -1,0 +1,41 @@
+--- vote 1: PASS ---
+**Question 1: Are the concurrency bugs filed under 🐛 Bugs?**
+
+Yes. The report lists both bugs under the Bugs section:
+- `src/hooks/useDeviceFeed.ts` setInterval with no cleanup (R10 Q1)
+- `src/hooks/useDeviceSearch.ts` out-of-order response due to missing `ignore` flag/AbortController (R10 Q2/Q3)
+
+Neither is mentioned elsewhere as Design Debt or lower.
+
+**Question 2: Are production sleeps filed under 🔴 Design Debt, not Bugs?**
+
+Yes. The report lists production sleeps under Design Debt at R10 Q5:
+- `src/services/retry.ts:49,64`
+- `src/pages/Heartbeats/heartbeatFeed.ts:658-674`
+- `src/services/syncService.ts:144`
+
+All three are categorized as Design Debt ("Replace Sleep with Cancellable Wait"), not under Bugs.
+
+---
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+**Question 1: Real concurrency bugs filed under 🐛 Bugs**
+
+The report lists both bugs correctly:
+- `src/hooks/useDeviceFeed.ts:12-22` under R10 Q1: `useEffect(() => { setInterval(...) }, [pollMs])` with no cleanup
+- `src/hooks/useDeviceSearch.ts:13-30` under R10 Q2/Q3: out-of-order response bug where stale responses overwrite fresh ones due to no `ignore` flag or `AbortController`
+
+Both appear in the 🐛 Bugs section, not under Design Debt.
+
+**Question 2: Production sleeps filed under 🔴 Design Debt**
+
+The report lists production sleeps under Design Debt:
+- `src/services/retry.ts:49,64`
+- `src/pages/Heartbeats/heartbeatFeed.ts:658-674`
+- `src/services/syncService.ts:144`
+
+All appear in the 🔴 Design Debt section as R10 Q5 findings (`await new Promise((resolve)=>setTimeout(resolve, ...))`), not under Bugs.
+
+VERDICT: PASS

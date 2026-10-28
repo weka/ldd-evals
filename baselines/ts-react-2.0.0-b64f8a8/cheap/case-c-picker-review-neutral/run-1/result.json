@@ -1,0 +1,38 @@
+{
+  "case": "case-c-picker-review-neutral",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": true,
+  "graders": [
+    {
+      "name": "anchor-picker",
+      "type": "regex",
+      "passed": true,
+      "detail": "picker\\.ts:[0-9]+ over last_message: 9 match(es); want at least 1"
+    },
+    {
+      "name": "evidence-flags",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i)primaryFound|secondaryFound|boolean flag|flag-driven over last_message: 6 match(es); want at least 1"
+    },
+    {
+      "name": "evidence-protocol",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\.tsx?:[0-9]+ over last_message: 9 match(es); want at least 1"
+    },
+    {
+      "name": "precision-no-concurrency-findings",
+      "type": "regex",
+      "passed": true,
+      "detail": "Replace Sleep|Synchronized Owner|Inject the Exit Path over last_message: 0 match(es); want 0"
+    }
+  ],
+  "cost_usd": 1.9721454999999999,
+  "judge_cost_usd": 0,
+  "duration_ms": 516750,
+  "num_turns": 14,
+  "segments": 1,
+  "scaffold_dir": "/tmp/ldd-eval-case-c-picker-review-neutral-668853737"
+}

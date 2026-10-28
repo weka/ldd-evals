@@ -1,0 +1,38 @@
+{
+  "case": "centerpiece-storify-review-neutral",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": true,
+  "graders": [
+    {
+      "name": "anchor-heartbeat-feed",
+      "type": "regex",
+      "passed": true,
+      "detail": "heartbeatFeed\\.ts:[0-9]+ over last_message: 67 match(es); want at least 1"
+    },
+    {
+      "name": "evidence-protocol",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\.tsx?:[0-9]+ over last_message: 69 match(es); want at least 1"
+    },
+    {
+      "name": "r3-q3-block-comments",
+      "type": "regex",
+      "passed": true,
+      "detail": "parse the line|look up or create device|transitions over last_message: 5 match(es); want at least 1"
+    },
+    {
+      "name": "race-found",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i)backoff|retry|retries|setTimeout over last_message: 8 match(es); want at least 1"
+    }
+  ],
+  "cost_usd": 3.645465099999999,
+  "judge_cost_usd": 0,
+  "duration_ms": 1303487,
+  "num_turns": 14,
+  "segments": 1,
+  "scaffold_dir": "/tmp/ldd-eval-centerpiece-storify-review-neutral-4231332561"
+}

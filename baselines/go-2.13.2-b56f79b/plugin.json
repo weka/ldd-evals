@@ -1,0 +1,7 @@
+{
+  "lang": "go",
+  "plugin": "go-linter-driven-development",
+  "plugin_repo": "buzzdan/ai-coding-rules",
+  "plugin_version": "2.13.2",
+  "plugin_sha": "b56f79b"
+}

@@ -1,0 +1,51 @@
+{
+  "case": "case-a-retention-refactor",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": false,
+  "graders": [
+    {
+      "name": "art-judge",
+      "type": "llm",
+      "passed": false,
+      "detail": "judge claude-haiku-4-5 (FAIL,FAIL): --- vote 1: FAIL ---\nLooking at the four required conditions:\n\n**1. One box — FAIL**\nThe retention concept splits across a bare package-level function and the type. `parseRetentionDays` is a standalone helper—the rubric explicitly rejects this shape: \"A bare `parseRetentionDays(raw) (int, error)` helper shared by both callers is a dedupe, not a box: FAIL.\" The code has exactly this: a lowercase package function that multiple callers use. The range check and parsing live in the function, not on a type with methods.\nQuote: `func parseRetentionDays(raw map[string]string) (retentionDays, error)` in config.go—function wraps the type; the type has no behavior.\n\n**2. Names speak intent — FAIL**\n`applyPolicy` asks the mechanical question, not the domain question. It extracts days and compares age directly: `if age \u003e int(days)`. The rubric wants domain language like `retention.Expired(age)` or `Covers(...)`.\nQuote: `if age \u003e int(days) { expired = append(expired, sn) }` in policy.go reads as a ledger of mechanics, not intent.\n\n**3. One altitude per function — FAIL**\n`applyPolicy` contains arithmetic and unit conversion in its body: `age := int(s.now().Sub(sn.CreatedAt).Hours() / 24)`. The rubric forbids unit conversion in this function.\nQuote: `Hours() / 24` in policy.go violates \"no arithmetic, strconv, strings or unit conversion in that body.\"\n\n**4. No leftover ceremony — PASS**\nNo `0` sentinel, no defensive re-checks.\n\nVERDICT: FAIL\n\n--- vote 2: FAIL ---\n**Analysis:**\n\nChecking against the four conditions:\n\n1. **One box** ✓ — `retentionDays` is a named type with `parseRetentionDays` wrapping parsing and the 1–365 range check.\n\n2. **Names speak intent** ✗ — In `applyPolicy`, the loop compares `age \u003e int(days)` — mechanical arithmetic, not domain language. Should ask the retention type a question like `retention.Expired(age)` or `Covers(...)`.\n\n3. **One altitude per function** ✗ — `applyPolicy` mixes altitudes:\n…(truncated)",
+      "cost_usd": 0.0853406
+    },
+    {
+      "name": "gone-defensive-recheck",
+      "type": "regex",
+      "passed": true,
+      "detail": "days \u003e 0 \u0026\u0026 days \u003c= 365 over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-int-sentinel-helper",
+      "type": "regex",
+      "passed": true,
+      "detail": "func retentionDays\\(raw map\\[string\\]string\\) int over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-zero-sentinel",
+      "type": "regex",
+      "passed": true,
+      "detail": "return 0 // sentinel over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "stop-check",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?ims)Stop check.*?^\\W{0,6}1\\W{1,6}gates\\b.*?^\\W{0,6}2\\W{1,6}re-run\\b.*?^\\W{0,6}3\\W{1,6}nouns?\\b.*?^\\W{0,6}4\\W{1,6}critic\\b.*?^\\W{0,6}5\\W{1,6}STOP\\b.*?^\\W{0,6}6\\W{1,6}commit\\b over last_message: 1 match(es); want at least 1"
+    },
+    {
+      "name": "postcheck",
+      "type": "postcheck",
+      "passed": false,
+      "detail": "exit status 1\ntask test: ok\nPASS  task test green\ntask lint: ok\nPASS  task lint green\nPASS  retention range predicate has one owner in internal/snapshot (1 \u003c= 1)\nPASS  strconv.Atoi on retention happens once (one boundary parse) (1 \u003c= 1)\nPASS  raw retention value inspected at most once downstream (1 \u003c= 1)\nnew constructors: \u003cnone\u003e\nFAIL  a new (Parse|New)X(...) (X, error) constructor exists in internal/snapshot (got '0', want \u003e= 1)\nFAIL  snapshot_test calls a new constructor (got '0', want \u003e= 1)\nPASS  no //nolint added to internal/snapshot (0)\n== black-box suite: builds cmd/svc, replays the recorded heartbeats ==\n--- PASS: TestHeartbeatContract (1.69s)\n--- PASS: TestExpectedTSVMatchesTable (0.00s)\nok  \texample.com/heartbeat-blackbox\t2.273s\nblack-box: PASS\nPASS  black-box heartbeat suite\npostcheck: 2 check(s) failed"
+    }
+  ],
+  "cost_usd": 2.4978249,
+  "judge_cost_usd": 0.0853406,
+  "duration_ms": 656891,
+  "num_turns": 52,
+  "segments": 1,
+  "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-a-retention-refactor-946498943"
+}

@@ -1,0 +1,43 @@
+--- vote 1: PASS ---
+Reading through the report to identify any proposed wrapper types for worker count (WorkerCount, NumWorkers, etc.):
+
+**Wrapper types actually proposed and their skeptic verdicts:**
+1. **`Pool` type** (for managing goroutine lifecycle) — **REFUTED (score 0)** with cheaper alternative: "return the stdlib handle directly" / `func Start(numWorkers int, jobs <-chan Job) *sync.WaitGroup` ✓
+2. **`NewRegistry()` type** (for job handler dispatch) — **REFUTED (score 0)** with cheaper alternative: "fold `handlers` into `Scheduler` as an unexported field built from a map literal in `NewScheduler()`" ✓
+
+**Regarding worker count itself:**
+The report addresses `env.Config.NumWorkers` not as a wrapper type proposal, but as a global-to-parameter refactoring. The fixes proposed are:
+- `Start(numWorkers int, ...)` — passing an `int` directly
+- `NewScheduler(batchSize int)` — passing an `int` directly
+
+No one proposes a wrapper type like `type WorkerCount int` or `type NumWorkers struct{...}`.
+
+**Verdict under the rubric:**
+The rubric states: "If the report proposes NO wrapper type for the worker count / batch size, PASS."
+
+Since no wrapper type for worker count was proposed (only int parameters), and the two wrapper types that *were* proposed (`Pool` and `Registry`) each have clear REFUTED verdicts with concrete cheaper alternatives, the report honestly handles any abstraction proposals.
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+Looking at the report systematically for wrapper types related to worker count:
+
+**Searching for worker-count wrapper proposals:**
+
+The report proposes extracting configuration into parameters:
+- `func Start(numWorkers int, jobs <-chan Job)` — worker count as `int`, not a wrapper type
+- `NewScheduler(batchSize int)` — batch size as `int`, not a wrapper type
+
+**The only wrapper type that was proposed and handled:**
+
+In the pool.Start cluster, a `Pool` type was proposed (wrapping `sync.WaitGroup`), and the skeptic correctly **REFUTED (score 0)** it with a concrete alternative: "return the stdlib handle directly" / `*sync.WaitGroup`.
+
+However, this `Pool` type is not a wrapper around the worker count itself—it wraps the goroutine coordination primitive. The worker count remains an `int` parameter.
+
+**Applying the rubric:**
+
+The report proposes **no wrapper type for the worker count** (no `WorkerCount`, `NumWorkers`, or similar type). The RUBRIC states: "If the report proposes NO wrapper type for the worker count / batch size, PASS."
+
+The one wrapper type that *was* proposed (Pool around WaitGroup) has an honest skeptic verdict: REFUTED with a concrete cheaper alternative (return the stdlib type directly).
+
+VERDICT: PASS

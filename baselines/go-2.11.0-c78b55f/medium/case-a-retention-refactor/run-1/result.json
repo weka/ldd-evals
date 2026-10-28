@@ -1,0 +1,45 @@
+{
+  "case": "case-a-retention-refactor",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": true,
+  "graders": [
+    {
+      "name": "art-judge",
+      "type": "llm",
+      "passed": true,
+      "detail": "judge claude-haiku-4-5 (PASS,PASS): --- vote 1: PASS ---\nI'll evaluate each of the four required criteria:\n\n**1. One box.** The `Retention` type in `config.go` encapsulates validation entirely. Lines 7–10 define the type with private `days` field. Lines 13–24 show `ParseRetention` as the only constructor: it parses `\"\u003cn\u003ed\"` format, checks `days \u003c= 0 || days \u003e 365`, and returns a `Retention` or error. In `policy.go` line 10, the caller simply calls `ParseRetention(raw)` — no re-parsing of `\"d\"` suffixes or range checks outside the box. ✓\n\n**2. Names speak intent.** In `policy.go` lines 16–18, the pruning loop reads: \"if `retention.Expired(now, sn.CreatedAt)`\" — a domain question in plain language. The method name `Expired` (defined in `config.go` line 27) is intent, not mechanics (no `check`, `validate`, or `getDays`). ✓\n\n**3. One altitude per function.** The `applyPolicy` function in `policy.go` lines 9–21 reads top-down as: obtain retention (line 10), collect expired snapshots (lines 16–18), return them (line 20). There is no arithmetic, no `strconv`, no `strings`, no unit conversion in that body — all delegated to the `Retention` type's methods. ✓\n\n**4. No leftover ceremony.** No `0` sentinel, no defensive re-check comment, no stale comments where names now speak. The comments in `config.go` (lines 8, 15, 28) document invariants and contracts; they aren't remnants where the name alone would suffice. ✓\n\n**FAIL conditions:** Neither `strconv.Atoi(strings.TrimSuffix(` outside the type nor `days \u003c= 0 || days \u003e 365` duplicated elsewhere appears. ✓\n\nVERDICT: PASS\n\n--- vote 2: PASS ---\nLooking at the four RUBRIC criteria:\n\n**1. One box.** ✓ `Retention` is a named type in config.go with its parsing (`ParseRetention`) and range validation (1–365 days) all inside. Nothing outside it re-parses the `\"d\"` suffix or re-checks the range. Quote: `type Retention struct { days int }` and `if err != nil || days \u003c= 0 || days \u003e 365` all within `ParseReten…(truncated)",
+      "cost_usd": 0.0400499
+    },
+    {
+      "name": "gone-defensive-recheck",
+      "type": "regex",
+      "passed": true,
+      "detail": "days \u003e 0 \u0026\u0026 days \u003c= 365 over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-int-sentinel-helper",
+      "type": "regex",
+      "passed": true,
+      "detail": "func retentionDays\\(raw map\\[string\\]string\\) int over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-zero-sentinel",
+      "type": "regex",
+      "passed": true,
+      "detail": "return 0 // sentinel over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "postcheck",
+      "type": "postcheck",
+      "passed": true,
+      "detail": "task test: ok\nPASS  task test green\ntask lint: ok\nPASS  task lint green\nPASS  retention range predicate has one owner in internal/snapshot (1 \u003c= 1)\nPASS  strconv.Atoi on retention happens once (one boundary parse) (1 \u003c= 1)\nPASS  raw retention value inspected at most once downstream (1 \u003c= 1)\nnew constructors: ParseRetention\nPASS  a new (Parse|New)X(...) (X, error) constructor exists in internal/snapshot (1 \u003e= 1)\nPASS  snapshot_test calls a new constructor (3 \u003e= 1)\nPASS  Retention has no exported fields (0)\nPASS  Retention is never built by literal outside internal/snapshot/config.go (0)\nPASS  no //nolint added to internal/snapshot (0)\n== black-box suite: builds cmd/svc, replays the recorded heartbeats ==\n--- PASS: TestHeartbeatContract (1.10s)\n--- PASS: TestExpectedTSVMatchesTable (0.00s)\nok  \texample.com/heartbeat-blackbox\t1.103s\nblack-box: PASS\nPASS  black-box heartbeat suite\npostcheck: all checks passed"
+    }
+  ],
+  "cost_usd": 1.7645209000000006,
+  "judge_cost_usd": 0.0400499,
+  "duration_ms": 508037,
+  "num_turns": 54,
+  "segments": 1,
+  "scaffold_dir": "/tmp/ldd-eval-case-a-retention-refactor-3326502570"
+}

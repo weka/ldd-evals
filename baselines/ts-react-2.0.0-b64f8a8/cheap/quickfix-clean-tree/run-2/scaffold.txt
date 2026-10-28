@@ -1,0 +1,1 @@
+scaffolded ts-react-mini at /tmp/ldd-eval-quickfix-clean-tree-3780792443 (3d3aebb; node_modules from /tmp/ts-react-mini-npm-cache)

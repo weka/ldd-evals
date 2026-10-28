@@ -1,0 +1,13 @@
+schema_version: "1.1"
+context:
+  scaffold_script: ../scaffold/default.sh
+postcheck: ./postcheck.sh
+tier: medium
+notes: |
+  R7 Q7 through the writing path: the @testing skill's rung-0 target now says
+  "no untriaged survivor when the mutation tool runs over the leaf's package".
+  The prompt names the bar in the user's words, never the tool. Postcheck runs
+  gremlins itself over each package and reads LIVED lines; Truncate's two
+  equivalent mutants may live only if a comment beside the tests records them.
+  Production files must be byte-identical to the scaffold: every survivor here
+  is a missing row, none is dead logic.

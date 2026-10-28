@@ -1,0 +1,3 @@
+PASS  no commit after the scaffold base (0)
+PASS  working tree clean (nothing edited) (0)
+postcheck: all checks passed

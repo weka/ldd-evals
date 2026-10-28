@@ -1,0 +1,20 @@
+# Analysis
+
+Looking at the FOCUS text for any wrapper type proposals regarding worker count:
+
+**Worker count handling:**
+- The report identifies `env.Config.NumWorkers` being read as a global from `internal/pool/workers.go:18`
+- Proposed fix: `Start(jobs <-chan Job, numWorkers int)` — passing `numWorkers` directly as an `int` parameter to a constructor
+- No wrapper type (like `type WorkerCount int` or `type NumWorkers struct{...}`) is proposed anywhere
+
+**Batch size handling:**
+- Similarly, `env.Config.BatchSize` is flagged
+- Proposed fix: `NewScheduler(batchSize int)` — also a direct parameter, no wrapper type
+
+**What the skeptic did address:**
+- The handlers map wrapping: REFUTED wrapping in a `Dispatcher/Registry` type (score 0-1) with a concrete cheaper alternative (constructor injection onto Scheduler)
+- But this is about the job-handlers map, not worker count
+
+The RUBRIC explicitly states: "If the report proposes NO wrapper type for the worker count / batch size, PASS." Since all proposals here use primitive `int` parameters rather than introducing a new wrapper type, the criterion is satisfied without requiring skeptic confirmation.
+
+VERDICT: PASS

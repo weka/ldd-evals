@@ -1,0 +1,51 @@
+--- vote 1: PASS ---
+**Analysis:**
+
+1. **Absence has a name** ✓
+   - `Find` returns `(Device, bool)`, eliminating nil pointers
+   - `DiscardSink()` is a proper null-object implementation: "a real Sink that writes nowhere, so Record never needs to ask whether a sink was given"
+   - `Record` has zero nil checks; the constructor guarantees `r.sink` and `r.clock` are non-nil
+   - Default clock is the constructor's responsibility: `r := &Reporter{sink: DiscardSink(), clock: time.Now}`
+
+2. **The constructor owns the invariants** ✓
+   - `sink` and `clock` are unexported fields
+   - `NewReporter` uses functional options; validates that sink and clock options are not nil before accepting them
+   - Options that pass `nil` trigger an error return from the constructor, not silent defaults
+   - `wire.go` shows clean usage: `NewReporter(WithSink(NewSink(w)))` — no positional nils
+
+3. **Methods read as sentences** ✓
+   - `Record` is one line: stamp event with clock, write to sink
+   - `Announce` uses comma-ok idiom: `if d, ok := catalog.Find(name); ok { rep.Record(d.Event()) }`
+
+4. **Comments earn their place** ✓
+   - No trivial self-repeating comments
+   - Comments explain non-obvious contracts: `// Both are guaranteed non-nil by construction.`, `// WithSink(nil)` is an error, pass `DiscardSink()` instead, clone behavior in `NewCatalog`
+
+No FAIL conditions found: no nil checks in methods, no nil returns from `Find`, no positional nil arguments.
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+**1. Absence has a name.**
+- `Find` returns `(Device, bool)` with `return Device{}, false` — no nil pointer.
+- Sink absence is named: `DiscardSink()` returns a real Sink that writes nowhere.
+- Default clock is in the constructor: `r := &Reporter{sink: DiscardSink(), clock: time.Now}`.
+- `Record` has no nil check — it just calls `r.sink.Write(...)` directly. ✓
+
+**2. Constructor owns the invariants.**
+- `sink` and `clock` are unexported fields.
+- Functional options prevent `NewReporter(nil, nil)`: `WithSink(nil)` and `WithClock(nil)` are caught as construction errors.
+- `wire.go` reads as `NewReporter(WithSink(NewSink(w)))` — no positional nils. ✓
+
+**3. Methods read as sentences.**
+- `Record(ev Event)` is one line: stamps with clock, hands to sink, no branching.
+- `Announce` uses comma-ok: `if d, ok := catalog.Find(name); ok { rep.Record(...) }` — not a pointer nil check. ✓
+
+**4. Comments earn their place.**
+- No dead comments like `// Reporter is a reporter.` or `// Sink is where events are written.`
+- Remaining comments state contracts: `// Reporter ... Both are guaranteed non-nil by construction.`, `// WithSink sets ... A nil sink is a construction error.`, etc.
+- Each comment explains a non-obvious invariant or behavior. ✓
+
+Each file tells one story at one altitude: catalog (find devices), reporter (record with clock to sink), wire (announce a device).
+
+VERDICT: PASS

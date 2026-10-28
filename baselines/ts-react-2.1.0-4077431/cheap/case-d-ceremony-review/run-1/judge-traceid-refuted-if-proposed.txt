@@ -1,0 +1,33 @@
+--- vote 1: PASS ---
+Reading the report against the RUBRIC:
+
+The 🔴 DESIGN DEBT section proposes five findings:
+- `ReplicaCount` collapse (inverse — remove a wrapper)
+- `Name` collapse (inverse — remove a wrapper)  
+- `Grants` constructor validation
+- `Grants` copy-on-exit
+- `Grants` copy-on-entry
+
+No `TraceID` domain type is proposed anywhere in Design Debt.
+
+The report mentions `trace` parameter only once (🟡 Readability Debt, `src/pages/Devices/trace.ts:16`, a TRIM note about comment rewording). This is documentation refinement in the Readability section, not a design type proposal.
+
+The Skeptic was not spawned; the report notes R1's findings are *inverse* (collapse primitives), not extractions. No hunter proposed a TraceID domain type.
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+Reading through the report for any proposed `TraceID` (or equivalent) type in the 🔴 DESIGN DEBT section:
+
+The five Design Debt findings are:
+- `ReplicaCount` (collapse to `number`)
+- `Name` (collapse to `string`)  
+- `Grants` constructor (add validation)
+- `Grants.all()` (copy on output)
+- `Grants` constructor storage (copy on input)
+
+No TraceID type is proposed. The only mention of `trace` is in the 🟡 READABILITY DEBT section: `src/pages/Devices/trace.ts:16` is a doc comment TRIM operation, not a domain-type extraction proposal. The reference is to prose documentation about the `traceId` parameter, which the rubric explicitly permits.
+
+The skeptic was not spawned (report states "no finding proposed a qualifying extraction"), so there is no skeptic verdict to examine.
+
+VERDICT: PASS

@@ -1,0 +1,17 @@
+# Assessment
+
+Checking both questions from the RUBRIC:
+
+**Question 1**: Is the unguarded concurrent map write listed under 🐛 Bugs?
+✅ **YES.** The report explicitly lists under 🐛 Bugs:
+> 1. **`internal/services/device_service.go:218` — confirmed data race**, reproducible via `task test:race`. `lastSeen` is written unlocked in `ProcessHeartbeat` and in the unbounded `flushLoop` goroutine...
+
+**Question 2**: Is the production `time.Sleep` listed under 🔴 Design Debt (not Bugs)?
+❌ **NO.** The production `time.Sleep` (retry backoff in ProcessHeartbeat's goto loop, line 181) is mentioned only in the informational cluster section:
+> **R10**: proven data race on `s.lastSeen` (above) + uncancellable `time.Sleep` in its retry `goto` loop (line 181)
+
+However, it is **not explicitly listed as a separate item in the 🔴 Design Debt section**. The Design Debt section covers R8, R6, R11, R12, R2, R4, and R7, but R10's `time.Sleep` finding is not formally filed there. (The report does mention `time.Sleep` under 🟡 Readability Debt, but only for test synchronization, not the production retry backoff.)
+
+The data race passes placement criteria, but the production `time.Sleep` is missing from its required Design Debt categorization.
+
+VERDICT: FAIL

@@ -1,0 +1,64 @@
+{
+  "case": "case-c-picker-refactor",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": false,
+  "graders": [
+    {
+      "name": "art-judge",
+      "type": "llm",
+      "passed": false,
+      "detail": "judge claude-haiku-4-5: Looking at the FOCUS code against the RUBRIC requirements:\n\n1. **Collection type with a name:** The code has no `Nodes` collection type (or similar) that wraps `[]Node` with methods like `InZone()`, `OutsideZone()`, `First()`. There's only `replicaSelection`, an internal helper—not the domain-level collection the criterion asks for. **FAIL**\n\n2. **Node knows its health:** ✓ The `usable()` method on `Node` encapsulates the health check cleanly. **PASS**\n\n3. **Pick tells the story:** **Outright FAIL conditions hit:**\n   - `havePrimary` and `haveSecondary` are `found`-style flags (the rubric forbids these surviving anywhere).\n   - `pickReplicas` still ranges over the slice with a nested `if`: `for _, n := range nodes { if !n.usable() { continue } ... }`. The rubric explicitly says \"FAIL outright if `pickReplicas` still ranges over the slice with nested `if`.\"\n\n4. **Names and comments earn their place:** The comment \"// Placer is a placer.\" (line 13) is exactly the kind of restatement the rubric forbids (\"No `// Placer is a placer` style restatements remain\"). **FAIL**\n\nThe refactoring did not complete what the criteria demanded: a `Nodes` collection type that owns the iteration and placement logic, removing loops and found-flags from the main picker.\n\nVERDICT: FAIL",
+      "cost_usd": 0.018682
+    },
+    {
+      "name": "collection-type-exists",
+      "type": "regex",
+      "passed": false,
+      "detail": "^type \\w+ \\[\\]Node over files: 0 match(es); want at least 1"
+    },
+    {
+      "name": "comma-ok-query",
+      "type": "regex",
+      "passed": false,
+      "detail": "\\) \\(Node, bool\\) over files: 0 match(es); want at least 1"
+    },
+    {
+      "name": "gone-found-flags",
+      "type": "regex",
+      "passed": true,
+      "detail": "Found\\s*:?=\\s*(true|false) over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-inline-capacity-check",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\.Capacity \u003c= 0 over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-inline-zone-check",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\.Zone == \"\" over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "single-altitude",
+      "type": "llm",
+      "passed": false,
+      "detail": "judge claude-haiku-4-5: Looking at the code against the rubric:\n\n**`Pick` method (lines 23-30):** Clean. Every statement is either an assignment of a named call (`p.pickReplicas(nodes, zone)`), a guard clause (`if err != nil`), or a return. ✓\n\n**`pickReplicas` method (lines 32-41):** Violates the rubric.\n- Line 34 contains `for _, n := range nodes` — a direct loop over the node slice in the orchestrator\n- The rubric explicitly states: \"NO loop over the node slice\" and \"Loops... are not allowed in the orchestrator\"\n- While the field access and flag logic is correctly moved into the `replicaSelection` helper type, the orchestrator itself is still performing the iteration and inspection\n\nThe code pushes some complexity into the helper, but the core orchestration logic (`pickReplicas`) still owns the loop over nodes. The rubric requires that all looping and field access move entirely into collection methods so the orchestrator reads as pure named calls and assignments.\n\nThe fix would be to abstract the loop into a method on a collection type (e.g., `type Nodes []Node` with a method that processes all nodes), leaving `pickReplicas` to only call named operations.\n\nVERDICT: FAIL",
+      "cost_usd": 0.018595
+    },
+    {
+      "name": "postcheck",
+      "type": "postcheck",
+      "passed": true,
+      "detail": "task test: ok\nPASS  task test green\ntask lint: ok\nPASS  task lint green\nPASS  Placer.Pick still exists in internal/placement\n  gocognit(pickReplicas) = 3\nPASS  gocognit of Pick and every receiver method it calls (3 \u003c= 5)\nPASS  no //nolint in internal/placement production code (0)\n== black-box suite: builds cmd/svc, replays the recorded heartbeats ==\n--- PASS: TestHeartbeatContract (1.26s)\n--- PASS: TestExpectedTSVMatchesTable (0.00s)\nok  \texample.com/heartbeat-blackbox\t1.266s\nblack-box: PASS\nPASS  black-box heartbeat suite\npostcheck: all checks passed"
+    }
+  ],
+  "cost_usd": 1.6003897,
+  "judge_cost_usd": 0.037277000000000005,
+  "duration_ms": 491970,
+  "num_turns": 50,
+  "segments": 1,
+  "scaffold_dir": "/tmp/ldd-eval-case-c-picker-refactor-2691705981"
+}

@@ -1,0 +1,52 @@
+{
+  "case": "case-f-globals-refactor",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": false,
+  "graders": [
+    {
+      "name": "art-judge",
+      "type": "llm",
+      "passed": false,
+      "detail": "judge claude-haiku-4-5: Looking at this code against the rubric:\n\n**Criterion 1 (Root as wiring diagram):** `main` loads `cfg` once and passes specific values (`cfg.BatchSize`, `cfg.NumWorkers`, `cfg.FlapWindowSec`, `cfg.Region`) to collaborators. This part is sound.\n\n**Criterion 2 (Islands clean):** \n- `pool` is clean: `Start(jobs \u003c-chan Job, numWorkers int)` has explicit, named parameters. ✓\n- `jobs` is **not clean**: `registry.go` has three package-level mutable globals (`handlers`, `store`, `storeOnce`) hidden from callers. The `dispatch` function looks up `handlers[\"snapshot\"]` and `handlers[\"sync\"]` — these dependencies are initialized in `init()` and invisible to whoever calls `Scheduler`. The `GetStore()` singleton is lazily initialized; main never passes the store to jobs, so jobs still reaches for a hidden global.\n\n**Criterion 3 (env only loads):**\n- `env.go` contains `func init()` (line initializing `region = os.Getenv(\"REGION\")`). ✗\n- `env.go` contains package-level mutable `var region string`. ✗\n\n**Criterion 4 (Names carry meaning):** Parameter names are good (`numWorkers`, `batchSize`), but the underlying problem is they're not the core issue here.\n\n**Explicit FAIL conditions met:**\n- `env.go` still contains `func init()`. \n- `env.go` contains package-level mutable config (`region`).\n\nThe globals haven't moved to the root; they've been rearranged. The jobs package still has hidden initialization via `init()`, package-level handler registration, and a lazy-singleton store pattern. Main never explicitly wires the store or handlers — they're sprung by the jobs package itself.\n\nVERDICT: FAIL",
+      "cost_usd": 0.026031
+    },
+    {
+      "name": "gone-config-global",
+      "type": "regex",
+      "passed": true,
+      "detail": "^var Config Configuration over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-nolint-gochecknoglobals-env",
+      "type": "regex",
+      "passed": true,
+      "detail": "nolint:gochecknoglobals // loaded in main over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "load-returns-a-value",
+      "type": "regex",
+      "passed": true,
+      "detail": "^func Load\\(\\) \\(?[A-Z]\\w*(, error)?\\)? \\{ over files: 1 match(es); want at least 1"
+    },
+    {
+      "name": "main-reads-as-a-story",
+      "type": "llm",
+      "passed": false,
+      "detail": "judge claude-haiku-4-5: Analyzing the FOCUS file against the RUBRIC requirements:\n\n**Requirement 1 Analysis:** Configuration is obtained once (`cfg := env.Load()` on line 28), but individual values are NOT consistently handed to constructors. While `cfg.FlapWindowSec`, `cfg.BatchSize`, `cfg.NumWorkers`, and `cfg.Region` are properly extracted and passed (lines 54, 56, 65), the `WEBHOOK_URL` is read directly inline (line 52: `os.Getenv(\"WEBHOOK_URL\")`). This violates the stated principle that \"individual values are handed to constructors\" after being obtained once—it should either be part of `cfg` or extracted into a named variable first like the `listenAddr()` and `defaultStorePath()` helpers.\n\n**Requirement 2 Analysis:** The flow mostly reads as a narrative (load config → build store → build services → serve), but has interruptions. The random jitter sleep (lines 31–33) is an unnamed side effect that doesn't fit the story. The store validation (lines 48–50) happens after services are partially constructed, adding a non-standard step. The story is roughly there but not cleanly at one altitude.\n\n**Requirement 3 Analysis:** No problematic business logic is present—the wiring helpers (`listenAddr`, `defaultStorePath`, `mustOpenFileRepo`, `routes`, `healthz`) are appropriately scoped. This requirement is satisfied.\n\n**Critical Issue:** The code fails requirement 1 because `WEBHOOK_URL` is obtained via `os.Getenv()` inline rather than being obtained once and handed explicitly, breaking the pattern established by other config values.\n\nVERDICT: FAIL",
+      "cost_usd": 0.04595200000000001
+    },
+    {
+      "name": "postcheck",
+      "type": "postcheck",
+      "passed": false,
+      "detail": "exit status 1\ntask test: ok\nPASS  task test green\ntask lint: ok\nPASS  task lint green\n== the ratchet: env.Config references outside cmd/, per commit ==\nPASS  at least 3 commits after the scaffold base (6 \u003e= 3)\n  5ec8e35    7  go-mini: initial import\n  a7adcc5    7  env: return the loaded Configuration from Load\n  d6ebfda    6  pool: take numWorkers as an explicit parameter\n  0d38ce0    4  jobs: take batchSize/numWorkers as Scheduler fields\n  3c18129    0  services: take flapWindowSec/batchSize as constructor params\n  61efc88    0  cmd/svc: thread the loaded Configuration explicitly\n  0a394c7    0  env: remove the Config global\nPASS  env.Config references outside cmd/ never rise and end at 0\nPASS  no commit touches non-test code in more than 2 packages (island + its caller) (2 \u003c= 2)\n== islands are clean ==\nPASS  pool no longer imports env (0)\nFAIL  jobs no longer imports env (got '1', want '0')\nPASS  shallow fix rejected: env.Configuration is not a param/field type in pool, jobs or handlers (0)\n== end state ==\nFAIL  R8 Q1: no package-level var left in internal/env (got '1', want '0')\nFAIL  R8 Q2: no init() left in internal/env (got '1', want '0')\nFAIL  no //nolint in internal/env (got '2', want '0')\nPASS  no //nolint in internal/pool (0)\nFAIL  no nolint:gochecknoglobals anywhere for the config global (got '1', want '0')\n== test payoff ==\nPASS  R8 Q6: no test mutates env.Config (0)\nFAIL  t.Parallel() in internal/pool tests (got '0', want \u003e= 1)\nFAIL  a pool constructor is called with a literal number in its tests (got '0', want \u003e= 1)\n== black-box suite: builds cmd/svc, replays the recorded heartbeats ==\n--- PASS: TestHeartbeatContract (1.23s)\n--- PASS: TestExpectedTSVMatchesTable (0.00s)\nok  \texample.com/heartbeat-blackbox\t1.231s\nblack-box: PASS\nPASS  black-box heartbeat suite\npostcheck: 7 check(s) failed"
+    }
+  ],
+  "cost_usd": 2.1473284000000006,
+  "judge_cost_usd": 0.071983,
+  "duration_ms": 428505,
+  "num_turns": 95,
+  "segments": 1,
+  "scaffold_dir": "/tmp/ldd-eval-case-f-globals-refactor-4075009640"
+}

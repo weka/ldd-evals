@@ -1,0 +1,99 @@
+{
+  "case": "case-f-globals-review",
+  "run": 2,
+  "model": "claude-sonnet-5",
+  "passed": true,
+  "graders": [
+    {
+      "name": "anchor-env-global",
+      "type": "regex",
+      "passed": true,
+      "detail": "env\\.go:[0-9]+ over last_message: 5 match(es); want at least 1"
+    },
+    {
+      "name": "evidence-protocol",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\.go:[0-9]+ over last_message: 32 match(es); want at least 1"
+    },
+    {
+      "name": "fix-clean-island",
+      "type": "regex",
+      "passed": true,
+      "detail": "Extract Clean Island|Push the Global Up over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "no-edit",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Edit called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "no-multiedit",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "MultiEdit called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "no-write",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Write called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "nolint-is-a-finding",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i)nolint over last_message: 4 match(es); want at least 1"
+    },
+    {
+      "name": "precision-drain-clean",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?m)^[^|\\n]*\\bdrain\\(\\)[^|\\n]*\\| over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "r8-q2-init",
+      "type": "regex",
+      "passed": true,
+      "detail": "init\\(\\) over last_message: 3 match(es); want at least 1"
+    },
+    {
+      "name": "r8-q5-jobs-read",
+      "type": "regex",
+      "passed": true,
+      "detail": "scheduler\\.go:[0-9]+ over last_message: 12 match(es); want at least 1"
+    },
+    {
+      "name": "r8-q5-pool-read",
+      "type": "regex",
+      "passed": true,
+      "detail": "workers\\.go:[0-9]+ over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "r8-q6-test-mutates-global",
+      "type": "regex",
+      "passed": true,
+      "detail": "workers_test\\.go:[0-9]+ over last_message: 1 match(es); want at least 1"
+    },
+    {
+      "name": "refuted-carries-alternative",
+      "type": "llm",
+      "passed": true,
+      "detail": "judge claude-haiku-4-5 (PASS,PASS): --- vote 1: PASS ---\nLooking through the report for any wrapper type proposals for worker count:\n\nThe report mentions `env.Config.NumWorkers` and `env.Config.BatchSize` multiple times, but only as observations about **existing code structure** — e.g., \"read sideways from library code,\" \"test must write `env.Config.NumWorkers = 2` directly.\" \n\nThe design debt recommendations focus on threading the existing `*Configuration` struct as a parameter (`\"thread `*Configuration` in as a parameter\"`), not on creating a new wrapper type like `WorkerCount`, `NumWorkers`, or similar.\n\nNo hunter proposal for a new worker-count wrapper type appears in the report.\n\n**VERDICT: PASS**\n\n--- vote 2: PASS ---\nThe report mentions `NumWorkers` and `BatchSize` in the Design Debt section, but does not propose creating a wrapper type (like `WorkerCount`) for the worker count. Instead, the fix proposes threading the existing `*Configuration` type through constructors:\n\n\u003e `internal/pool/workers.go:18` + `internal/jobs/scheduler.go:44` | R8 Q1: ... | Push the Global Up One Level / Extract Clean Island: **thread `*Configuration` in as a parameter**\n\nThis solution uses the existing `Configuration` struct (which already contains `NumWorkers` and `BatchSize` as fields) rather than introducing a new wrapper. No new wrapper type is proposed anywhere in the report.\n\nPer the rubric: \"If the report proposes NO wrapper type for the worker count / batch size, PASS.\"\n\nVERDICT: PASS",
+      "cost_usd": 0.0675044
+    },
+    {
+      "name": "rule-cited",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\bR(1[0-2]|[1-9])\\b over last_message: 60 match(es); want at least 1"
+    }
+  ],
+  "cost_usd": 2.377639500000001,
+  "judge_cost_usd": 0.0675044,
+  "duration_ms": 725988,
+  "num_turns": 13,
+  "segments": 1,
+  "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-f-globals-review-3785822079"
+}

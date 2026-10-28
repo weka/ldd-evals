@@ -1,0 +1,16 @@
+schema_version: "1.1"
+context:
+  scaffold_script: ../scaffold/red-lint.sh
+postcheck: ./postcheck.sh
+tier: medium
+notes: |
+  Scoped to internal/services and internal/env, a PR's worth of packages: quickfix
+  resolves its scope by the ladder (argument, working tree, branch, nothing) and
+  the red-lint scaffold's stripped state is the committed state, so the bare command
+  would reach "nothing in scope" (see quickfix-clean-tree). Within the scope, every
+  `# noqa`, `# type: ignore` and `# ty: ignore` directive is stripped → ruff and mypy are red on the
+  design plants. The lint-fixer must FIX the mechanical class (B904 raise-from,
+  BLE001/S110 swallowed exceptions, RET504/RET505, PLR5501, PLW2901, SIM110,
+  D101/D103 docstrings) and ESCALATE the design class with a rule route (C901 and
+  PLR09xx → R3, PLW0603 → R8, FBT001 → R11, PLR2004 on enum-shaped strings → R1),
+  never re-suppress, never touch pyproject.toml, never weaken a test assertion.

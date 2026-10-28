@@ -1,0 +1,32 @@
+{
+  "case": "case-d-ceremony-review-neutral",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": true,
+  "graders": [
+    {
+      "name": "evidence-protocol",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\.tsx?:[0-9]+ over last_message: 17 match(es); want at least 1"
+    },
+    {
+      "name": "precision-trace-func-clean",
+      "type": "regex",
+      "passed": true,
+      "detail": "Devices/trace\\.ts:[0-9]+ \\| over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "replica-count-named",
+      "type": "regex",
+      "passed": true,
+      "detail": "ReplicaCount over last_message: 10 match(es); want at least 1"
+    }
+  ],
+  "cost_usd": 1.5762011999999999,
+  "judge_cost_usd": 0,
+  "duration_ms": 578258,
+  "num_turns": 11,
+  "segments": 1,
+  "scaffold_dir": "/tmp/ldd-eval-case-d-ceremony-review-neutral-2752536240"
+}

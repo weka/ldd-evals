@@ -1,0 +1,35 @@
+task test: ok
+PASS  task test green
+task lint: ok
+PASS  task lint green
+== the ratchet: env.Config references outside cmd/, per commit ==
+PASS  at least 3 commits after the scaffold base (5 >= 3)
+  d5e53c5    7  go-mini: initial import
+  b706dae    6  pool: take numWorkers as a parameter instead of reading env.Config
+  918cdad    6  jobs: inject batch size and worker count into Scheduler
+  87ee743    4  services: inject batch size into SnapshotService
+  231200e    2  services: inject flap window into DeviceService
+  f93ceb8    0  env: remove the global Config, region and init in favor of Load()'s return value
+PASS  env.Config references outside cmd/ never rise and end at 0
+PASS  no commit touches non-test code in more than 2 packages (island + its caller) (2 <= 2)
+== islands are clean ==
+PASS  pool no longer imports env (0)
+FAIL  jobs no longer imports env (got '1', want '0')
+PASS  shallow fix rejected: env.Configuration is not a param/field type in pool, jobs or handlers (0)
+== end state ==
+PASS  R8 Q1: no package-level var left in internal/env (0)
+PASS  R8 Q2: no init() left in internal/env (0)
+PASS  no //nolint in internal/env (0)
+PASS  no //nolint in internal/pool (0)
+PASS  no nolint:gochecknoglobals anywhere for the config global (0)
+== test payoff ==
+PASS  R8 Q6: no test mutates env.Config (0)
+FAIL  t.Parallel() in internal/pool tests (got '0', want >= 1)
+FAIL  a pool constructor is called with a literal number in its tests (got '0', want >= 1)
+== black-box suite: builds cmd/svc, replays the recorded heartbeats ==
+--- PASS: TestHeartbeatContract (1.22s)
+--- PASS: TestExpectedTSVMatchesTable (0.00s)
+ok  	example.com/heartbeat-blackbox	1.222s
+black-box: PASS
+PASS  black-box heartbeat suite
+postcheck: 3 check(s) failed

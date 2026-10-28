@@ -1,0 +1,15 @@
+Looking at the FOCUS code against the RUBRIC requirements:
+
+1. **Collection type with a name:** The code has no `Nodes` collection type (or similar) that wraps `[]Node` with methods like `InZone()`, `OutsideZone()`, `First()`. There's only `replicaSelection`, an internal helper—not the domain-level collection the criterion asks for. **FAIL**
+
+2. **Node knows its health:** ✓ The `usable()` method on `Node` encapsulates the health check cleanly. **PASS**
+
+3. **Pick tells the story:** **Outright FAIL conditions hit:**
+   - `havePrimary` and `haveSecondary` are `found`-style flags (the rubric forbids these surviving anywhere).
+   - `pickReplicas` still ranges over the slice with a nested `if`: `for _, n := range nodes { if !n.usable() { continue } ... }`. The rubric explicitly says "FAIL outright if `pickReplicas` still ranges over the slice with nested `if`."
+
+4. **Names and comments earn their place:** The comment "// Placer is a placer." (line 13) is exactly the kind of restatement the rubric forbids ("No `// Placer is a placer` style restatements remain"). **FAIL**
+
+The refactoring did not complete what the criteria demanded: a `Nodes` collection type that owns the iteration and placement logic, removing loops and found-flags from the main picker.
+
+VERDICT: FAIL

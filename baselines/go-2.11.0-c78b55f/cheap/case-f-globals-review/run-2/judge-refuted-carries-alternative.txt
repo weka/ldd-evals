@@ -1,0 +1,34 @@
+--- vote 1: PASS ---
+Looking at the report for any wrapper type proposals related to worker count or batch size:
+
+**Worker Count/NumWorkers findings:**
+- R8 Q5 proposes: "add numWorkers int as a parameter to Start" — this is passing an int, not proposing a wrapper type
+- The cluster on pool.Start recommends: "give Start a `numWorkers int` parameter" — raw int, not a type wrapper
+
+**Batch Size findings:**
+- R8 Q5 proposes: "add batchSize int to NewScheduler" — again, raw int parameter, not a wrapper type
+- 🐛 Bugs section explicitly states: "Skeptic: N/A — no new type proposed; apply as written" — the skeptic confirms no wrapper type was proposed
+
+**JobKind finding (for reference):**
+The only wrapper type consideration in the report is for JobKind, unrelated to worker count. The skeptic gives it a CONFIRMED verdict with a cheaper alternative.
+
+The report proposes passing worker count and batch size as plain `int` parameters to constructors/functions, not as wrapper types like `WorkerCount` or `NumWorkers` (as a type). The skeptic explicitly confirms no new type is proposed for BatchSize.
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+Reading through the report to identify any proposals for wrapper types (WorkerCount, NumWorkers, etc.) for worker count or batch size:
+
+**Worker count references:**
+- `internal/pool/workers.go:18` — Design Debt recommends "add `numWorkers int` as a parameter to Start" (raw `int`, not a wrapper type)
+- `internal/pool/workers_test.go:11` — test fix follows from the parameter injection above
+
+**Batch size references:**
+- Under 🐛 Bugs, the `internal/jobs/scheduler.go:44` finding includes: "Skeptic: N/A — no new type proposed; apply as written | Validate BatchSize once in Load()"
+- Recommendations are to validate as `int`, not wrap it
+
+**Search result:** The report proposes **no wrapper type** for worker count or batch size anywhere. All recommendations use raw `int` parameters passed through constructors/functions. The skeptic explicitly confirms "N/A — no new type proposed" when addressing the BatchSize validation issue.
+
+Per the rubric: "If the report proposes NO wrapper type for the worker count / batch size, PASS."
+
+VERDICT: PASS

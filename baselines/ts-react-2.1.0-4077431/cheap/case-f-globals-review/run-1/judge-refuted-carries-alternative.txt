@@ -1,0 +1,26 @@
+--- vote 1: PASS ---
+Looking at the FOCUS text for any proposals about wrapper types for worker count:
+
+The report addresses `CONFIG.numWorkers` and `CONFIG.batchSize` throughout (in R2, R8, R10 findings). However, **no new wrapper type** (like `WorkerCount`, `NumWorkers`, or similar wrapper class/interface) is proposed anywhere in the review. 
+
+The suggested fixes are all about:
+- Validating the existing int values in `load()`
+- Injecting the existing `CONFIG` singleton instead of reaching it globally
+- Migrating the duplicate polling hook
+- Fixing comments
+
+The skeptic section explicitly states "N/A" for the relevant clusters — R2 is noted as "mechanism, not an extraction" and R5's "Slice out a feature" is out of skeptic scope.
+
+Since no wrapper type is proposed, the first RUBRIC condition applies: "If the report proposes NO wrapper type for the worker count / batch size, PASS."
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+The report discusses validation and injection of `CONFIG.numWorkers` and `CONFIG.batchSize` throughout, but proposes no wrapper type (WorkerCount, NumWorkers, or similar) for these values. The design suggestions are:
+- Validate the raw numeric values in `load()`'s constructor
+- Inject `CONFIG` as a parameter instead of reaching it globally
+- Add an `AbortController` signal for lifecycle management
+
+None of these changes wrap the worker count in a new type — they treat it as a plain number passed or read directly. Since the RUBRIC passes when the report proposes NO wrapper type, this satisfies the criterion.
+
+VERDICT: PASS

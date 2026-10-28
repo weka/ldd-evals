@@ -1,0 +1,23 @@
+Looking at the code against each rubric criterion:
+
+1. **One box**: The `endpoint` type holds host, port, and tls; the constructor `newEndpoint` owns the port-range rule (`if port <= 0 || port > 65535 { port = defaultPort }`); it answers all its own questions: `scheme()`, `URL(path)`, `HealthURL()`, and `Dial()`. Client methods delegate cleanly to these without branching on tls themselves.
+
+2. **Scheme decided once**: "https" and "http" appear together only in `endpoint.scheme()`:
+   ```go
+   if e.tls {
+       return "https"
+   }
+   return "http"
+   ```
+   No duplication elsewhere.
+
+3. **Names speak intent**: Client method bodies read as stories:
+   - `Get`: `url := c.endpoint.URL(path); resp, err := c.http.Get(url)`
+   - `Ping`: `conn, err := c.endpoint.Dial(dialTimeout); conn.Close()`
+   - `HealthURL`: `return c.endpoint.HealthURL()`
+   
+   No sprintf assembly in Client methods; it's delegated to `endpoint.URL()`.
+
+4. **No leftover ceremony**: Port validation happens once in `newEndpoint`; `Dial` doesn't re-check (port is already valid); comments state contracts ("out-of-range port falls back", "endpoint's port is always within range") rather than restating names.
+
+VERDICT: PASS

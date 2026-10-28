@@ -1,0 +1,38 @@
+--- vote 1: FAIL ---
+Looking at the code structure:
+
+**Pick's body** reads cleanly: it delegates to `pickReplicas` and handles the error guard clause. ✓
+
+**pickReplicas's body** delegates all work to `firstUsable` calls... but this is where the problem appears. The statements are:
+- `primary, ok := firstUsable(nodes, func(n Node) bool { return n.Zone == zone })`
+- Guard clause
+- `secondary, ok := firstUsable(nodes, func(n Node) bool { return n.Zone != zone })`
+- Guard clause
+- Return
+
+While each statement is technically an assignment or guard, the lambda functions passed to `firstUsable` contain field comparisons (`.Zone == zone` and `.Zone != zone`). The rubric explicitly forbids "NO field comparisons such as `.Zone ==`" in the orchestrator bodies. 
+
+Even though the field access is syntactically embedded in lambda arguments rather than direct statements, these lambdas are part of the orchestrator's control flow and the comparisons execute within that context. The rubric's intent—evident from the distinction that "loops and field access are allowed inside methods of a collection type... [but] are not allowed in the orchestrator"—is to enforce delegation to purpose-built helpers. Using lambdas keeps the orchestrator entangled with field comparison logic rather than fully delegating it.
+
+The proper pattern would use named methods like `firstInZone(nodes, zone)` and `firstNotInZone(nodes, zone)` (either on `Placer` or a collection type), eliminating field access from the orchestrator.
+
+**VERDICT: FAIL**
+
+--- vote 2: FAIL ---
+Looking at the `Pick` and `pickReplicas` methods:
+
+The structure is clean at first glance—both methods contain only named function calls and guard clauses. However, the RUBRIC explicitly prohibits "NO field comparisons such as `.Zone ==`" in the orchestrator.
+
+In `pickReplicas`, the field comparisons appear here:
+```go
+primary, ok := firstUsable(nodes, func(n Node) bool { return n.Zone == zone })
+secondary, ok := firstUsable(nodes, func(n Node) bool { return n.Zone != zone })
+```
+
+The lambdas contain `n.Zone == zone` and `n.Zone != zone`, which are exactly the kind of field comparisons the RUBRIC forbids. While these are passed as arguments rather than written directly in statement bodies, they still constitute field-access logic in the orchestrator.
+
+The RUBRIC's spirit and explicit example—"methods of a collection type (for example `type Nodes []Node` with queries returning `(Node, bool)`)—suggests field logic should be extracted into proper methods of a collection type, not embedded in lambdas within the orchestrator. The current code keeps field-comparison decisions at the orchestrator level, just expressed through inline lambdas rather than direct syntax.
+
+The expected pattern would be methods like `FirstUsableInZone()` and `FirstUsableNotInZone()`, or a proper `Nodes` collection type with query methods that encapsulate the field logic separately from orchestration.
+
+VERDICT: FAIL

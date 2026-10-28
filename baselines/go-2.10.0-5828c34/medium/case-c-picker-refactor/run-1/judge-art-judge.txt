@@ -1,0 +1,15 @@
+Reading through the code against the rubric:
+
+**Criterion 1 (collection type):** FAILS. There is no `Nodes` type or equivalent collection. The loop still lives directly in `pickReplicas` as a plain `for _, n := range nodes` iteration. The walking isn't owned by a collection type with methods like `InZone()`, `First()`, etc.
+
+**Criterion 2 (node knows its health):** FAILS. `usable()` is a package-level function, not a method on `Node`. The rubric requires "as a method on `Node` (`Usable()`, `Healthy()`)."
+
+**Criterion 3 (Pick tells the story):** FAILS. The logic is delegated to `pickReplicas`, and crucially, the code retains `havePrimary` and `haveSecondary` booleans—renamed flags that still track "found" state. The rubric explicitly says: "FAIL outright if `primaryFound`, `secondaryFound` or any `found` flag survives." These are that same pattern.
+
+**Criterion 4 (names and comments):** FAILS. `// Placer is a placer.` is exactly the restatement the rubric forbids.
+
+**FAIL OUTRIGHT condition:** `pickReplicas` still ranges over the slice with an `if` conditional inside (`if !usable(n)`). The rubric demands: "FAIL outright if `pickReplicas` still ranges over the slice with nested `if`."
+
+The code hasn't been refactored into the desired shape—it's still structured as a loop with flag state, just wrapped through a couple of helper methods.
+
+VERDICT: FAIL

@@ -1,0 +1,62 @@
+{
+  "case": "quickfix-red-lint",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": true,
+  "graders": [
+    {
+      "name": "escalated-gocognit",
+      "type": "regex",
+      "passed": true,
+      "detail": "gocognit[^\\n]{0,240}\\bR3\\b over trace: 15 match(es); want at least 1"
+    },
+    {
+      "name": "escalated-line",
+      "type": "regex",
+      "passed": true,
+      "detail": "ESCALATED:|LINT STATUS: escalations pending over trace: 8 match(es); want at least 1"
+    },
+    {
+      "name": "fixed-errcheck",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?s)FIXED\\b.{0,600}errcheck over trace: 8 match(es); want at least 1"
+    },
+    {
+      "name": "globals-routed-r8",
+      "type": "regex",
+      "passed": true,
+      "detail": "gochecknoglobals[^\\n]{0,240}\\bR8\\b over trace: 16 match(es); want at least 1"
+    },
+    {
+      "name": "gocognit-routed-r3",
+      "type": "regex",
+      "passed": true,
+      "detail": "gocognit[^\\n]{0,240}R3-storifying over trace: 15 match(es); want at least 1"
+    },
+    {
+      "name": "no-bare-ready-const",
+      "type": "regex",
+      "passed": true,
+      "detail": "const \\w+ = \"READY\" over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "no-nolint",
+      "type": "regex",
+      "passed": true,
+      "detail": "//nolint over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "postcheck",
+      "type": "postcheck",
+      "passed": true,
+      "detail": "PASS  .golangci.yaml unchanged from the fixture's original\ntask test: ok\nPASS  task test green\ninfo  task lint issues remaining: 11\ninfo  commits since scaffold: 6\nPASS  assertions kept in ./internal/handlers/handlers_test.go (23 \u003e= 20)\nPASS  assertions kept in ./internal/handlers/heartbeat_test.go (27 \u003e= 27)\nPASS  assertions kept in ./internal/jobs/scheduler_test.go (10 \u003e= 10)\nPASS  assertions kept in ./internal/models/region_test.go (4 \u003e= 4)\nPASS  assertions kept in ./internal/models/tenant_test.go (3 \u003e= 3)\nPASS  assertions kept in ./internal/pkg/deviceid/deviceid_test.go (4 \u003e= 4)\nPASS  assertions kept in ./internal/placement/picker_test.go (4 \u003e= 4)\nPASS  assertions kept in ./internal/pool/workers_test.go (1 \u003e= 1)\nPASS  assertions kept in ./internal/report/report_test.go (11 \u003e= 11)\nPASS  assertions kept in ./internal/services/service_test.go (64 \u003e= 55)\nPASS  assertions kept in ./internal/snapshot/schedule_test.go (12 \u003e= 12)\nPASS  assertions kept in ./internal/snapshot/scheduler_test.go (14 \u003e= 14)\nPASS  assertions kept in ./internal/transport/client_test.go (1 \u003e= 1)\nPASS  assertions kept in ./internal/utils/utils_test.go (7 \u003e= 7)\npostcheck: all checks passed"
+    }
+  ],
+  "cost_usd": 7.7545670000000015,
+  "judge_cost_usd": 0,
+  "duration_ms": 2217550,
+  "num_turns": 26,
+  "segments": 1,
+  "scaffold_dir": "/tmp/ldd-eval-quickfix-red-lint-2347733183"
+}

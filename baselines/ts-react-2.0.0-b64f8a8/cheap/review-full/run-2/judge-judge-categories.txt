@@ -1,0 +1,30 @@
+--- vote 1: PASS ---
+**Question 1**: Are the concurrency bugs listed under 🐛 Bugs?
+
+Yes. The report correctly files both bugs under the 🐛 BUGS section:
+- "src/hooks/useDeviceFeed.ts:13... a `setInterval` started in a `useEffect`/`FeedStore` constructor is never cleared"
+- "src/hooks/useDeviceSearch.ts:17-29... a stale response for an earlier query can overwrite a newer one"
+
+Neither appears under 🔴 Design Debt or 🟡 Readability Debt.
+
+**Question 2**: Is the production sleep under 🔴 Design Debt, not Bugs?
+
+Yes. The report files it correctly: "src/services/retry.ts:49,64; src/services/syncService.ts:144; src/pages/Heartbeats/heartbeatFeed.ts:667 | R10 Q5: `await new Promise(resolve => setTimeout(resolve, ...))` in retry/backoff loops" appears under 🔴 DESIGN DEBT, not under 🐛 BUGS.
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+Looking at the report's 🐛 BUGS section:
+
+**Question 1:** Both concurrency bugs are correctly categorized:
+- The `setInterval` in `src/hooks/useDeviceFeed.ts:13` without cleanup is listed under Bugs (R10 Q1)
+- The out-of-order response race in `src/hooks/useDeviceSearch.ts:17-29` (fire-and-forget with no AbortController/ignore flag) is listed under Bugs (R10 Q2)
+
+**Question 2:** The production sleep (`await new Promise(resolve => setTimeout(resolve, ...))`) appears in the 🔴 DESIGN DEBT section under R10 Q5, covering:
+- `src/services/retry.ts:49,64` (retry backoff sleeps)
+- `src/services/syncService.ts:144` (backoff sleep)
+- `src/pages/Heartbeats/heartbeatFeed.ts:667` (polling delay in heartbeat feed)
+
+These sleeps are explicitly categorized as Design Debt, not Bugs. The 🐛 BUGS section lists only the three concurrency races and makes no mention of production sleeps.
+
+VERDICT: PASS

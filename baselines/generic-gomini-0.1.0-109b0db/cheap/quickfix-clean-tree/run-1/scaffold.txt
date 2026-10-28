@@ -1,0 +1,1 @@
+scaffolded go-mini at /tmp/ldd-eval-quickfix-clean-tree-4117154088 (9be70c6)

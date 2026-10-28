@@ -1,0 +1,41 @@
+--- vote 1: PASS ---
+**Analysis:**
+
+**Point 1 — Configuration loading:**
+Configuration loaded once at line 27: `cfg := env.Load()`. Individual values (`cfg.FlapWindowSec`, `cfg.BatchSize`, `cfg.NumWorkers`, `cfg.Region`) are handed to constructors. The `os.Getenv` calls (WEBHOOK_URL, PORT, STORE_PATH) are small wiring helpers at the entry point, not global config reads. ✓
+
+**Point 2 — One-altitude story:**
+Main reads clearly: load config (line 27) → construct leaf values (store, services at lines 31–48) → construct scheduler/handlers (lines 50–57) → serve (lines 59–69). Each step is a named call or assignment. No jumping between altitudes. ✓
+
+**Point 3 — No business logic:**
+- Flag parsing, jitter sleep, store validation: infrastructure setup, not domain logic. ✓
+- `grantsFor()`: takes flag, returns Grants dependency. Wiring, not business logic. ✓
+- `mustOpenFileRepo()`, `routes()`, `listenAddr()`, `defaultStorePath()`: all small wiring helpers matching the rubric's examples. ✓
+- `healthz()`: simple health check handler. Not parsing, comparisons, or retry logic in the rubric's forbidden sense. ✓
+
+Main itself contains no string splitting, status comparisons, or retry loops. All composition is at the entry point.
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+Checking the file against the three rubric points:
+
+**Point 1 — Config obtained once, values distributed to constructors:**
+- Line 32: `cfg := env.Load()` loads config once at the top ✓
+- Individual values are extracted and passed: `cfg.FlapWindowSec` → `flapWindow`, `cfg.BatchSize` and `cfg.NumWorkers` to scheduler, `cfg.Region` to logging
+- No reads of `env.Config.X` elsewhere in the file
+- `os.Getenv()` calls (WEBHOOK_URL, PORT, STORE_PATH) are in small wiring helpers (`listenAddr()`, `defaultStorePath()`, main body) — allowed as R8 entry-point wiring ✓
+
+**Point 2 — Story at one altitude:**
+Main body reads: flags → load config → build leaves (store, notifier, audit, flapWindow, scheduler) → build orchestrators (services, mux routes, server) → serve. Each step is a named call or assignment ✓
+
+**Point 3 — No business logic:**
+- Jitter sleep (line 36) is startup wiring, not business logic
+- Store health check (lines 49–51) is validation
+- `grantsFor()`, `mustOpenFileRepo()`, `listenAddr()`, `defaultStorePath()`, `routes()`, `healthz()` are all small wiring helpers with no business logic, parsing, or control flow
+- No string splitting beyond simple `:` concatenation for listen address
+- No status comparisons or retry loops ✓
+
+All three points satisfied. Configuration flows cleanly through to constructors as individual values; composition root reads at one altitude; no business logic embedded in main.
+
+VERDICT: PASS

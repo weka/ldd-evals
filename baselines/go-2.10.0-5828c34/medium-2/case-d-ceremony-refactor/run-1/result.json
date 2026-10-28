@@ -1,0 +1,39 @@
+{
+  "case": "case-d-ceremony-refactor",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": true,
+  "graders": [
+    {
+      "name": "art-judge",
+      "type": "llm",
+      "passed": true,
+      "detail": "judge claude-haiku-4-5: # Analysis\n\nChecking each point from the rubric:\n\n**Point 1 (No new indirection):** \nThe code shows domain types (`Device`, `Job`, `Tenant`, etc.) with straightforward methods, and a `Handler` struct in trace.go with `List` method—standard patterns, not added wrapper types or interfaces. The `Routes` function is a common Go registration pattern. No new indirection visible.\n\n**Point 2 (Deletion allowed, growth not):**\n`grants.go` is absent—permitted if dead code. The surviving types show domain-appropriate methods only: `IsOnline`, `IsSnapshot`, `Outranks`, `ParsePriority`, `Zone`, `Includes`, `Line`—these are vocabulary, not bureaucratic growth.\n\n**Point 3 (Trace reason survives):**\nIn trace.go:List, the comment states: \"It echoes the caller's X-Trace header so a device's log lines and the request that produced them can be joined later.\" The reasoning is present at `w.Header().Set(\"X-Trace\", r.Header.Get(\"X-Trace\"))`. This preserves the *why*.\n\n**Point 4 (Names kept or sharpened):**\n`Handler`, `NewHandler`, `List`, `Routes` are clear. Methods like `IsOnline`, `ParseRegion`, `Outranks` use domain vocabulary. No verbose renaming like `HasPermission`, `GetAll`, or `traceRequest`. Names remained sharp.\n\nThe code is well-boxed: domain models with focused methods, handlers using standard patterns, comments explaining real reasons for choices (especially the trace join logic). No interfaces wrapping `Handler`, no options structs, no builder patterns. The structure predates the agent's work and was left intact.\n\nVERDICT: PASS",
+      "cost_usd": 0.047091
+    },
+    {
+      "name": "no-traceid-type",
+      "type": "regex",
+      "passed": true,
+      "detail": "type TraceID over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "trace-header-still-set",
+      "type": "regex",
+      "passed": true,
+      "detail": "Header\\(\\)\\.Set\\(\"X-Trace\" over files: 1 match(es); want at least 1"
+    },
+    {
+      "name": "postcheck",
+      "type": "postcheck",
+      "passed": true,
+      "detail": "task test: ok\nPASS  task test green\ntask lint: ok\nPASS  task lint green\nPASS  ReplicaCount has at most its original single method (deleted or untouched, never grown) (0 \u003c= 1)\nPASS  ReplicaCount is declared at most once (0 \u003c= 1)\nPASS  no TraceID-like wrapper appeared anywhere (0)\n== black-box suite: builds cmd/svc, replays the recorded heartbeats ==\n--- PASS: TestHeartbeatContract (1.20s)\n--- PASS: TestExpectedTSVMatchesTable (0.00s)\nok  \texample.com/heartbeat-blackbox\t1.206s\nblack-box: PASS\nPASS  black-box heartbeat suite\npostcheck: all checks passed"
+    }
+  ],
+  "cost_usd": 0.30209119999999995,
+  "judge_cost_usd": 0.047091,
+  "duration_ms": 107926,
+  "num_turns": 25,
+  "segments": 1,
+  "scaffold_dir": "/tmp/ldd-eval-case-d-ceremony-refactor-3022386268"
+}

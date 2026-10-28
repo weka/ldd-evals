@@ -1,0 +1,21 @@
+task test: ok
+PASS  task test green
+task lint: ok
+PASS  task lint green
+PASS  deviceid: no surviving mutant (0)
+FAIL  models: no surviving mutant (got '999', want '0')
+FAIL  utils: no surviving mutant (none recorded as equivalent) (got '999', want '0')
+PASS  production file untouched: internal/pkg/deviceid/deviceid.go
+PASS  production file untouched: internal/models/tenant.go
+PASS  production file untouched: internal/utils/strings.go
+PASS  no module-wide mutation run (gremlins unleash ./... in the trace) (0)
+FAIL  no //nolint added to the three packages (got '2', want '       2')
+PASS  at least one commit after the scaffold (1 >= 1)
+PASS  clean tree at the end
+== black-box suite: builds cmd/svc, replays the recorded heartbeats ==
+--- PASS: TestHeartbeatContract (1.68s)
+--- PASS: TestExpectedTSVMatchesTable (0.00s)
+ok  	example.com/heartbeat-blackbox	2.244s
+black-box: PASS
+PASS  black-box heartbeat suite
+postcheck: 3 check(s) failed

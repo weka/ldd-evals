@@ -1,0 +1,45 @@
+--- vote 1: FAIL ---
+I'll analyze whether the report satisfies both criteria from the RUBRIC.
+
+**Question 1: Is the unguarded concurrent dict access listed under 🐛 Bugs?**
+
+YES. In the 🐛 Bugs section, I find:
+```
+internal/services/device_service.py:194,383-385,458-460 (vs. correctly-guarded `flush()` at 434-438) 
+| `self.last_seen` written/deleted from 3 places outside `with self.mu:` while a 
+background thread and per-request threads (svc `ThreadingMixIn`) touch the same dict 
+— concurrent `del`/write races
+```
+This correctly describes the data race on the `last_seen` dict and is listed as a 🐛 Bug (severity M).
+
+**Question 2: Is the production `time.sleep` listed under 🔴 Design Debt rather than under 🐛 Bugs?**
+
+NO. The `time.sleep` issues are handled inconsistently:
+- The `time.sleep(attempt * 0.2)` in process_heartbeat (line 164) is mentioned in the DeviceService.process_heartbeat cluster but **not listed as a separate finding in either section** — it's only referenced within the cluster description.
+- The retry.py:13-17 finding is listed in 🐛 Bugs as "Email alerts silently get a generic 5.0s retry delay instead of an owned policy (missing case)" — but this frames the issue as a missing case dispatch bug, not a time.sleep design problem.
+- There is no explicit finding in the 🔴 Design Debt section treating production `time.sleep` calls as a design debt issue.
+
+The report mentions the sleep problem within cluster discussions but fails to elevate it as a distinct Design Debt finding in the designated section.
+
+VERDICT: FAIL
+
+--- vote 2: FAIL ---
+Looking at the report against the RUBRIC's two questions:
+
+**Question 1: Is the unguarded concurrent dict access listed under 🐛 Bugs?**
+
+YES. Under 🐛 Bugs, I find:
+> "internal/services/device_service.py:194,383-385,458-460 ... `self.last_seen` written/deleted from 3 places outside `with self.mu:` while a background thread and per-request threads (svc `ThreadingMixIn`) touch the same dict — concurrent `del`/write races"
+
+This is explicitly filed as a Bug, not under Design Debt.
+
+**Question 2: Is the production `time.sleep` listed under 🔴 Design Debt rather than 🐛 Bugs?**
+
+NO. The production `time.sleep` calls are mentioned but not explicitly filed under either section:
+- The `time.sleep(attempt * 0.2)` from process_heartbeat appears only in the "DeviceService.process_heartbeat" cluster description (line 164), with routing advice but no explicit entry in the 🔴 Design Debt findings.
+- The `time.sleep(0.05)` in `_flush_loop` likewise appears only in its cluster description, not as a separate Design Debt filing.
+- The test sleeps (R7 Q6) are in Readability Debt, but these are test code, not production retry backoff.
+
+The RUBRIC requires both questions answered YES. Question 1 passes; Question 2 fails because the production `time.sleep` calls are not explicitly listed under the 🔴 Design Debt section—they are mentioned in cluster analysis but never categorized in the actual findings sections.
+
+VERDICT: FAIL

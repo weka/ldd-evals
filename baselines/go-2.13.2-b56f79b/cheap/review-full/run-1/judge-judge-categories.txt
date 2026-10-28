@@ -1,0 +1,39 @@
+--- vote 1: PASS ---
+**Question 1: Unguarded concurrent map write in Bugs?**
+
+Found under 🐛 BUGS:
+```
+internal/services/device_service.go:82,218,463-467,571-576 | R10 Q3/Q4: `DeviceService.mu` guards `cache` but `s.lastSeen` is written unlocked at :218 (from concurrent HTTP handlers) and read/deleted unlocked in `Purge` and in the `flushLoop` goroutine — concurrent unguarded map access
+```
+
+This explicitly names the unguarded concurrent map write (`s.lastSeen`) in `device_service.go`, filed under Bugs. ✓
+
+**Question 2: Production time.Sleep (retry backoff) in Design Debt, not Bugs?**
+
+Found in 🔴 DESIGN DEBT:
+- `internal/services/retry.go:34-43,46-54` | `withRetry`/`SendWithRetry` both sleep on every retry
+- `internal/services/sync_service.go:115-124` | `saveWithRetry` sleeps on each failed attempt
+- `internal/services/device_service.go:111,175-186` | `goto retry` backoff sleep
+
+All three retry backoff sleep issues are filed under Design Debt, not Bugs. The only sleep mentioned in the Bugs section is `flushLoop`'s polling sleep, which is different. ✓
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+**Question 1:** Unguarded concurrent map write?
+
+The report lists this under 🐛 BUGS:
+> internal/services/device_service.go:82,218,463-467,571-576 | R10 Q3/Q4: `DeviceService.mu` guards `cache` but `s.lastSeen` is written unlocked at :218 (from concurrent HTTP handlers) and read/deleted unlocked in `Purge` and in the `flushLoop` goroutine — concurrent unguarded map access
+
+This matches the criteria exactly: the lastSeen map written from HTTP handlers (ProcessHeartbeat) and read by the flushLoop goroutine. ✓
+
+**Question 2:** Production time.Sleep backoff calls?
+
+The report lists all three under 🔴 DESIGN DEBT:
+- internal/services/retry.go:34-43,46-54 | "sleep on every retry with no `ctx`"
+- internal/services/sync_service.go:115-124 | "sleeps on each failed attempt"
+- internal/services/device_service.go:111,175-186 | "`goto retry` backoff sleep"
+
+All filed under Design Debt, not Bugs. ✓
+
+VERDICT: PASS

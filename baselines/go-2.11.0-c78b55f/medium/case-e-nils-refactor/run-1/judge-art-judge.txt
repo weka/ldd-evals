@@ -1,0 +1,46 @@
+--- vote 1: FAIL ---
+Looking at the FOCUS code against the RUBRIC:
+
+**Criterion 1 (Absence has a name):** ✓ `Find` returns `(Device, bool)`, not nil. `NewReporter` defaults to `DiscardSink()` with no nil checks in `Record`. Clock defaulted in constructor to `time.Now`.
+
+**Criterion 2 (Constructor owns invariants):** ✓ `sink` and `clock` are unexported. `NewReporter` uses functional options with validation, not positional parameters. `wire.go` calls `NewReporter(WithSink(NewSink(w)))` idiomatically.
+
+**Criterion 3 (Methods read as sentences):** ✓ `Record` is one line: `r.sink.Write(ev.At(r.clock()))`. `Announce` uses comma-ok (`if d, ok := catalog.Find(name)`) to check for presence.
+
+**Criterion 4 (Comments earn their place):** ✗ The rubric explicitly states that `// Sink is where events are written.` should be gone as a tautological comment. This line appears verbatim in `reporter.go` above the `Sink` type. This is a direct violation—the comment names what the code already makes obvious.
+
+The presence of this specifically-flagged redundant comment means criterion 4 fails to hold.
+
+VERDICT: FAIL
+
+--- vote 2: FAIL ---
+Reading the code against the RUBRIC's four conditions:
+
+**1. Absence has a name** ✓
+- `Find` returns `(Device, bool)`, not nil
+- `DiscardSink()` provides the null-object 
+- `Record` has no nil check
+- `NewReporter` sets defaults in the constructor
+
+**2. Constructor owns invariants** ✓
+- `Reporter.sink` and `Reporter.clock` are unexported
+- `NewReporter` uses functional options; no `nil, nil` defaults
+- `wire.go` shows `NewReporter(WithSink(NewSink(w)))`
+
+**3. Methods read as sentences** ✓
+- `Record` is one line: `r.sink.Write(ev.At(r.clock()))`
+- `Announce` uses comma-ok pattern: `if d, ok := catalog.Find(name); ok`
+
+**4. Comments earn their place** ✗
+The rubric explicitly lists three comments that should be gone for PASS:
+> `// Reporter is a reporter.`, `// Sink is where events are written.` and the `// forget this once → panic` warning are gone
+
+In `reporter.go` at line 79, the code contains:
+```go
+// Sink is where events are written.
+type Sink struct {
+```
+
+This is one of the specific boilerplate examples that should be removed. While the other comments add value (defaults contract, RFC3339 format detail), this one states only what the name already says.
+
+VERDICT: FAIL

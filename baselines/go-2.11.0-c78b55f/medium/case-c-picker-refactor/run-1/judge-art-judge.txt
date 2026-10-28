@@ -1,0 +1,34 @@
+--- vote 1: FAIL ---
+Looking at the code against the RUBRIC:
+
+**Criterion 1 (Collection has a name): FAIL**  
+No named collection type exists. The code still uses `[]Node` directly and a standalone `firstUsable()` function that ranges over the slice, rather than methods on a collection type like `Nodes` with `InZone()`, `OutsideZone()`, `First()`.
+
+**Criterion 2 (Node knows its own health): PASS**  
+`Node.usable()` method exists and properly encapsulates: `n.Zone != "" && n.Capacity > 0`.
+
+**Criterion 3 (Pick tells the story): FAIL**  
+The `ok` pattern persists throughout—`primary, ok := firstUsable(...)` and `secondary, ok := firstUsable(...)`. The RUBRIC explicitly states "No `primaryFound` style booleans anywhere in the file"; while these aren't named that way, the boolean flag pattern remains. Also, `Pick` is just a thin wrapper around `pickReplicas`; the actual story logic is still in a helper method.
+
+**Criterion 4 (Names and comments): PARTIAL FAIL**  
+The package comment says the code "picks" but doesn't explain *why* placement spreads replicas across zones (the failure-domain reasoning). Method names are reasonable but `pickReplicas` and `firstUsable` are generic helpers, not domain words.
+
+**Additional FAIL clause triggered:**  
+The RUBRIC explicitly states FAIL if "pickReplicas still ranges over the slice with nested if" — the `firstUsable` function does exactly this: `for _, n := range nodes { if n.usable() && matches(n)`. This entire loop-and-flag pattern should move into methods on a named collection type.
+
+VERDICT: FAIL
+
+--- vote 2: FAIL ---
+Looking at this code against the rubric:
+
+**Requirement 1 (Collection type exists):** FAIL — There is no `Nodes` or similar collection type. The code still works directly with `[]Node` slices and delegates to a `firstUsable()` helper. The required methods like `InZone(zone)`, `OutsideZone(zone)`, `First()` returning `(Node, bool)` do not exist on any collection type.
+
+**Requirement 2 (Node knows health):** PASS — The `usable()` method on `Node` encapsulates the health check once, though it's lowercase when the rubric examples show `Usable()`.
+
+**Requirement 3 (Pick tells the story):** FAIL — `pickReplicas()` still uses flag-driven logic: `primary, ok := firstUsable(...); if !ok { return error }; secondary, ok := firstUsable(...); if !ok { return error }`. This is the opposite of a "two-line story." The requirement calls for each step to be a named call on a collection (e.g., `primary := nodes.InZone(zone).First()`), not checking boolean flags multiple times.
+
+**Requirement 4 (Names & comments):** PARTIAL FAIL — The package comment says *what* the placer does but not *why* placement spreads replicas across zones (a domain principle). The rubric explicitly requires this. Also, `firstUsable` is a generic helper, not a domain word.
+
+The code still exhibits the original problem: flag-driven logic with a loop hidden in `firstUsable()`. A true refactor would introduce a `Nodes` collection type with zone-filtering methods that own the walking, so Pick becomes a clean orchestration of named calls.
+
+VERDICT: FAIL

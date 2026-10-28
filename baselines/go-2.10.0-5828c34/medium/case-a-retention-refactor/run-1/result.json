@@ -1,0 +1,45 @@
+{
+  "case": "case-a-retention-refactor",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": true,
+  "graders": [
+    {
+      "name": "art-judge",
+      "type": "llm",
+      "passed": true,
+      "detail": "judge claude-haiku-4-5: ## Analysis\n\nChecking each criterion:\n\n1. **One box.** The `Retention` type owns its parsing entirely. `ParseRetention` handles the `\"d\"` suffix stripping and range validation in one place: `strconv.Atoi(strings.TrimSuffix(v, \"d\"))` and `if err != nil || days \u003c= 0 || days \u003e 365`. No caller re-parses or re-checks. ✓\n\n2. **Names speak intent.** The `Prune` method reads top-down in domain language: `expired := r.Expired(snaps, s.now())`. The `Expired` method name says what it does semantically, not mechanically. ✓\n\n3. **One altitude per function.** The `Prune` body is a story: obtain retention → call `Expired()` → delete → return. No arithmetic, strconv, or strings operations in the function body itself; all parsing is delegated to `ParseRetention`. ✓\n\n4. **No ceremony.** The `Retention` type has no zero sentinel. Comments present explain non-obvious invariants (`strict inequality`) or parsing rules, not defensive re-checks. No comment left where a name now says it (e.g., no \"already validated\" comment). ✓\n\nThe FAIL conditions are also avoided: `strconv.Atoi(strings.TrimSuffix(...` appears only inside `ParseRetention`, and the range check `days \u003c= 0 || days \u003e 365` appears only once.\n\nVERDICT: PASS",
+      "cost_usd": 0.024239999999999998
+    },
+    {
+      "name": "gone-defensive-recheck",
+      "type": "regex",
+      "passed": true,
+      "detail": "days \u003e 0 \u0026\u0026 days \u003c= 365 over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-int-sentinel-helper",
+      "type": "regex",
+      "passed": true,
+      "detail": "func retentionDays\\(raw map\\[string\\]string\\) int over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-zero-sentinel",
+      "type": "regex",
+      "passed": true,
+      "detail": "return 0 // sentinel over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "postcheck",
+      "type": "postcheck",
+      "passed": true,
+      "detail": "task test: ok\nPASS  task test green\ntask lint: ok\nPASS  task lint green\nPASS  retention range predicate has one owner in internal/snapshot (1 \u003c= 1)\nPASS  strconv.Atoi on retention happens once (one boundary parse) (1 \u003c= 1)\nPASS  raw retention value inspected at most once downstream (1 \u003c= 1)\nnew constructors: ParseRetention\nPASS  a new (Parse|New)X(...) (X, error) constructor exists in internal/snapshot (1 \u003e= 1)\nPASS  snapshot_test calls a new constructor (3 \u003e= 1)\nPASS  Retention has no exported fields (0)\nPASS  Retention is never built by literal outside internal/snapshot/policy.go (0)\nPASS  no //nolint added to internal/snapshot (0)\n== black-box suite: builds cmd/svc, replays the recorded heartbeats ==\n--- PASS: TestHeartbeatContract (1.21s)\n--- PASS: TestExpectedTSVMatchesTable (0.00s)\nok  \texample.com/heartbeat-blackbox\t1.211s\nblack-box: PASS\nPASS  black-box heartbeat suite\npostcheck: all checks passed"
+    }
+  ],
+  "cost_usd": 2.2061858000000005,
+  "judge_cost_usd": 0.024239999999999998,
+  "duration_ms": 696859,
+  "num_turns": 67,
+  "segments": 3,
+  "scaffold_dir": "/tmp/ldd-eval-case-a-retention-refactor-284870262"
+}

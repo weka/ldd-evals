@@ -1,0 +1,32 @@
+task: Task "build" is up to date
+task: [go:cases] mkdir -p /home/user/ldd-evals/../ai-coding-rules/go-linter-driven-development/evals
+task: [go:cases] rsync -a --delete --exclude=/README.md go/cases/ go/scaffold go/postcheck go/fixture /home/user/ldd-evals/../ai-coding-rules/go-linter-driven-development/evals/
+task: [go:run] bin/ldd-eval run --tag cheap --model claude-sonnet-5 --max-cost-usd 80 --keep-temp --plugin-dir /home/user/ldd-evals/../ai-coding-rules/go-linter-driven-development --out results/go-rebaseline-5828c34/cheap  --resume /home/user/ldd-evals/../ai-coding-rules/go-linter-driven-development/evals
+ldd-eval: 10 case(s) -> results/go-rebaseline-5828c34/cheap
+case-a-retention-review run 1/2: passed=false cost=$1.0911 turns=34 
+case-a-retention-review run 2/2: passed=false cost=$1.2870 turns=32 
+case-b-endpoint-review run 1/2: passed=false cost=$1.4848 turns=46 
+case-b-endpoint-review run 2/2: passed=false cost=$1.7728 turns=42 
+case-c-picker-review run 1/2: passed=false cost=$1.1973 turns=32 
+case-c-picker-review run 2/2: passed=false cost=$2.1822 turns=44 
+case-d-ceremony-review run 1/2: passed=true cost=$1.9101 turns=44 
+case-d-ceremony-review run 2/2: passed=true cost=$1.4534 turns=37 
+case-e-nils-review run 1/2: passed=false cost=$1.2159 turns=33 
+case-e-nils-review run 2/2: passed=false cost=$1.7878 turns=39 
+case-f-globals-review run 1/2: passed=false cost=$4.5191 turns=74 
+case-f-globals-review run 2/2: passed=true cost=$2.3557 turns=42 
+centerpiece-storify-review run 1/2: passed=false cost=$9.9612 turns=185 
+centerpiece-storify-review run 2/2: passed=false cost=$1.2882 turns=39 
+review-full run 1/3: passed=false cost=$5.5414 turns=57 
+review-full run 2/3: passed=false cost=$0.1577 turns=10 
+review-full run 3/3: passed=false cost=$0.1499 turns=9 
+trigger-go resumed 1/3: passed=false cost=$0.2071 turns=3 
+trigger-go resumed 2/3: passed=false cost=$0.0428 turns=1 
+trigger-go resumed 3/3: passed=false cost=$0.0661 turns=3 
+trigger-non-go resumed 1/3: passed=true cost=$0.0432 turns=1 
+trigger-non-go resumed 2/3: passed=true cost=$0.0381 turns=1 
+trigger-non-go resumed 3/3: passed=true cost=$0.0380 turns=1 
+aggregate: passRate=0.26 averageScore=0.75 totalCostUSD=39.7909 -> results/go-rebaseline-5828c34/cheap/aggregate-result.json
+ldd-eval: some cases fell below the pass-rate threshold 1.00
+task: Failed to run task "go:run": exit status 1
+exit=201

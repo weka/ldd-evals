@@ -1,0 +1,14 @@
+results/
+bin/
+**/fixture/*/bin/
+.task/
+.DS_Store
+# traces can hold data from the machine that ran them: the archive and unpacked copies stay local
+baselines/**/trace.jsonl
+baselines/**/traces.tar.zst
+# macOS AppleDouble files
+**/._*
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/

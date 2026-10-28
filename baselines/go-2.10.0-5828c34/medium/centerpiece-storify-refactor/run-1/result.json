@@ -1,0 +1,82 @@
+{
+  "case": "centerpiece-storify-refactor",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": false,
+  "graders": [
+    {
+      "name": "art-judge",
+      "type": "llm",
+      "passed": false,
+      "detail": "judge claude-haiku-4-5: # Analysis\n\nLooking at `ProcessHeartbeat` and the surrounding service code, I'll evaluate against the five RUBRIC criteria:\n\n1. **The story** - ProcessHeartbeat does read as distinct chapters: parse → load/create → apply → persist. However, the chapters are incomplete. The persist step includes cache management (lines with `s.mu.Lock()`, `s.cache[...] = d`, `s.mu.Unlock()`) which is mechanical boilerplate, not a named domain concept. Similarly, `s.lastSeen[hb.id] = d.LastSeen` is left inline rather than boxed.\n\n2. **Concepts have boxes** - Most are well-boxed:\n   - Heartbeat parsing: `parsedHeartbeat` struct ✓\n   - Device loading: `loadOrCreateDevice()` ✓  \n   - Status transition: `applyHeartbeat()` with `resolveFlapping()` ✓\n   - Notification: `notifyDown()` with retry ✓\n   - **BUT** cache persistence is not boxed — the mutex lock/unlock and map update sit exposed in ProcessHeartbeat itself (lines within the `if changed || force` block). The \"cache\" concept doesn't have its own box.\n\n3. **Names are domain words** - Excellent. `parseHeartbeat`, `loadOrCreateDevice`, `applyHeartbeat`, `notifyDown`, `resolveFlapping` all read as domain operations a fleet operator would recognize. ✓\n\n4. **Comments earned their place** - The PR reference in the method docstring (\"added in PR #87 after the outage\") is historical noise rather than a why. The `// bounds-checked` comment justifies an invariant. Mostly acceptable but the PR reference is weak.\n\n5. **Nothing ugly hid elsewhere** - `notifyDown` properly encapsulates retry with backoff and audit logging rather than just moving old code. However, this doesn't excuse ProcessHeartbeat itself: the mutex choreography and cache assignment are mechanical details that didn't migrate to a helper.\n\n**Critical observation:** Lines like `s.mu.Lock(); s.cache[cacheKey(tenant, hb.id)] = d; s.mu.Unlock();` are the exact kind of mechanical boilerplate the rubric expects to be boxed. A reviewer would say…(truncated)",
+      "cost_usd": 0.082864
+    },
+    {
+      "name": "gone-block-comments",
+      "type": "regex",
+      "passed": true,
+      "detail": "// (parse the line|look up or create device|transitions)$ over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-five-results",
+      "type": "regex",
+      "passed": false,
+      "detail": "tags \\[\\]string, err error\\) over files: 1 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-force-saves",
+      "type": "regex",
+      "passed": false,
+      "detail": "changed \\|\\| force over files: 1 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-goto",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\bgoto\\b over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-minus-one-sentinel",
+      "type": "regex",
+      "passed": true,
+      "detail": ", -1, false over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-n-reused-as-score",
+      "type": "regex",
+      "passed": true,
+      "detail": "n = n \\* 10 over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-region-byte-slice",
+      "type": "regex",
+      "passed": false,
+      "detail": "t\\[7:\\] == \"eu\" over files: 1 match(es); want exactly 0"
+    },
+    {
+      "name": "process-heartbeat-kept",
+      "type": "regex",
+      "passed": true,
+      "detail": "func \\(\\w+ \\*DeviceService\\) ProcessHeartbeat\\( over files: 1 match(es); want at least 1"
+    },
+    {
+      "name": "single-altitude",
+      "type": "llm",
+      "passed": true,
+      "detail": "judge claude-haiku-4-5: Looking at the `ProcessHeartbeat` method in the file, I need to verify it meets the stated criteria.\n\n**Structure of ProcessHeartbeat:**\n\nThe method contains:\n1. `hb, err := parseHeartbeat(raw, force)` — parse (named call) ✓\n2. Error check with early return ✓\n3. `d, err := s.loadOrCreateDevice(...)` — look up/create (named call) ✓\n4. Error check with early return ✓\n5. `d, score, changed := s.applyHeartbeat(d, hb, force)` — apply transition (named call) ✓\n6. `d.LastSeen = time.Now()` — assignment of named call ✓\n7. Conditional persist block:\n   - `s.repo.Save(context.Background(), d)` — persist (named call) ✓\n   - `s.mu.Lock()` and `s.mu.Unlock()` — named calls ✓\n   - `s.cache[cacheKey(tenant, hb.id)] = d` — assignment ✓\n8. `s.lastSeen[hb.id] = d.LastSeen` — assignment ✓\n9. Return result ✓\n\n**Checking prohibited constructs:**\n\n- ✗ `strings.` calls: None\n- ✗ Slice indexing (`parts[0]`, `t[7:]`): None (map access is different)\n- ✗ String literal comparisons (`== \"READY\"`): None\n- ✗ Labeled `continue`: None\n- ✗ `goto`: None\n- ✗ `time.Sleep`: None (only `time.Now()`)\n- ✗ Hand-rolled retry loop: None\n- ✗ Nested `if` blocks more than 2 levels deep: Max nesting is 2 levels (the `if changed || force` containing `if err := s.repo.Save...`)\n\nEvery statement is either a named call, an assignment, or an early return of an error. The body delegates low-level work (notify-on-DOWN, scoring) to `applyHeartbeat` and `parseHeartbeat` helper functions, which the rubric explicitly allows.\n\nVERDICT: PASS",
+      "cost_usd": 0.07041
+    },
+    {
+      "name": "postcheck",
+      "type": "postcheck",
+      "passed": false,
+      "detail": "exit status 1\ntask test: ok\nPASS  task test green\ntask lint: ok\nPASS  task lint green\n== complexity ==\nPASS  gocognit(ProcessHeartbeat) (was 76) (6 \u003c= 10)\nPASS  gocyclo(ProcessHeartbeat) (was 40) (6 \u003c= 8)\nPASS  ProcessHeartbeat still defined in internal/services\nPASS  R1 Q3: no status string-literal comparison inside ProcessHeartbeat (0)\nPASS  R3 Q2: no strings./index manipulation inside ProcessHeartbeat (0)\nPASS  no //nolint on ProcessHeartbeat (0)\n== services-scoped oracles (baseline = scaffold base commit) ==\nFAIL  R8 Q3: context.Background() gone from internal/services (got '3', want '0')\nPASS  context.TODO() not used as an escape hatch (1 \u003c= 1)\nFAIL  R10 Q5: the retry sleep is gone (time.Sleep count below baseline) (got '5', want \u003c= 4)\nPASS  R1 Q5: functions returning \u003e3 values (ProcessHeartbeat's gone) (1 \u003c= 1)\nPASS  R1 Q3: \"READY\" literal has one owner on the heartbeat path (3 fewer than baseline) (2 \u003c= 3)\nPASS  R3 Q4: the labeled-continue dedupe left ProcessHeartbeat (1 \u003c= 1)\n== the parse leaf ==\nFAIL  production code CALLS a Parse*Heartbeat* constructor (declarations and comments excluded) (got '0', want \u003e= 1)\nFAIL  R7: an external-package _test.go calls Parse*Heartbeat*( with a literal (got '0', want \u003e= 1)\n== black-box suite: builds cmd/svc, replays the recorded heartbeats ==\n--- PASS: TestHeartbeatContract (1.18s)\n--- PASS: TestExpectedTSVMatchesTable (0.00s)\nok  \texample.com/heartbeat-blackbox\t1.188s\nblack-box: PASS\nPASS  black-box heartbeat suite\npostcheck: 4 check(s) failed"
+    }
+  ],
+  "cost_usd": 1.9884791999999998,
+  "judge_cost_usd": 0.153274,
+  "duration_ms": 572569,
+  "num_turns": 61,
+  "segments": 1,
+  "scaffold_dir": "/tmp/ldd-eval-centerpiece-storify-refactor-631072742"
+}

@@ -1,0 +1,58 @@
+{
+  "case": "case-f-globals-refactor",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": false,
+  "graders": [
+    {
+      "name": "art-judge",
+      "type": "llm",
+      "passed": true,
+      "detail": "judge claude-haiku-4-5 (PASS,PASS): --- vote 1: PASS ---\n**Rubric check, top-down:**\n\n1. **Root is a wiring diagram.** `main.go` loads `cfg := env.Load()` once, then extracts specific values: `flapWindow := time.Duration(cfg.FlapWindowSec) * time.Second` → `services.NewDeviceService(...)`, and `cfg.BatchSize, cfg.NumWorkers` → `jobs.NewScheduler(...)`. No other file touches `env.Load()` or the `Configuration` value. ✓\n\n2. **Islands are clean.** `pool` imports nothing but `\"log\"`. Signature: `Start(jobs \u003c-chan Job, numWorkers int)` — explicit, named. `jobs` has no `env` import. Signature: `NewScheduler(batchSize, numWorkers int)` — explicit, named. No package-level config var that main sets externally. ✓\n\n3. **Env only loads.** No `func init()` in `env.go`. No mutable package-level `Config` or `region`. `Load()` returns a value. Defaults colocated with keys: `intEnv(\"NUM_WORKERS\", 4)`, `intEnv(\"BATCH\", 64)`, `intEnv(\"FLAP_WINDOW_SEC\", 30)`. Helper `regionOrDefault()` is a function, not a var. ✓\n\n4. **Names carry meaning.** Parameters: `numWorkers`, `batchSize`, `flapWindow time.Duration`. No bare `cfg` passed to leaf packages. No bare `n` or `opts interface{}`. ✓\n\nNo file other than `main.go` references `env.Config`, and `env.go` has no `func init()`.\n\nVERDICT: PASS\n\n--- vote 2: PASS ---\nReading top-down through the four packages:\n\n**1. The root reads like a wiring diagram.**\nMain loads config once: `cfg := env.Load()`. Hands specific values downward: `jobs.NewScheduler(cfg.BatchSize, cfg.NumWorkers)` and `flapWindow := time.Duration(cfg.FlapWindowSec) * time.Second` passed to `services.NewDeviceService(...)`. No `env.Config.` read elsewhere in the file. ✓\n\n**2. Islands are clean.**\n`pool` imports nothing from `env`; `jobs` imports nothing from `env`. Pool's signature: `Start(jobs \u003c-chan Job, numWorkers int)` names the dependency. Scheduler's signature: `NewScheduler(batchSize, numWorkers int)` names both dependencies explicitly. No package-level mu…(truncated)",
+      "cost_usd": 0.1587064
+    },
+    {
+      "name": "gone-config-global",
+      "type": "regex",
+      "passed": true,
+      "detail": "^var Config Configuration over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-nolint-gochecknoglobals-env",
+      "type": "regex",
+      "passed": true,
+      "detail": "nolint:gochecknoglobals // loaded in main over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "load-returns-a-value",
+      "type": "regex",
+      "passed": true,
+      "detail": "^func Load\\(\\) \\(?[A-Z]\\w*(, error)?\\)? \\{ over files: 1 match(es); want at least 1"
+    },
+    {
+      "name": "main-reads-as-a-story",
+      "type": "llm",
+      "passed": true,
+      "detail": "judge claude-haiku-4-5 (PASS,PASS): --- vote 1: PASS ---\n**Analysis:**\n\n**Point 1 — Configuration loading:**\nConfiguration loaded once at line 27: `cfg := env.Load()`. Individual values (`cfg.FlapWindowSec`, `cfg.BatchSize`, `cfg.NumWorkers`, `cfg.Region`) are handed to constructors. The `os.Getenv` calls (WEBHOOK_URL, PORT, STORE_PATH) are small wiring helpers at the entry point, not global config reads. ✓\n\n**Point 2 — One-altitude story:**\nMain reads clearly: load config (line 27) → construct leaf values (store, services at lines 31–48) → construct scheduler/handlers (lines 50–57) → serve (lines 59–69). Each step is a named call or assignment. No jumping between altitudes. ✓\n\n**Point 3 — No business logic:**\n- Flag parsing, jitter sleep, store validation: infrastructure setup, not domain logic. ✓\n- `grantsFor()`: takes flag, returns Grants dependency. Wiring, not business logic. ✓\n- `mustOpenFileRepo()`, `routes()`, `listenAddr()`, `defaultStorePath()`: all small wiring helpers matching the rubric's examples. ✓\n- `healthz()`: simple health check handler. Not parsing, comparisons, or retry logic in the rubric's forbidden sense. ✓\n\nMain itself contains no string splitting, status comparisons, or retry loops. All composition is at the entry point.\n\nVERDICT: PASS\n\n--- vote 2: PASS ---\nChecking the file against the three rubric points:\n\n**Point 1 — Config obtained once, values distributed to constructors:**\n- Line 32: `cfg := env.Load()` loads config once at the top ✓\n- Individual values are extracted and passed: `cfg.FlapWindowSec` → `flapWindow`, `cfg.BatchSize` and `cfg.NumWorkers` to scheduler, `cfg.Region` to logging\n- No reads of `env.Config.X` elsewhere in the file\n- `os.Getenv()` calls (WEBHOOK_URL, PORT, STORE_PATH) are in small wiring helpers (`listenAddr()`, `defaultStorePath()`, main body) — allowed as R8 entry-point wiring ✓\n\n**Point 2 — Story at one altitude:**\nMain body reads: flags → load config → build leav…(truncated)",
+      "cost_usd": 0.0655413
+    },
+    {
+      "name": "stop-check",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?ims)Stop check.*?^\\W{0,6}1\\W{1,6}gates\\b.*?^\\W{0,6}2\\W{1,6}re-run\\b.*?^\\W{0,6}3\\W{1,6}nouns?\\b.*?^\\W{0,6}4\\W{1,6}critic\\b.*?^\\W{0,6}5\\W{1,6}STOP\\b.*?^\\W{0,6}6\\W{1,6}commit\\b over last_message: 1 match(es); want at least 1"
+    },
+    {
+      "name": "postcheck",
+      "type": "postcheck",
+      "passed": false,
+      "detail": "exit status 1\ntask test: ok\nPASS  task test green\ntask lint: ok\nPASS  task lint green\n== the ratchet: env.Config references outside cmd/, per commit ==\nPASS  at least 3 commits after the scaffold base (6 \u003e= 3)\n  bdf6212    0  go-mini: initial import\n  900d290    0  pool: inject worker count instead of reading env.Config\n  38890eb    0  jobs: replace the handler/store package globals with a constructed Scheduler\n  e44709f    0  services: inject batch size into SnapshotService instead of env.Config\n  19f8294    0  services: inject flap window into DeviceService instead of env.Config\n  6229db3    0  env: return Configuration from Load instead of a package global\n  9eb2ef3    0  services, jobs, env: trim low-value comments in files touched by the globals removal\nPASS  env.Config references outside cmd/ never rise and end at 0\n== packages changed in code, per commit (comment-only edits do not count) ==\n  900d290    2  pool: inject worker count instead of reading env.Config\n  38890eb    2  jobs: replace the handler/store package globals with a constructed Scheduler\n  e44709f    1  services: inject batch size into SnapshotService instead of env.Config\n  19f8294    2  services: inject flap window into DeviceService instead of env.Config\n  6229db3    2  env: return Configuration from Load instead of a package global\n  9eb2ef3    1  services, jobs, env: trim low-value comments in files touched by the globals removal\nPASS  no commit changes non-test code in more than 2 packages (island + its caller) (2 \u003c= 2)\n== islands are clean ==\nPASS  pool no longer imports env (0)\nPASS  jobs no longer imports env (0)\nPASS  shallow fix rejected: env.Configuration is not a param/field type in pool, jobs or handlers (0)\n== end state ==\nPASS  R8 Q1: no package-level var left in internal/env (0)\nPASS  R8 Q2: no init() left in internal/env (0)\nPASS  no //nolint in internal/env (0)\nPASS  no //nolint in internal/pool (0)\nPASS  no nolint:gochecknoglobals anywhere for the config global (0)\n== test payoff ==\nPASS …(truncated)"
+    }
+  ],
+  "cost_usd": 4.931171899999998,
+  "judge_cost_usd": 0.2242477,
+  "duration_ms": 1273413,
+  "num_turns": 123,
+  "segments": 1,
+  "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-f-globals-refactor-58104895"
+}

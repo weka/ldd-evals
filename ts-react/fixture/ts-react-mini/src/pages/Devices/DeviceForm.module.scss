@@ -1,0 +1,18 @@
+.form {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.5rem 1rem;
+  align-items: center;
+  max-width: 32rem;
+  margin: 1rem 0;
+
+  button {
+    grid-column: 2;
+    justify-self: start;
+  }
+}
+
+.error {
+  grid-column: 1 / -1;
+  color: #a33;
+}

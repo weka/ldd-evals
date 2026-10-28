@@ -1,0 +1,42 @@
+--- vote 1: PASS ---
+**Analysis:**
+
+1. **Unguarded concurrent map write under 🐛 Bugs?**
+   Yes. The report lists under Bugs (second row):
+   ```
+   internal/services/device_service.go:218, ~463-467 (Purge), ~572-576 (flushLoop)
+   | `s.lastSeen[id] = d.LastSeen` written unlocked at :218...
+   ```
+   Explicitly categorizes the race on the unguarded `lastSeen` map as a bug, not design debt.
+
+2. **Production `time.Sleep` (retry backoff) under 🔴 Design Debt (not Bugs)?**
+   Yes. Under Design Debt:
+   ```
+   internal/services/retry.go:34-55, sync_service.go:115-123
+   | `time.Sleep` inside retry/backoff loops with no `ctx`, no cancellation
+   | [cluster: DeviceService.ProcessHeartbeat covers the device_service.go instance]
+   ```
+   The retry backoff sleeps in retry.go and sync_service.go are explicitly listed under Design Debt, with the note confirming that ProcessHeartbeat's instance is covered.
+
+Both criteria satisfied.
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+Looking at the report:
+
+**Question 1 — Concurrent map write under Bugs?**
+Yes. The 🐛 Bugs section lists:
+> `s.lastSeen[id] = d.LastSeen` written unlocked at :218 (after `s.mu.Unlock()` at :216); `Purge` and `flushLoop` read/delete it with zero locking at all, while `Flush` does lock it — inconsistent, live data-race risk on a map
+
+This is exactly the unguarded `lastSeen` map write, categorized as a bug, not design debt.
+
+**Question 2 — Production time.Sleep under Design Debt?**
+Yes. The 🔴 Design Debt section lists:
+> `time.Sleep` inside retry/backoff loops with no `ctx`, no cancellation [cluster: DeviceService.ProcessHeartbeat covers the device_service.go instance] R10 Q5
+
+This covers `retry.go:34-55` and `sync_service.go:115-123`, filed under Design Debt as required.
+
+Both conditions met.
+
+VERDICT: PASS

@@ -1,0 +1,70 @@
+{
+  "case": "case-c-picker-refactor",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": false,
+  "graders": [
+    {
+      "name": "art-judge",
+      "type": "llm",
+      "passed": false,
+      "detail": "judge claude-haiku-4-5 (FAIL,FAIL): --- vote 1: FAIL ---\nReading through the rubric against the FOCUS code:\n\n**1. Collection has a name:** ✗ No top-level collection type exists. Only `replicaSlots` (private, internal). The code should have a public `Nodes` or similar type with methods like `InZone(zone)`, `OutsideZone(zone)`, `First()`. The walking still happens inside the loop in `pickReplicas`.\n\n**2. Node knows its health:** ✗ Health check is a standalone function `usable(n Node)`, not a method on `Node`. Should be `n.Usable()` or `n.Healthy()`.\n\n**3. Pick tells the story:** ✗ Pick calls `pickReplicas`, which still loops: `for _, n := range nodes { slots.offer(n, zone) }`. Inside `offer`, nested `if` statements check zone and set flags. The pattern is unchanged — loop plus conditionals, not a named sequence of steps.\n\n**4. Names and comments:** Partial. Comments are reasonable; no tautologies like \"Placer is a placer.\" But the package comment doesn't explain *why* replicas spread across zones (the business logic).\n\n**Fail conditions hit:**\n- `hasPrimary` and `hasSecondary` are `primaryFound`/`secondaryFound` style flags. Rubric says this is an outright fail.\n- `pickReplicas` ranges over the slice with nested `if` statements inside `offer`. Rubric says this is an outright fail.\n\nThe refactoring is incomplete. The flags and loop pattern remain unchanged, just wrapped in a `replicaSlots` struct instead of eliminated.\n\nVERDICT: FAIL\n\n--- vote 2: FAIL ---\n**Analysis against RUBRIC:**\n\n1. **Collection has a name:** No. Code still takes `nodes []Node` as a bare slice parameter. No `Nodes` type with methods like `InZone()`, `OutsideZone()`, `First()` exists. ✗\n\n2. **Node knows its health:** No. `usable(n Node)` remains a standalone function, not a method. The predicate is still inline in the picker logic (inside `replicaSlots.offer()`). ✗\n\n3. **Pick tells the story:** No. `Pick()` delegates to `pickReplicas()`, which loops over the slice and calls `slots.offer…(truncated)",
+      "cost_usd": 0.06407879999999999
+    },
+    {
+      "name": "collection-type-exists",
+      "type": "regex",
+      "passed": false,
+      "detail": "^type \\w+ \\[\\]Node over files: 0 match(es); want at least 1"
+    },
+    {
+      "name": "comma-ok-query",
+      "type": "regex",
+      "passed": false,
+      "detail": "\\) \\(Node, bool\\) over files: 0 match(es); want at least 1"
+    },
+    {
+      "name": "gone-found-flags",
+      "type": "regex",
+      "passed": true,
+      "detail": "Found\\s*:?=\\s*(true|false) over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-inline-capacity-check",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\.Capacity \u003c= 0 over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "gone-inline-zone-check",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\.Zone == \"\" over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "single-altitude",
+      "type": "llm",
+      "passed": false,
+      "detail": "judge claude-haiku-4-5 (FAIL,FAIL): --- vote 1: FAIL ---\nLooking at the two key functions:\n\n**`Pick` method:** Clean orchestration—assignment of named call, guard clause, return. ✓\n\n**`pickReplicas` method:** Contains a direct violation:\n```go\nfor _, n := range nodes {\n\tslots.offer(n, zone)\n}\n```\n\nThe RUBRIC explicitly states \"NO loop over the node slice\" in the orchestrator, and \"Loops and field access are allowed inside methods of a collection type... they are not allowed in the orchestrator.\"\n\nThe `pickReplicas` function ranges directly over the input node slice. This breaks R3 Q2—the orchestration should delegate the loop logic to a collection method (e.g., something like `slots.fillFrom(nodes, zone)` where the loop lives inside `replicaSlots`'s methods), not loop itself.\n\nThe boolean flags (`hasPrimary`, `hasSecondary`) are correctly confined inside `replicaSlots` methods, so that part is fine.\n\nVERDICT: FAIL\n\n--- vote 2: FAIL ---\nLooking at the code structure:\n\n**Pick method:** Clean. Each statement is either a named call (`p.pickReplicas(...)`) or a guard clause returning an error. ✓\n\n**pickReplicas method (the delegated helper):**\n```go\nfunc (p *Placer) pickReplicas(nodes []Node, zone string) (Node, Node, error) {\n\tslots := newReplicaSlots()\n\tfor _, n := range nodes {              // ← LOOP OVER NODE SLICE\n\t\tslots.offer(n, zone)\n\t}\n\tif !slots.filled() {\n\t\treturn Node{}, Node{}, fmt.Errorf(\"no placement for zone %q\", zone)\n\t}\n\treturn slots.primary, slots.secondary, nil\n}\n```\n\nThe rubric explicitly forbids \"NO loop over the node slice\" in orchestrator code. The loop `for _, n := range nodes` violates this. The rubric states loops are allowed only inside collection-type methods (like `replicaSlots`), not in the orchestrator itself.\n\nThe code should push the loop down—something like `slots.offerAll(nodes, zone)` as a method on the collection—to keep `pickReplicas` at single altitude (named calls only).\n\nVERDICT: FAIL",
+      "cost_usd": 0.1659894
+    },
+    {
+      "name": "stop-check",
+      "type": "regex",
+      "passed": false,
+      "detail": "(?ims)Stop check.*?^\\W{0,6}1\\W{1,6}gates\\b.*?^\\W{0,6}2\\W{1,6}re-run\\b.*?^\\W{0,6}3\\W{1,6}nouns?\\b.*?^\\W{0,6}4\\W{1,6}critic\\b.*?^\\W{0,6}5\\W{1,6}STOP\\b.*?^\\W{0,6}6\\W{1,6}commit\\b over last_message: 0 match(es); want at least 1"
+    },
+    {
+      "name": "postcheck",
+      "type": "postcheck",
+      "passed": true,
+      "detail": "task test: ok\nPASS  task test green\ntask lint: ok\nPASS  task lint green\nPASS  Placer.Pick still exists in internal/placement\n  gocognit(pickReplicas) = 2\nPASS  gocognit of Pick and every receiver method it calls (2 \u003c= 5)\nPASS  no //nolint in internal/placement production code (0)\n== shipped ==\nPASS  at least one commit after the scaffold base (the green tree is committed) (2 \u003e= 1)\nPASS  working tree clean at the end (nothing left uncommitted) (0)\n== black-box suite: builds cmd/svc, replays the recorded heartbeats ==\n--- PASS: TestHeartbeatContract (1.70s)\n--- PASS: TestExpectedTSVMatchesTable (0.00s)\nok  \texample.com/heartbeat-blackbox\t2.263s\nblack-box: PASS\nPASS  black-box heartbeat suite\npostcheck: all checks passed"
+    }
+  ],
+  "cost_usd": 2.0242905,
+  "judge_cost_usd": 0.2300682,
+  "duration_ms": 855162,
+  "num_turns": 49,
+  "segments": 1,
+  "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-c-picker-refactor-4195949150"
+}

@@ -1,0 +1,13 @@
+schema_version: "1.1"
+context:
+  scaffold_script: ../scaffold/default.sh
+tier: cheap
+notes: |
+  R7 Q7 through the read-only path. Three leaf packages whose tables miss a
+  boundary row each (see the R7.Q7.* manifest entries); the hunter may not run
+  tests, so it cannot run gremlins and must take the hand check the question
+  spells out: list the leaf's comparisons, check the table for a row at each
+  boundary, name the row that would kill the mutant. Contains and DaysBetween
+  have every boundary covered and must draw no Q7 row. Truncate's two survivors
+  are equivalent mutants nobody recorded, so a row asking for the record is
+  correct and is not graded either way.

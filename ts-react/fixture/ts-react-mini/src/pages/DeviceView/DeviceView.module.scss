@@ -1,0 +1,13 @@
+.page {
+  max-width: 60rem;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+
+  button[aria-selected='true'] {
+    font-weight: 700;
+  }
+}

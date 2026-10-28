@@ -1,0 +1,25 @@
+--- vote 1: FAIL ---
+## Reasoning
+
+The FOCUS text is a summary that references a separate detailed report ("in the report I just sent you"). 
+
+**Question 1 (concurrent map write under 🐛 Bugs):** ✅ Satisfied. Item #4 in the "6 bugs to fix immediately" section explicitly describes the `lastSeen` map as "written both under lock (`Flush`) and unguarded (`ProcessHeartbeat`, `Purge`, `flushLoop`) — concurrent-map-write crash risk." This is clearly categorized as a bug.
+
+**Question 2 (time.Sleep under 🔴 Design Debt):** ❌ Cannot verify. The FOCUS text mentions ProcessHeartbeat as an oversized function ("ProcessHeartbeat (5 rules) — oversized, un-storified, un-ctx'd, duplicate tag-parsing logic") but does **not explicitly mention production `time.Sleep` calls or their categorization under Design Debt**. The detailed sections with 🐛 Bugs and 🔴 Design Debt categorizations are not shown in this summary text.
+
+The FOCUS is a summary pointing to a separate report; the actual detailed categorization needed to verify criterion 2 is not present in the text provided for grading.
+
+VERDICT: FAIL
+
+--- vote 2: FAIL ---
+Looking at the FOCUS text against the CRITERIA:
+
+**Question 1: Is the unguarded concurrent map write listed under 🐛 Bugs?**
+✓ YES — Bug #4 explicitly states: "`lastSeen` map is written both under lock (`Flush`) and unguarded (`ProcessHeartbeat`, `Purge`, `flushLoop`) — concurrent-map-write crash risk." This is listed under "6 bugs to fix immediately."
+
+**Question 2: Is the production `time.Sleep` listed under 🔴 Design Debt?**
+✗ NO — The report text does not mention `time.Sleep`, retry backoff, or production sleep calls anywhere in the provided summary. While the report discusses various design issues (ProcessHeartbeat being oversized, DeviceService as a god object, etc.), there is no explicit mention of production `time.Sleep` calls being filed under Design Debt.
+
+Since both questions must be answered yes to pass, and the second question cannot be satisfied by the report text provided, the verdict is:
+
+VERDICT: FAIL

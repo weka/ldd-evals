@@ -1,0 +1,7 @@
+{
+  "lang": "ts-react",
+  "plugin": "ts-react-linter-driven-development",
+  "plugin_repo": "buzzdan/ai-coding-rules",
+  "plugin_version": "2.1.0",
+  "plugin_sha": "4077431"
+}

@@ -1,0 +1,47 @@
+--- vote 1: FAIL ---
+Looking at the report structure, I need to verify two specific categorizations:
+
+**Question 1: Is the `lastSeen` concurrent map write under 🐛 Bugs?**
+
+Yes. Under the **🐛 BUGS** section, the first entry clearly identifies the race:
+> "internal/services/device_service.go:218,463-467,568-578 | R10 Q3 (mandatory — confirmed with `go test -race ./...`: real DATA RACE between ProcessHeartbeat:218 and flushLoop:574) | s.lastSeen is written/deleted from 3 independent, unguarded sites (ProcessHeartbeat, Purge, flushLoop)..."
+
+This explicitly categorizes the unguarded concurrent map write as a bug. ✓
+
+**Question 2: Is the production `time.Sleep` listed under 🔴 Design Debt "rather than" under 🐛 Bugs?**
+
+No. The production `time.Sleep` calls appear in **both** sections:
+- Under **🐛 BUGS** (entries 3-5): device_service.go:181, retry.go:34-55, sync_service.go:115-126 are all listed as bugs
+- Under **🔴 DESIGN DEBT**: the same three entries also appear
+
+The RUBRIC asks if they're listed "rather than" under Bugs—this phrasing indicates exclusivity (Design Debt, not Bugs). Since these entries are categorized under both sections, they fail this criterion. They should be purely under Design Debt if the categorization is correct per the CRITERIA.
+
+Brief reasoning: The report misclassifies the production sleep backoff issues by listing them under 🐛 Bugs when they should only appear under 🔴 Design Debt.
+
+VERDICT: FAIL
+
+--- vote 2: FAIL ---
+Looking at the report:
+
+**Question 1: Is the unguarded concurrent map write listed under 🐛 Bugs?**
+
+Yes. The report lists under Bugs:
+```
+internal/services/device_service.go:218,463-467,568-578 | R10 Q3 (mandatory —
+  confirmed with `go test -race ./...`: real DATA RACE between
+  ProcessHeartbeat:218 and flushLoop:574) | s.lastSeen is written/deleted from
+  3 independent, unguarded sites...
+```
+
+**Question 2: Is the production time.Sleep filed under 🔴 Design Debt rather than 🐛 Bugs?**
+
+No. The report lists three time.Sleep issues under 🐛 BUGS:
+- `internal/services/device_service.go:181` — ProcessHeartbeat's retry sleep
+- `internal/services/retry.go:34-55` — withRetry/SendWithRetry sleep
+- `internal/services/sync_service.go:115-126` — saveWithRetry sleep
+
+All three are categorized as bugs (Q5 severity), not as design debt. The criteria requires these to be filed under Design Debt instead.
+
+The first question passes but the second fails. Since both must pass:
+
+VERDICT: FAIL

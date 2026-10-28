@@ -1,0 +1,31 @@
+Looking at the ProcessHeartbeat implementation and the supporting package:
+
+**Strengths:**
+
+1. **The story** ✓ – ProcessHeartbeat reads as chapters: parse (parseHeartbeat), find/register (loadOrCreateDevice), apply transition (dampFlap + status change), notify (notifyDown), score, and persist. Each helper's job is predictable from its name.
+
+2. **Concepts have boxes** ✓ – parsedHeartbeat struct with parser; Status constants (StatusDown, StatusReady, StatusDegraded); domain-named helpers throughout.
+
+3. **Domain names** ✓ – `parseHeartbeat`, `loadOrCreateDevice`, `dampFlap`, `applyVersionAndTags`, `heartbeatScore`, `notifyDown`. All domain verbs on domain nouns.
+
+4. **Comments earned place** ✓ – No "// parse the line" markers; function docstrings explain why, not what.
+
+**Critical failures:**
+
+5. **Ugly hid elsewhere** ✗ – The rubric explicitly states: **"FAIL outright if ... a labeled `continue` ... survives."**
+
+In `heartbeat_parser.go`, the `normalizeTags()` function uses a labeled continue:
+```go
+outer:
+	for _, t := range in {
+		...
+		for _, e := range tags {
+			if e == t {
+				continue outer // already added. skip
+			}
+		}
+```
+
+This is a control-flow pattern the rubric flagged for elimination. Additionally, `notifyDown()` in device_service.go embeds retry/backoff with bare `time.Sleep()` instead of using the extracted `withRetry()` helper that exists in retry.go—another example of "ugly hid elsewhere" where retry logic wasn't properly extracted.
+
+VERDICT: FAIL

@@ -1,0 +1,99 @@
+{
+  "case": "case-f-globals-review",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": true,
+  "graders": [
+    {
+      "name": "anchor-env-global",
+      "type": "regex",
+      "passed": true,
+      "detail": "env\\.py:[0-9]+ over last_message: 6 match(es); want at least 1"
+    },
+    {
+      "name": "evidence-protocol",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\.py:[0-9]+ over last_message: 50 match(es); want at least 1"
+    },
+    {
+      "name": "fix-clean-island",
+      "type": "regex",
+      "passed": true,
+      "detail": "Extract Clean Island|Push the Global Up over last_message: 5 match(es); want at least 1"
+    },
+    {
+      "name": "no-edit",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Edit called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "no-multiedit",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "MultiEdit called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "no-write",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Write called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "nolint-is-a-finding",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i)noqa|type: ignore over last_message: 4 match(es); want at least 1"
+    },
+    {
+      "name": "precision-drain-clean",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\b_drain\\(\\) over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "r8-q2-init",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i)_region\\b|import[- ]time|at import|module import|when the module (is )?(loads|imported) over last_message: 12 match(es); want at least 1"
+    },
+    {
+      "name": "r8-q5-jobs-read",
+      "type": "regex",
+      "passed": true,
+      "detail": "scheduler\\.py:[0-9]+ over last_message: 13 match(es); want at least 1"
+    },
+    {
+      "name": "r8-q5-pool-read",
+      "type": "regex",
+      "passed": true,
+      "detail": "workers\\.py:[0-9]+ over last_message: 7 match(es); want at least 1"
+    },
+    {
+      "name": "r8-q6-test-mutates-global",
+      "type": "regex",
+      "passed": true,
+      "detail": "test_workers\\.py:[0-9]+ over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "refuted-carries-alternative",
+      "type": "llm",
+      "passed": true,
+      "detail": "judge claude-haiku-4-5 (PASS,PASS): --- vote 1: PASS ---\nLooking through the FOCUS text for any proposal of a wrapper type for worker count (e.g., `WorkerCount`, `NumWorkers`):\n\nThe document discusses `num_workers` and `batch_size` extensively in the **env.Configuration / CONFIG** cluster, but the skeptic's verdict there explicitly states: **\"not sent — no new type proposed\"** and recommends instead \"Pass `num_workers`/`batch_size` as parameters into `pool.start()`/`Scheduler.__init__`\" — passing raw values as constructor arguments, not wrapping them in a type.\n\nThe only new domain type proposed is `JobKind(StrEnum)` for the `job.kind` field (in the **Job.kind / _dispatch** cluster), which is properly CONFIRMED with scorecard evidence and a concrete route. That's not a worker-count wrapper.\n\nPer the RUBRIC: \"If the report proposes NO wrapper type for the worker count / batch size, PASS.\"\n\nThe report proposes no wrapper type for worker count.\n\nVERDICT: PASS\n\n--- vote 2: PASS ---\nThe report addresses worker count handling in the `Configuration.CONFIG` cluster (findings R2, R8 Q1/Q5, R8 Q6), but **proposes no wrapper type** for `num_workers` or `batch_size`. \n\nInstead, the skeptic's verdict is to pass these as **raw integer parameters** directly into `pool.start()` and `Scheduler.__init__()`, which the rubric explicitly recognizes as an acceptable alternative (\"pass num_workers as an int parameter to a constructor\").\n\nThe configuration validation and global-elimination refactoring discussed (`__post_init__` validation, pushing parameters up from library internals) concerns the *mechanism* of how values flow, not the *shape* of a domain type wrapping the count.\n\nPer the rubric: \"If the report proposes NO wrapper type for the worker count / batch size, PASS.\"\n\n---\n\nVERDICT: PASS",
+      "cost_usd": 0.0318652
+    },
+    {
+      "name": "rule-cited",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\bR(1[0-2]|[1-9])\\b over last_message: 53 match(es); want at least 1"
+    }
+  ],
+  "cost_usd": 3.7707797999999997,
+  "judge_cost_usd": 0.0318652,
+  "duration_ms": 990539,
+  "num_turns": 46,
+  "segments": 1,
+  "scaffold_dir": "/tmp/ldd-eval-case-f-globals-review-655146644"
+}

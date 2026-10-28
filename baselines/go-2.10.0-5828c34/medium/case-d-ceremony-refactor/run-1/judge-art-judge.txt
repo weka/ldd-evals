@@ -1,0 +1,25 @@
+Looking at the FOCUS files against the RUBRIC's four criteria:
+
+**Criterion 1 - No new indirection:**
+Several types introduce accessors that add a layer over direct field access:
+- `Heartbeat` has `// Line returns the line. func (h Heartbeat) Line() string { return h.Raw }` — wraps the public `Raw` field unnecessarily. Quote: `func (h Heartbeat) Line() string { return h.Raw }`
+- `Device` has `func (d *Device) SetStatus(s string) { d.Status = s }` — setter for a public field. The comment `// SetStatus sets the status.` restates the obvious without explaining why this indirection exists.
+- `Schedule` has `func (s Schedule) Days() []Weekday { return s.days }` — accessor for a private field, which is reasonable, but the comment `// Days returns the days.` adds length without WHY.
+
+These setters and getters add structure (indirection) that the plain fields and direct access did not need, violating the principle. ✗
+
+**Criterion 2 - Deletion allowed, growth not:**
+`grants.go` is absent from FOCUS (deleted if unreferenced, which passes). However, visible code includes methods on structs — without the before state, unclear if grown. The pattern of accessor methods suggests growth. ✗
+
+**Criterion 3 - Trace reason survives:**
+Quote from `trace.go`: `// List returns the device listing handler. It echoes the caller's X-Trace header so a device's log lines and the request that produced them can be joined later.` ✓
+
+**Criterion 4 - Names kept, sharpened:**
+Identifiers `List`, `Routes`, `Status`, `IsOnline`, `Outranks` are sharp, no renames adding words. ✓
+
+**Additional violation:**
+The non-informative comments (`SetStatus sets the status`, `Line returns the line`, `Days returns the days`, `IsOnline returns whether the device is online`) make code longer to read without adding information about WHY, violating the rubric's principle: "Anything that made a reader's glance longer than before is FAIL."
+
+Setters like `SetStatus` and accessors like `Line()` on public/accessible fields introduce unnecessary indirection, matching the pattern the rubric warns against in the negative control. Quote: `func (d *Device) SetStatus(s string) { d.Status = s }`
+
+VERDICT: FAIL

@@ -1,0 +1,68 @@
+{
+  "case": "case-g-leaf-mutants-review",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": false,
+  "graders": [
+    {
+      "name": "evidence-protocol",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\.tsx?:[0-9]+ over last_message: 18 match(es); want at least 1"
+    },
+    {
+      "name": "no-edit",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Edit called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "no-multiedit",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "MultiEdit called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "no-write",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Write called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "q7-judged",
+      "type": "regex",
+      "passed": true,
+      "detail": "R7 Q7:[^\\n]*per-leaf, not judged over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "recall-q7-deviceid-max-length",
+      "type": "regex",
+      "passed": true,
+      "detail": "deviceId(\\.test)?\\.ts[^\\n]*(?i:\\b64\\b|max[ _-]?len|length boundary) over last_message: 1 match(es); want at least 1"
+    },
+    {
+      "name": "recall-q7-slugify-separator",
+      "type": "regex",
+      "passed": true,
+      "detail": "strings(\\.test)?\\.ts[^\\n]*(?i:leading|trailing|separator|dash|hyphen|out\\.length) over last_message: 3 match(es); want at least 1"
+    },
+    {
+      "name": "recall-q7-tenant-message",
+      "type": "regex",
+      "passed": false,
+      "detail": "tenant(\\.test)?\\.ts[^\\n]*(?i:tenant: empty|toThrow|message) over last_message: 0 match(es); want at least 1"
+    },
+    {
+      "name": "rule-cited",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\bR(1[0-2]|[1-9])\\b over last_message: 69 match(es); want at least 1"
+    }
+  ],
+  "cost_usd": 2.2310462,
+  "judge_cost_usd": 0,
+  "duration_ms": 740033,
+  "num_turns": 18,
+  "segments": 1,
+  "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-g-leaf-mutants-review-2825396357"
+}

@@ -1,0 +1,15 @@
+## Analysis
+
+Checking each criterion:
+
+1. **One box.** The `Retention` type owns its parsing entirely. `ParseRetention` handles the `"d"` suffix stripping and range validation in one place: `strconv.Atoi(strings.TrimSuffix(v, "d"))` and `if err != nil || days <= 0 || days > 365`. No caller re-parses or re-checks. ✓
+
+2. **Names speak intent.** The `Prune` method reads top-down in domain language: `expired := r.Expired(snaps, s.now())`. The `Expired` method name says what it does semantically, not mechanically. ✓
+
+3. **One altitude per function.** The `Prune` body is a story: obtain retention → call `Expired()` → delete → return. No arithmetic, strconv, or strings operations in the function body itself; all parsing is delegated to `ParseRetention`. ✓
+
+4. **No ceremony.** The `Retention` type has no zero sentinel. Comments present explain non-obvious invariants (`strict inequality`) or parsing rules, not defensive re-checks. No comment left where a name now says it (e.g., no "already validated" comment). ✓
+
+The FAIL conditions are also avoided: `strconv.Atoi(strings.TrimSuffix(...` appears only inside `ParseRetention`, and the range check `days <= 0 || days > 365` appears only once.
+
+VERDICT: PASS

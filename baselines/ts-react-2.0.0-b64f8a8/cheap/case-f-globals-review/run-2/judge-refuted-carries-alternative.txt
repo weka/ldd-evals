@@ -1,0 +1,28 @@
+--- vote 1: PASS ---
+Looking at the FOCUS text for wrapper type proposals related to worker count/batch size:
+
+The report proposes **`WorkerSettings`** as a domain wrapper type to unify `batchSize` and `numWorkers`. This appears in the CONFIG cluster section:
+
+> Skeptic: CONFIRMED (score 3, judgment call) on the R1 extraction — but flags that CONFIG's own mutability is the real blocker...— alternative: validate `batchSize`/`numWorkers` independently in `load()` and lock `CONFIG` behind an accessor before unifying them into one `WorkerSettings`
+
+The skeptic's verdict is:
+- **CONFIRMED** (score 3, judgment call) with verified evidence — the missing domain concept is real
+- **Concrete alternative noted inline** — validate independently in `load()`, lock CONFIG behind an accessor, then unify into one `WorkerSettings`
+
+This satisfies the RUBRIC requirement: the proposal appears with a skeptic verdict (CONFIRMED) and includes a concrete alternative. The verdict is honest about the tradeoff (acknowledging CONFIG's mutability as the real blocker while confirming the domain type is sound).
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+Looking for any wrapper type proposal for worker count in this report:
+
+Found: `WorkerSettings` is proposed as a validating domain type to consolidate `CONFIG.batchSize` and `CONFIG.numWorkers` (mentioned in the Configuration/CONFIG cluster and across multiple design-debt items).
+
+Checking the skeptic's verdict in the cluster section:
+```
+Skeptic: CONFIRMED (score 3, judgment call) on the R1 extraction — ... — alternative: validate `batchSize`/`numWorkers` independently in `load()` and lock `CONFIG` behind an accessor before unifying them into one `WorkerSettings`...
+```
+
+The skeptic provides a **CONFIRMED** verdict (score 3, judgment call) with verified evidence, plus a concrete alternative path to reach `WorkerSettings` (validate independently then lock CONFIG behind an accessor). This satisfies the rubric requirement for an honest skeptic review: the verdict line is `CONFIRMED (score N: ...)` with scorecard evidence and an alternative noted inline.
+
+VERDICT: PASS

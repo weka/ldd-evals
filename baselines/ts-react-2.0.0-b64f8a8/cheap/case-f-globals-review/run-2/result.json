@@ -1,0 +1,93 @@
+{
+  "case": "case-f-globals-review",
+  "run": 2,
+  "model": "claude-sonnet-5",
+  "passed": true,
+  "graders": [
+    {
+      "name": "anchor-env-global",
+      "type": "regex",
+      "passed": true,
+      "detail": "env\\.ts:[0-9]+ over last_message: 12 match(es); want at least 1"
+    },
+    {
+      "name": "evidence-protocol",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\.tsx?:[0-9]+ over last_message: 39 match(es); want at least 1"
+    },
+    {
+      "name": "fix-clean-island",
+      "type": "regex",
+      "passed": true,
+      "detail": "Extract Clean Island|Push the Global Up over last_message: 3 match(es); want at least 1"
+    },
+    {
+      "name": "no-edit",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Edit called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "no-multiedit",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "MultiEdit called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "no-write",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Write called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "nolint-is-a-finding",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i)eslint-disable|ts-expect-error|ts-ignore|suppression over last_message: 5 match(es); want at least 1"
+    },
+    {
+      "name": "r8-q2-init",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i)\\bregion\\b[^\\n]{0,80}(import|module|top[- ]level)|import[- ]time|at import|module (import|scope|load)|top[- ]level|when the module (is )?(loads|loaded|imported|evaluated) over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "r8-q5-jobs-read",
+      "type": "regex",
+      "passed": true,
+      "detail": "useSnapshotScheduler\\.tsx?:[0-9]+ over last_message: 6 match(es); want at least 1"
+    },
+    {
+      "name": "r8-q5-pool-read",
+      "type": "regex",
+      "passed": true,
+      "detail": "workers\\.ts:[0-9]+ over last_message: 6 match(es); want at least 1"
+    },
+    {
+      "name": "r8-q6-test-mutates-global",
+      "type": "regex",
+      "passed": true,
+      "detail": "workers\\.test\\.tsx?:[0-9]+ over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "refuted-carries-alternative",
+      "type": "llm",
+      "passed": true,
+      "detail": "judge claude-haiku-4-5 (PASS,PASS): --- vote 1: PASS ---\nLooking at the FOCUS text for wrapper type proposals related to worker count/batch size:\n\nThe report proposes **`WorkerSettings`** as a domain wrapper type to unify `batchSize` and `numWorkers`. This appears in the CONFIG cluster section:\n\n\u003e Skeptic: CONFIRMED (score 3, judgment call) on the R1 extraction — but flags that CONFIG's own mutability is the real blocker...— alternative: validate `batchSize`/`numWorkers` independently in `load()` and lock `CONFIG` behind an accessor before unifying them into one `WorkerSettings`\n\nThe skeptic's verdict is:\n- **CONFIRMED** (score 3, judgment call) with verified evidence — the missing domain concept is real\n- **Concrete alternative noted inline** — validate independently in `load()`, lock CONFIG behind an accessor, then unify into one `WorkerSettings`\n\nThis satisfies the RUBRIC requirement: the proposal appears with a skeptic verdict (CONFIRMED) and includes a concrete alternative. The verdict is honest about the tradeoff (acknowledging CONFIG's mutability as the real blocker while confirming the domain type is sound).\n\nVERDICT: PASS\n\n--- vote 2: PASS ---\nLooking for any wrapper type proposal for worker count in this report:\n\nFound: `WorkerSettings` is proposed as a validating domain type to consolidate `CONFIG.batchSize` and `CONFIG.numWorkers` (mentioned in the Configuration/CONFIG cluster and across multiple design-debt items).\n\nChecking the skeptic's verdict in the cluster section:\n```\nSkeptic: CONFIRMED (score 3, judgment call) on the R1 extraction — ... — alternative: validate `batchSize`/`numWorkers` independently in `load()` and lock `CONFIG` behind an accessor before unifying them into one `WorkerSettings`...\n```\n\nThe skeptic provides a **CONFIRMED** verdict (score 3, judgment call) with verified evidence, plus a concrete alternative path to reach `WorkerSettings` (validate independently then lock CONFIG behind an accessor). This satisfies the rubr…(truncated)",
+      "cost_usd": 0.0480972
+    },
+    {
+      "name": "rule-cited",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\bR(1[0-2]|[1-9])\\b over last_message: 40 match(es); want at least 1"
+    }
+  ],
+  "cost_usd": 2.5741969,
+  "judge_cost_usd": 0.0480972,
+  "duration_ms": 755653,
+  "num_turns": 17,
+  "segments": 1,
+  "scaffold_dir": "/tmp/ldd-eval-case-f-globals-review-2956593983"
+}

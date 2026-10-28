@@ -1,0 +1,15 @@
+schema_version: "1.1"
+context:
+  scaffold_script: ../scaffold/red-lint.sh
+postcheck: ./postcheck.sh
+tier: medium
+notes: |
+  Scoped to internal/services and internal/env, a PR's worth of packages: quickfix
+  resolves its scope by the ladder (argument, working tree, branch, nothing) and
+  the red-lint scaffold's stripped state is the committed state, so the bare command
+  would reach "nothing in scope" (see quickfix-clean-tree). Within the scope, every
+  //nolint directive is stripped → the linter is red on the design plants. The lint-fixer must FIX
+  the mechanical class (errcheck, wrapcheck, goconst on "application/json",
+  misspell, early-return) and ESCALATE the design class with a rule route
+  (gocognit → R3, gochecknoglobals → R8, …), never re-suppress, never touch
+  .golangci.yaml, never weaken a test assertion.

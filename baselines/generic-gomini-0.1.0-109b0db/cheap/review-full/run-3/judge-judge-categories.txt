@@ -1,0 +1,52 @@
+--- vote 1: PASS ---
+Looking at the report structure:
+
+**Question 1: Is the unguarded concurrent map write (lastSeen) listed under 🐛 Bugs?**
+
+Yes. The first entry under the 🐛 Bugs section reads:
+```
+`internal/services/device_service.go:218,463-467 | ... s.lastSeen is written at ProcessHeartbeat:218 
+with no lock held ... Two or more goroutines writing/deleting the same Go map concurrently is a 
+fatal runtime crash ("concurrent map writes"), not merely a race.`
+```
+
+**Question 2: Is the production time.Sleep listed under 🔴 Design Debt rather than 🐛 Bugs?**
+
+Yes. Under the 🔴 Design Debt section, rule R10 (Concurrency Safety) contains multiple time.Sleep entries:
+- `internal/services/retry.go:32-43 (withRetry, sleep at :40)`
+- `internal/services/retry.go:45-53 (SendWithRetry, sleep at :52)`
+- `internal/services/device_service.go:169-186 (sleep at :181) [cluster: ProcessHeartbeat]`
+- `internal/services/sync_service.go:112-125 (saveWithRetry, sleep at :122)`
+
+The flushLoop's unconditional `time.Sleep(50ms)` is also in Design Debt under R10, not in Bugs.
+
+Both criteria are satisfied.
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+Looking at the report structure:
+
+**Question 1: Concurrent map write under 🐛 Bugs?**
+
+Yes. The report lists under the 🐛 Bugs section:
+```
+`internal/services/device_service.go:218,463-467 | internal/services/device_service.go:572-576 
+(flushLoop...) | ...s.lastSeen is written at ProcessHeartbeat:218 with no lock held... and 
+range-and-deleted from the flushLoop goroutine...with no lock at all...`
+```
+This is exactly the unguarded concurrent map write (lastSeen written from ProcessHeartbeat, read/deleted by flushLoop goroutine). ✓
+
+**Question 2: Production `time.Sleep` calls under 🔴 Design Debt (not 🐛 Bugs)?**
+
+Yes. The report lists under 🔴 Design Debt, specifically within the R10 — Concurrency Safety section:
+- `internal/services/device_service.go:169-186 (sleep at :181) [cluster: ProcessHeartbeat]...`
+- `internal/services/retry.go:32-43 (withRetry, sleep at :40)...`
+- `internal/services/retry.go:45-53 (SendWithRetry, sleep at :52)...`
+- `internal/services/sync_service.go:112-125 (saveWithRetry, sleep at :122)...`
+
+All production sleep calls are filed under Design Debt (R10's cancellability concerns), not Bugs. ✓
+
+Both criteria are satisfied.
+
+VERDICT: PASS

@@ -1,0 +1,21 @@
+## Analysis
+
+Checking against the rubric:
+
+**Criterion 1 - Configuration obtained once at top, values handed to constructors:**
+ISSUE: While `cfg := env.Load()` is called at the top, subsequent code reads configuration values directly from the environment instead of extracting them from `cfg`:
+- `notifier := services.NewNotifier(os.Getenv("WEBHOOK_URL"))` reads directly from environment
+- `listenAddr()` function calls `os.Getenv("PORT")` 
+- `defaultStorePath()` calls `os.Getenv("STORE_PATH")`
+
+Configuration is being obtained from multiple sources (cfg object *and* direct environment reads), violating the "once at the top" principle. These should come from cfg.
+
+**Criterion 2 - Story at one altitude:**
+ISSUE: The flow is interrupted by multiple environment reads scattered after the initial config load, breaking the clean narrative of "load config → build leaves → build services → serve."
+
+**Criterion 3 - No business logic:**
+This is satisfied — helpers are minimal and appropriate.
+
+The design violates the requirement that main.go be the *only* reader of configuration, consolidated at one point via `env.Load()`. All configuration values should be extracted from the loaded `cfg` object and passed to constructors, not retrieved ad-hoc from the environment later.
+
+`VERDICT: FAIL`

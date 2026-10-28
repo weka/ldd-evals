@@ -1,0 +1,13 @@
+I'll evaluate whether the code satisfies all four criteria in the RUBRIC.
+
+**1. One box:** "Retention" is a named type in `retention.go` with `ParseRetention()` that contains both the parsing (`strconv.Atoi(strings.TrimSuffix(v, "d"))`) and the 1–365 range check (`days <= 0 || days > 365`). Call sites in `policy.go` and `scheduler.go` only invoke `ParseRetention()` — nowhere else re-parses the "d" suffix or re-validates the range. ✓ Convincing line: `func ParseRetention(raw map[string]string) (Retention, error)` in retention.go.
+
+**2. Names speak intent:** The pruning loop in `applyPolicy` reads `if retention.Expired(sn.CreatedAt, now)` — a domain-level question, not arithmetic like `age > days`. The `Expired` method name describes the business concept, not the mechanism. ✓ Convincing line: `if retention.Expired(sn.CreatedAt, now)` in policy.go.
+
+**3. One altitude per function:** `applyPolicy` reads as a top-level story: obtain retention → loop to collect expired snapshots → return. No `strconv`, `strings`, arithmetic, or unit conversion in the body — all delegated to `ParseRetention` and `retention.Expired`. ✓ Convincing line: the entire `applyPolicy` body is five lines and calls only `ParseRetention` and `retention.Expired`.
+
+**4. No leftover ceremony:** No `0` sentinel for "unset", no defensive re-check comments, no comment describing mechanics where a name now suffices. ✓ Convincing line: `Retention struct { days int }` with no guards or fallbacks.
+
+**FAIL condition check:** `strconv.Atoi(strings.TrimSuffix(` appears only inside `ParseRetention` in retention.go (the box itself), not at a call site. `days <= 0 || days > 365` appears only once, in `ParseRetention`.
+
+VERDICT: PASS

@@ -1,0 +1,45 @@
+{
+  "case": "case-d-ceremony-refactor",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": false,
+  "graders": [
+    {
+      "name": "art-judge",
+      "type": "llm",
+      "passed": false,
+      "detail": "judge claude-haiku-4-5 (FAIL,FAIL): --- vote 1: FAIL ---\nLooking at the trace requirement in Point 3 of the rubric:\n\nThe rubric specifies: \"Whether `trace` is still a helper or was inlined into its single caller, the comment explaining why the header is echoed (joining a device's log lines to the request) must still exist in substance next to the `X-Trace` header write. A restated-name comment in its place, or no comment, is FAIL.\"\n\nIn the current `internal/handlers/trace.go`, the `trace` method is:\n```go\nfunc (h *Handler) trace(w http.ResponseWriter, traceID string) {\n\tw.Header().Set(\"X-Trace\", traceID)\n}\n```\n\nThe comment explaining the reason—that the trace header echoes the request ID so the device's log lines can be joined to the request—is completely absent. The method has no comment, and no other comment in `List` explains this behavior. The `List` comment only describes the handler's output, not the trace header's purpose.\n\nThe rubric explicitly states: \"no comment, is FAIL.\"\n\nAll other points hold: no new indirection (Point 1), dead code removal only (Point 2), and names preserved (Point 4).\n\nVERDICT: FAIL\n\n--- vote 2: FAIL ---\n**Point 1: No new indirection.** ✓ No interfaces, wrappers, or options structs added. `Handler`, `NewHandler`, `List`, and `Routes` in trace.go match the fixture.\n\n**Point 2: Deletion allowed, growth not.** ✓ `ReplicaCount` and `Name` are gone (dead-code removal). `Grants` with `Has()` and `All()` survives unchanged; no new methods added.\n\n**Point 3: The trace reason survives.** ✗ **FAIL HERE.** The `trace` method in trace.go:\n\n```go\nfunc (h *Handler) trace(w http.ResponseWriter, traceID string) {\n\tw.Header().Set(\"X-Trace\", traceID)\n}\n```\n\nhas no comment. The rubric requires: \"the comment explaining why the header is echoed (joining a device's log lines to the request) must still exist in substance next to the `X-Trace` header write.\" The rubric is explicit: \"no comment, is FAIL.\"\n\n**Point 4: Names kept or sharpened.** ✓ A…(truncated)",
+      "cost_usd": 0.1316194
+    },
+    {
+      "name": "no-traceid-type",
+      "type": "regex",
+      "passed": true,
+      "detail": "type TraceID over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "stop-check",
+      "type": "regex",
+      "passed": false,
+      "detail": "(?ims)Stop check.*?^\\W{0,6}1\\W{1,6}gates\\b.*?^\\W{0,6}2\\W{1,6}re-run\\b.*?^\\W{0,6}3\\W{1,6}nouns?\\b.*?^\\W{0,6}4\\W{1,6}critic\\b.*?^\\W{0,6}5\\W{1,6}STOP\\b.*?^\\W{0,6}6\\W{1,6}commit\\b over last_message: 0 match(es); want at least 1"
+    },
+    {
+      "name": "trace-header-still-set",
+      "type": "regex",
+      "passed": true,
+      "detail": "Header\\(\\)\\.Set\\(\"X-Trace\" over files: 1 match(es); want at least 1"
+    },
+    {
+      "name": "postcheck",
+      "type": "postcheck",
+      "passed": true,
+      "detail": "task test: ok\nPASS  task test green\ntask lint: ok\nPASS  task lint green\nPASS  ReplicaCount has at most its original single method (deleted or untouched, never grown) (0 \u003c= 1)\nPASS  ReplicaCount is declared at most once (0 \u003c= 1)\nPASS  no TraceID-like wrapper appeared anywhere (0)\n== black-box suite: builds cmd/svc, replays the recorded heartbeats ==\n--- PASS: TestHeartbeatContract (1.72s)\n--- PASS: TestExpectedTSVMatchesTable (0.00s)\nok  \texample.com/heartbeat-blackbox\t2.307s\nblack-box: PASS\nPASS  black-box heartbeat suite\npostcheck: all checks passed"
+    }
+  ],
+  "cost_usd": 2.8238046999999997,
+  "judge_cost_usd": 0.1316194,
+  "duration_ms": 829271,
+  "num_turns": 56,
+  "segments": 1,
+  "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-d-ceremony-refactor-2210634487"
+}

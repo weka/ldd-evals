@@ -1,0 +1,29 @@
+--- vote 1: PASS ---
+I'll evaluate each of the four required criteria:
+
+**1. One box.** The `Retention` type in `config.go` encapsulates validation entirely. Lines 7–10 define the type with private `days` field. Lines 13–24 show `ParseRetention` as the only constructor: it parses `"<n>d"` format, checks `days <= 0 || days > 365`, and returns a `Retention` or error. In `policy.go` line 10, the caller simply calls `ParseRetention(raw)` — no re-parsing of `"d"` suffixes or range checks outside the box. ✓
+
+**2. Names speak intent.** In `policy.go` lines 16–18, the pruning loop reads: "if `retention.Expired(now, sn.CreatedAt)`" — a domain question in plain language. The method name `Expired` (defined in `config.go` line 27) is intent, not mechanics (no `check`, `validate`, or `getDays`). ✓
+
+**3. One altitude per function.** The `applyPolicy` function in `policy.go` lines 9–21 reads top-down as: obtain retention (line 10), collect expired snapshots (lines 16–18), return them (line 20). There is no arithmetic, no `strconv`, no `strings`, no unit conversion in that body — all delegated to the `Retention` type's methods. ✓
+
+**4. No leftover ceremony.** No `0` sentinel, no defensive re-check comment, no stale comments where names now speak. The comments in `config.go` (lines 8, 15, 28) document invariants and contracts; they aren't remnants where the name alone would suffice. ✓
+
+**FAIL conditions:** Neither `strconv.Atoi(strings.TrimSuffix(` outside the type nor `days <= 0 || days > 365` duplicated elsewhere appears. ✓
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+Looking at the four RUBRIC criteria:
+
+**1. One box.** ✓ `Retention` is a named type in config.go with its parsing (`ParseRetention`) and range validation (1–365 days) all inside. Nothing outside it re-parses the `"d"` suffix or re-checks the range. Quote: `type Retention struct { days int }` and `if err != nil || days <= 0 || days > 365` all within `ParseRetention`.
+
+**2. Names speak intent.** ✓ The pruning loop in policy.go asks the retention in domain language: `if retention.Expired(now, sn.CreatedAt)`. The method name `Expired` describes intent, not mechanics. Quote: `func (r Retention) Expired(now, createdAt time.Time) bool`.
+
+**3. One altitude per function.** ✓ `applyPolicy` reads top-down: obtain retention, filter expired snapshots via the method call, return—with zero arithmetic, `strconv`, `strings`, or unit conversion in the body. Quote: entire function body is the parse, the loop calling `retention.Expired()`, and the return.
+
+**4. No leftover ceremony.** ✓ No `0` sentinel, no defensive re-check comment, no ceremony where the type and method names already speak. The comment on `Retention` establishes the invariant (appropriate) rather than restating what the name says.
+
+**Fail conditions:** No `strconv.Atoi(strings.TrimSuffix(` appears outside config.go, and the range check `days <= 0 || days > 365` appears only once (inside `ParseRetention`).
+
+VERDICT: PASS

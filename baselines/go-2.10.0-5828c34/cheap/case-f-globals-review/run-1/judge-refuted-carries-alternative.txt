@@ -1,0 +1,13 @@
+# Analysis
+
+The report addresses wrapper types related to worker count and batch size handling:
+
+1. **Bug 1** (`BatchSize` validation): Skeptic **REFUTED** the proposed `ParseBatchSize`/`PositiveInt` wrapper type with `score 0-1`, offering a concrete cheaper alternative: "add the bounds check directly in `intEnv`/`Load()`, returning the same plain `int`."
+
+2. **Bug 2** (`NumWorkers` bounds): References "Same root cause as above; the queue then stalls with no error anywhere. Same cheaper fix" — pointing back to Bug 1's REFUTED verdict and the same concrete alternative.
+
+3. **Cluster E** (`Pool` wrapper): Separately addresses a pool abstraction, which the skeptic **REFUTED** with `score 1` and a concrete alternative: "have `Start` return the `*sync.WaitGroup` (or a `func()` closure) directly`."
+
+All three instances follow the rubric's "REFUTED (score 0|1: ...)" pattern and each names a concrete cheaper alternative. No wrapper types appear with missing verdicts or REFUTED verdicts that lack a named alternative.
+
+VERDICT: PASS

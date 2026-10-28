@@ -1,0 +1,1612 @@
+# violations.yaml — every plant and every control in fixture/py-mini, anchored
+# by file + a stable ERE. check-manifest.sh asserts each anchor matches at least
+# one line in EACH listed file (paths relative to fixture/py-mini).
+#
+# py-mini is go-mini written in Python: the same device-fleet service, the same
+# packages as modules, the same 149 ids as go/violations.yaml, so the parity
+# report reads one rule at a time across two fixtures. Where a Go idiom has no
+# Python twin, the Python plant is the nearest disease the same rule catches,
+# and a comment on the entry says so.
+#
+# Id scheme
+#   <Rule>.<Question>.<slug>   a plant; the question is the rule's falsifying
+#                              question it trips (Qn), `critic` for comment-critic
+#                              plants, `lint` for mechanical lint-fixer plants
+#                              (FIX class — carried by a rule for counting only).
+#   CTRL.<Rule>.<slug>         a control: healthy code that must yield 0 findings.
+#   CASE-<A..F>.<slug>         a logic-hunter case member; `rule:` is the primary
+#                              rule the case grades, `case:` names the case.
+#
+# expect.review   category (🐛 Bugs · 🔴 Design Debt · 🟡 Readability Debt ·
+#                 🟢 Polish) + the fix move named in the rule's Fix pattern.
+# expect.refactor `gone` regex with count_max over the tree after the fix,
+#                 `present` regex that must appear; `scope` narrows the grep.
+# expect.lint     the ruff rule (or mypy) that fires in the red-lint scaffold and
+#                 the rule the lint-fixer must route it to (`action: FIX` =
+#                 mechanical). `linter: "-"` records that ruff has no rule for
+#                 this plant; the review hunters own it alone.
+# expect.prepare  the PREPARE gate this plant trips for the named spec.
+#
+# Controls carry two extra line-oriented keys read by
+# gen-review-graders.sh (the review-full precision graders):
+#   symbol: '<ERE>'     the control's distinguishing symbol; a Review report
+#                       that mentions it has flagged the control (false positive)
+#   mention_ok: true    a correct report legitimately names this symbol (as the
+#                       reuse target or the fix), so no precision grader is
+#                       generated; default: not mentioned.
+#   precision: finding  keeps the grader but moves the line: the report may name
+#                       the symbol (an existing type to wire in, say) and fails
+#                       only when one of the control's files is cited as a
+#                       finding location, tenant.py:NN with a line number. For a
+#                       control that a correct report cites as the fix route
+#                       while a wrong one re-proposes it.
+# A plant with a review cluster may carry one more:
+#   cluster_match: '<ERE>'  replaces the generated cluster grader's default
+#                       pattern (the word "cluster", then the anchor or its
+#                       last dotted segment on the same line) when reports
+#                       spell the cluster in more than one way.
+# A plant with expect.review may carry:
+#   recall_match: '<ERE>'   replaces the generated recall grader's basename
+#                       pattern for the plant's file set when reports name
+#                       the plant another way (env.CONFIG for env.py).
+#   recall_own: '<ERE>'     takes the plant out of its file set's recall grader
+#                       and gives it a grader of its own with this pattern,
+#                       for a plant its file name alone cannot prove found (a
+#                       god file is named in every report for other reasons).
+#
+# Line-oriented on purpose: `files:` is a one-line flow list, `anchor:` is one
+# single-quoted line, and the parsers only read id / rule / control / files /
+# anchor (+ symbol / mention_ok / precision on controls, cluster_match on
+# clustered plants). Keep it that way.
+#
+# Lint in Python is two tools. `task lint` is `ruff check` + `ruff format --check`
+# + `mypy --strict`; every plant is silenced with `# noqa: <codes>  # TODO` for
+# ruff and `# type: ignore[<code>]` for mypy, and scaffold/red-lint.sh strips both
+# (and ty's `# ty: ignore[<rule>]`, so a ty plant would need no scaffold change).
+# ruff has no duplicate-code, file-length, interface-return or exhaustiveness
+# rule and no race detector exists: those plants say `linter: "-"` and are
+# review-only.
+
+# ─── The centerpiece: DeviceService.process_heartbeat ────────────────────────
+
+- id: R3.Q1.process-heartbeat
+  rule: R3
+  questions: [Q1, Q3, Q5]
+  files: [internal/services/device_service.py]
+  anchor: 'def process_heartbeat\('
+  expect:
+    review:   { category: "🟡", cluster: "process_heartbeat", fix: "Extract Function named after the comment" }
+    refactor: { gone: 'attempt < 3', count_max: 0, present: 'def parse\w*(heartbeat|line)\w*\(|def (parse|from_line)\(cls' }
+    lint:     { linter: C901, route: R3, also: [PLR0911, PLR0912, PLR0915] }
+    postcheck: { cognitive_max: 10, cyclomatic_max: 8 }
+
+- id: R3.Q2.parse-beside-decision
+  rule: R3
+  questions: [Q2]
+  files: [internal/services/device_service.py, internal/services/heartbeat_parser.py]
+  anchor: 't\[7:\] == "eu"'
+  expect:
+    review:   { category: "🟡", cluster: "process_heartbeat", fix: "Split Phase" }
+    refactor: { gone: 't\[7:\]', count_max: 0 }
+
+- id: R3.Q3.block-comments
+  rule: R3
+  questions: [Q3, critic]
+  files: [internal/services/device_service.py]
+  anchor: '# (parse the line|look up or create device|transitions)$'
+  expect:
+    review:   { category: "🟡", cluster: "process_heartbeat", fix: "Extract Function named after the comment", critic: "DELETE → route R3" }
+    refactor: { gone: '# (parse the line|look up or create device|transitions)$', count_max: 0 }
+
+# Go deduped with a labeled `continue outer`; Python has no labels, so the
+# same dedupe is a for/else whose `break` skips the duplicate. Same disease
+# (a loop the collection type should own), R3 Q4.
+- id: R3.Q4.labeled-continue-dedupe
+  rule: R3
+  questions: [Q4]
+  files: [internal/services/device_service.py, internal/services/heartbeat_parser.py]
+  anchor: 'break  # already added\. skip'
+  expect:
+    review:   { category: "🟡", fix: "Extract Leaf Type" }
+    refactor: { gone: 'break  # already added\. skip', count_max: 0, present: '^class \w+\(list\[str\]\)' }
+
+# ruff's nesting rule (PLR1702) is preview-only; the nesting is counted by
+# C901 on the enclosing function.
+- id: R3.Q1.nested-blocks
+  rule: R3
+  questions: [Q1]
+  files: [internal/services/device_service.py]
+  anchor: 'if len\(parts\) > 3:'
+  expect:
+    review: { category: "🟡", fix: "Replace Nesting with Early Returns" }
+    lint:   { linter: C901, route: R3, note: "no stable nesting rule in ruff" }
+
+# Go's bare `return` of named results has no Python twin; the mechanical plant
+# at the same spot is an assignment returned on the next line (RET504).
+- id: R3.lint.bare-return
+  rule: R3
+  questions: [lint]
+  files: [internal/services/device_service.py]
+  anchor: '^\s+return window  # noqa: RET504'
+  expect:
+    lint: { linter: RET504, action: FIX }
+
+- id: R3.lint.early-return
+  rule: R3
+  questions: [lint]
+  files: [internal/services/device_service.py]
+  anchor: 'else:  # noqa: RET505'
+  expect:
+    lint: { linter: RET505, action: FIX, also: [PLR5501] }
+
+- id: R1.Q1.inline-id-check
+  rule: R1
+  questions: [Q1]
+  files: [internal/services/device_service.py, internal/services/heartbeat_parser.py]
+  anchor: 'not device_id or len\(device_id\) > 64'
+  expect:
+    review:   { category: "🔴", cluster: "process_heartbeat", fix: "Replace Primitive with Domain Type" }
+    refactor: { gone: 'len\(device_id\) > 64', count_max: 1 }
+
+- id: R1.Q3.status-string-compare
+  rule: R1
+  questions: [Q3]
+  files: [internal/services/device_service.py]
+  anchor: 'status not in \("READY", "DEGRADED", "DOWN", "BOOTING"\)'
+  expect:
+    review:   { category: "🔴", cluster: "Device.status", fix: "Name enum strings" }
+    refactor: { gone: '"READY"', count_max: 1, present: '^class Status\((str, )?Enum\)|^class Status\(StrEnum\)|^Status = Literal\[' }
+
+- id: R1.Q3.region-byte-slices
+  rule: R1
+  questions: [Q3]
+  files: [internal/services/device_service.py, internal/services/heartbeat_parser.py, internal/models/tags.py]
+  anchor: '== "eu" or .*== "us"'
+  expect:
+    review:   { category: "🔴", fix: "Replace Primitive with Domain Type", note: "Region.parse already exists and is not used here" }
+    refactor: { gone: '== "eu" or', count_max: 1 }
+
+- id: R1.Q4.minus-one-sentinel
+  rule: R1
+  questions: [Q4]
+  files: [internal/services/device_service.py]
+  anchor: 'return (device_id|""), -1, False'
+  expect:
+    review:   { category: "🔴", cluster: "process_heartbeat", fix: "Replace Sentinel with comma-ok" }
+    refactor: { gone: ', -1, False', count_max: 0 }
+
+# Go returned five values; Python returns a five-tuple with the error as its
+# last member, the ported shape of `(id, n, changed, tags, err)`. ruff counts
+# return statements (PLR0911), not result values; that is the nearest lint.
+- id: R1.Q5.five-results
+  rule: R1
+  questions: [Q5]
+  files: [internal/services/device_service.py, internal/services/heartbeat_parser.py]
+  anchor: '-> tuple\[str, \w+, \w+, list\[str\] \| None, str \| None\]:'
+  expect:
+    review:   { category: "🔴", cluster: "process_heartbeat", fix: "Introduce Parameter Object" }
+    refactor: { gone: 'list\[str\] \| None, str \| None\]', count_max: 0 }
+    lint:     { linter: PLR0911, route: "@code-designing", note: "ruff has no result-count rule" }
+
+- id: R1.Q5.heartbeat-clump
+  rule: R1
+  questions: [Q5]
+  files: [internal/services/device_service.py, internal/handlers/heartbeat.py]
+  anchor: '^\s+raw: str,$|raw, tenant, force\)'
+  expect:
+    review: { category: "🔴", cluster: "process_heartbeat", fix: "Introduce Parameter Object" }
+
+- id: R2.Q1.device-literal-in-service
+  rule: R2
+  questions: [Q1]
+  files: [internal/services/device_service.py, internal/handlers/devices.py]
+  anchor: 'Device\($|Device\(id='
+  expect:
+    review:   { category: "🔴", cluster: "Device", fix: "Add validating constructor" }
+    refactor: { gone: 'Device\(id=', count_max: 0, present: 'def __post_init__\(self\)|def (parse|new|create|register)\w*\(cls' }
+
+- id: R2.Q5.tags-nil-or-slice
+  rule: R2
+  questions: [Q5]
+  files: [internal/services/device_service.py]
+  anchor: 'return "", -1, False, None, '
+  expect:
+    review: { category: "🔴", cluster: "process_heartbeat", fix: "Replace nil returns" }
+
+# Go manufactured `context.Background()` in library code. Python has no ctx to
+# thread, so the disease changes: library modules configure the process-wide
+# root logger at import (`logging.basicConfig`) instead of receiving a logger
+# from the composition root. Same rule (R8), question Q3 by analogy: library
+# code reaching for process-global state the caller should hand it.
+- id: R8.Q3.context-background-in-service
+  rule: R8
+  questions: [Q3]
+  files: [internal/services/device_service.py, internal/services/sync_service.py, internal/jobs/registry.py]
+  anchor: '^logging\.basicConfig\('
+  expect:
+    review:   { category: "🔴", fix: "Push the Global Up One Level" }
+    refactor: { gone: '^logging\.basicConfig\(', count_max: 0, scope: 'internal/', present: 'logging\.basicConfig\(' }
+
+- id: R8.Q5.flap-window-from-service
+  rule: R8
+  questions: [Q5]
+  files: [internal/services/device_service.py, internal/services/snapshot_service.py]
+  anchor: 'CONFIG\.(flap_window_sec|batch_size)'
+  expect:
+    review:   { category: "🔴", fix: "Push the Global Up One Level" }
+    refactor: { gone: 'CONFIG\.', count_max: 0, scope: 'internal/services/' }
+
+# No race detector in Python; the evidence is the code: the request thread
+# writes last_seen while the flush thread iterates and deletes, no lock.
+- id: R10.Q3.last-seen-race
+  rule: R10
+  questions: [Q3]
+  files: [internal/services/device_service.py]
+  anchor: 'self\.last_seen\[device_id\] ='
+  expect:
+    review:   { category: "🐛", fix: "Extract Synchronized Owner", evidence: "written from the request thread, iterated by _flush_loop, no lock" }
+    refactor: { guarded: true }
+    lint:     { linter: "-", route: R10, note: "no race detector for Python" }
+
+# `goto retry` became a `while True` retry with a counter and `continue`;
+# the sleep between attempts is the same Q5 disease.
+- id: R10.Q5.goto-sleep-backoff
+  rule: R10
+  questions: [Q5]
+  files: [internal/services/device_service.py]
+  anchor: 'time\.sleep\(attempt \* 0\.2\)'
+  expect:
+    review:   { category: "🔴", cluster: "process_heartbeat", fix: "Replace Sleep with Timer Select" }
+    refactor: { gone: 'time\.sleep\(attempt \* 0\.2\)', count_max: 0 }
+
+- id: R11.Q4.force-flag-in-body
+  rule: R11
+  questions: [Q4]
+  files: [internal/services/device_service.py]
+  anchor: 'if force:|not force and|changed or force'
+  expect:
+    review:   { category: "🔴", cluster: "process_heartbeat", fix: "Split Flag Argument" }
+    refactor: { gone: 'changed or force', count_max: 0 }
+    lint:     { linter: FBT001, route: R11 }
+
+- id: R12.Q5.n-reused
+  rule: R12
+  questions: [Q5]
+  files: [internal/services/device_service.py, internal/services/cache.py]
+  anchor: '(n = n|size = size) \* 10'
+  expect:
+    review:   { category: "🔴", fix: "Split Variable" }
+    refactor: { gone: 'n = n \* 10', count_max: 0 }
+
+- id: R7.Q3.big-object-leaf-test
+  rule: R7
+  questions: [Q3]
+  files: [internal/handlers/test_heartbeat.py]
+  anchor: '"x" \* 65'
+  expect:
+    review:   { category: "🔴", fix: "Move the behavior down a rung" }
+    refactor: { present: 'parse\w*heartbeat\w*\("|Heartbeat\w*\.parse\("', scope: 'test_\w+\.py' }
+
+- id: R7.Q4.covered-only-through-handler
+  rule: R7
+  questions: [Q4]
+  files: [internal/handlers/test_heartbeat.py]
+  anchor: 'make_server\('
+  expect:
+    review:  { category: "🔴", fix: "Move the behavior down a rung" }
+    prepare: { gate: SAFE, spec: sms-channel, note: "characterization tests before any move" }
+
+- id: R9.Q4.what-comment-process-heartbeat
+  rule: R9
+  questions: [Q4]
+  files: [internal/services/device_service.py]
+  anchor: '^\s+"""Process a heartbeat\.$'
+  expect:
+    review: { category: "🟡", fix: "Convert WHAT to WHY or delete" }
+
+# ─── Comment-critic plants (R9 rung 1) ──────────────────────────────────────
+
+- id: R9.critic.provenance-tail
+  rule: R9
+  questions: [critic]
+  files: [internal/services/device_service.py]
+  anchor: 'added in PR #87'
+  expect:
+    review: { category: "🟡", verdict: TRIM, fix: "Convert WHAT to WHY or delete" }
+
+- id: R9.critic.decoder-ring
+  rule: R9
+  questions: [critic]
+  files: [internal/services/device_service.py]
+  anchor: 'see T-04-02|see spec §4\.2'
+  expect:
+    review: { category: "🟡", verdict: REWRITE, fix: "Convert WHAT to WHY or delete" }
+
+- id: R9.critic.review-defense
+  rule: R9
+  questions: [critic]
+  files: [internal/services/device_service.py]
+  anchor: 'bounds-checked'
+  expect:
+    review: { category: "🟡", verdict: DELETE, fix: "Convert WHAT to WHY or delete" }
+
+- id: R9.critic.restated-idiom
+  rule: R9
+  questions: [critic]
+  files: [internal/services/device_service.py, internal/services/snapshot_service.py, internal/services/sync_service.py]
+  anchor: 'None so we can tell unset from zero'
+  expect:
+    review: { category: "🟡", verdict: DELETE, fix: "Convert WHAT to WHY or delete" }
+
+- id: R9.critic.extraction-order
+  rule: R9
+  questions: [critic]
+  files: [internal/services/device_service.py, internal/services/heartbeat_parser.py]
+  anchor: 'already added\. skip'
+  expect:
+    review: { category: "🟡", verdict: "DELETE → route R3", fix: "Push the fact down a rung" }
+
+- id: R9.critic.long-private-comment
+  rule: R9
+  questions: [critic]
+  files: [internal/services/device_service.py]
+  anchor: 'The key is the tenant followed by a slash'
+  expect:
+    review: { category: "🟡", verdict: "TRIM or DELETE", fix: "Push the fact down a rung" }
+
+- id: R9.critic.caller-must
+  rule: R9
+  questions: [critic]
+  files: [internal/models/heartbeat.py, internal/services/device_service.py]
+  anchor: 'caller must ensure|assumes valid'
+  expect:
+    review: { category: "🟡", verdict: "DELETE → route R2", fix: "Push the fact down a rung" }
+
+# ─── R1 primitive obsession ─────────────────────────────────────────────────
+
+- id: R1.Q1.handler-inline-checks
+  rule: R1
+  questions: [Q1]
+  files: [internal/handlers/devices.py]
+  anchor: 'if not body\.get\("id"\)|"@" not in body\.get\("email"'
+  expect:
+    review: { category: "🔴", fix: "Replace Primitive with Domain Type" }
+
+- id: R1.Q2.email-contains-twice
+  rule: R1
+  questions: [Q2]
+  files: [internal/handlers/devices.py, internal/services/validate.py]
+  anchor: '"@" (not )?in '
+  expect:
+    review:   { category: "🔴", fix: "Replace Primitive with Domain Type" }
+    refactor: { gone: '"@" (not )?in ', count_max: 1 }
+    lint:     { linter: PLR2004, route: R1, note: "the literal is the predicate's whole vocabulary; a named constant is not the fix" }
+
+- id: R1.Q3.tags-loop
+  rule: R1
+  questions: [Q3]
+  files: [internal/services/device_service.py, internal/services/heartbeat_parser.py, internal/models/tags.py, internal/services/sync_service.py]
+  anchor: 't\.startswith\("region:"\)|for t in d\.tags'
+  expect:
+    review:   { category: "🔴", fix: "Extract Collection Type" }
+    refactor: { present: '^class \w+\(list\[str\]\)' }
+    lint:     { linter: SIM110, route: R1, note: "the any() rewrite ruff offers hides the missing collection type" }
+
+- id: R1.Q3.raw-channel-string
+  rule: R1
+  questions: [Q3]
+  files: [internal/models/alert.py, internal/models/channel.py]
+  anchor: '^\s+channel: str$|CHANNEL_EMAIL = "email"'
+  expect:
+    review:   { category: "🔴", cluster: "Alert.channel", fix: "Name enum strings" }
+    refactor: { present: 'def parse\w*channel\w*\(|class Channel\((str, )?Enum\)|class Channel\(StrEnum\)', gone: '^\s+channel: str$', count_max: 0 }
+    prepare:  { gate: MULTIPLY, spec: sms-channel }
+
+# goconst's twin is PLR2004 with strings counted as magic values (the fixture's
+# ruff config allows only numbers); it fires on the `==` comparisons in
+# device_service.py, not on `match` arms.
+- id: R1.Q3.status-enum-goconst
+  rule: R1
+  questions: [Q3]
+  files: [internal/services/alert_service.py, internal/services/device_service.py, internal/handlers/status.py]
+  anchor: 'case "READY":'
+  expect:
+    review:   { category: "🔴", cluster: "Device.status", fix: "Name enum strings" }
+    refactor: { gone: '^[A-Z_]+ = "READY"', count_max: 0 }
+    lint:     { linter: PLR2004, route: R1, note: "enum-shaped: escalate, never a bare module constant" }
+
+- id: R1.Q4.contact-domain-sentinel
+  rule: R1
+  questions: [Q4]
+  files: [internal/handlers/devices.py]
+  anchor: 'return ""$'
+  expect:
+    review:   { category: "🔴", fix: "Replace Sentinel with comma-ok" }
+    refactor: { gone: 'return ""$', count_max: 0, scope: 'internal/handlers/' }
+
+- id: R1.Q5.tenant-id-clump
+  rule: R1
+  questions: [Q5]
+  files: [internal/services/device_service.py, internal/repository/store.py, internal/repository/file_repo.py, internal/repository/mem_store.py]
+  anchor: 'tenant: str, device_id: str'
+  expect:
+    review: { category: "🔴", fix: "Introduce Parameter Object", skeptic: "either verdict; REFUTED must carry the cheaper alternative" }
+
+# ruff format breaks the six-parameter signature over several lines; the
+# anchor is the one parameter no other constructor in the fixture takes.
+- id: R1.Q5.new-sync-service-six-params
+  rule: R1
+  questions: [Q5]
+  files: [internal/services/sync_service.py]
+  anchor: '^\s+retries: int,$'
+  expect:
+    review: { category: "🔴", fix: "Introduce Parameter Object" }
+    lint:   { linter: PLR0913, route: "@code-designing", also: [FBT001] }
+
+- id: R1.Q7.catalog-models-nested
+  rule: R1
+  questions: [Q7]
+  files: [internal/report/catalog.py, internal/report/wire.py]
+  anchor: 'dict\[str, list\[str\]\]|\.models\(\)'
+  expect:
+    review: { category: "🔴", fix: "Name the Container" }
+
+- id: R1.Q8.retention-raw-map
+  rule: R1
+  questions: [Q8]
+  files: [internal/snapshot/config.py, internal/snapshot/policy.py, internal/snapshot/scheduler.py]
+  anchor: 'raw: dict\[str, str\]'
+  expect:
+    review: { category: "🔴", fix: "Name the Container", skeptic: "either verdict; REFUTED must carry the cheaper alternative" }
+
+- id: R1.Q1.settings-blob
+  rule: R1
+  questions: [Q1]
+  files: [internal/models/job.py, internal/jobs/registry.py, internal/services/device_service.py, internal/services/snapshot_service.py]
+  anchor: 'dict\[str, Any\]|job\.settings\["region"\]'
+  expect:
+    review: { category: "🔴", fix: "Replace Primitive with Domain Type" }
+
+# ruff has no duplicate-code detector (pylint's R0801 is not ported): the
+# duplicated batch loop is a review finding only.
+- id: R1.lint.run-loop-dupl
+  rule: R1
+  questions: [lint]
+  files: [internal/services/snapshot_service.py, internal/services/sync_service.py]
+  anchor: 'for start in range\(0, len\(devices\), batch\):'
+  expect:
+    review: { category: "🔴", fix: "Extract Collection Type" }
+    lint:   { linter: "-", route: R1, note: "no duplicate-code rule in ruff" }
+
+# PLR2004 fires on comparisons only, never on a repeated literal used as a
+# value, so the repeated content type has no ruff twin either.
+- id: R1.lint.content-type-goconst
+  rule: R1
+  questions: [lint]
+  files: [internal/services/notify.py, internal/services/alert_service.py, internal/services/snapshot_service.py, internal/services/device_service.py]
+  anchor: '"application/json"'
+  expect:
+    lint: { linter: "-", action: FIX, note: "not enum-shaped: a plain module constant is the right fix; no ruff rule fires" }
+
+- id: CTRL.R1.error-payload-map
+  rule: R1
+  control: true
+  files: [internal/handlers/heartbeat.py]
+  anchor: '\{"error": '
+  # A flat map literal built and written at one call site is data egress at the
+  # boundary, not a hidden type: a telling shape in one function needs no name.
+  symbol: '(?i)\b(error ?(payload|body|response|message)) (type|class|dataclass)\b|Name the Container[^\n]{0,80}"error"'
+  expect: { review: { findings: 0, note: "the one-shot error payload must not get a type" } }
+
+- id: CTRL.R1.tenant-type
+  rule: R1
+  control: true
+  files: [internal/models/tenant.py]
+  anchor: 'def parse\(cls, raw: str\) -> Self:'
+  symbol: 'Tenant\.parse'
+  precision: finding   # reports cite Tenant.parse as the existing type to wire in; re-proposing it is the false positive
+  expect: { review: { findings: 0, note: "must not be re-proposed" } }
+
+- id: CTRL.R1.region-type
+  rule: R1
+  control: true
+  files: [internal/models/region.py]
+  anchor: 'def parse\(cls, raw: str\) -> Self:'
+  symbol: 'Region\.parse'
+  mention_ok: true
+  expect: { review: { findings: 0 } }
+
+- id: CTRL.R1.named-const
+  rule: R1
+  control: true
+  files: [internal/pkg/deviceid/deviceid.py, internal/snapshot/schedule.py, internal/transport/client.py]
+  anchor: '^(_MAX_LEN = 64|_MINUTES_PER_DAY = 24 \* 60|_DEFAULT_PORT = 8080)$'
+  symbol: '_MAX_LEN|_MINUTES_PER_DAY'
+  expect: { review: { findings: 0 } }
+
+- id: CTRL.R1.trace-id-string
+  rule: R1
+  control: true
+  case: D
+  files: [internal/handlers/trace.py]
+  anchor: 'def _trace\(self, resp: Response, trace_id: str\) -> None:'
+  symbol: 'TraceI[Dd]\b'
+  expect: { review: { findings: 0, not_contains: 'TraceID' } }
+
+- id: CTRL.R1.grants-type
+  rule: R1
+  control: true
+  case: D
+  files: [internal/models/grants.py, internal/handlers/authz.py]
+  anchor: 'def has\(self, p: Permission\) -> bool:|grants\.has\(Permission\.WRITE\)'
+  mention_ok: true
+  expect: { review: { findings: 0, note: "an earned type with a production caller: never re-proposed, never removed as dead code" } }
+
+# ─── R2 self-validating types ───────────────────────────────────────────────
+
+# A plain dataclass with public fields and no __post_init__: every caller can
+# build an invalid Device.
+- id: R2.Q1.device-exported-fields
+  rule: R2
+  questions: [Q1]
+  files: [internal/models/device.py]
+  anchor: '^class Device:'
+  expect:
+    review:   { category: "🔴", cluster: "Device", fix: "Add validating constructor" }
+    refactor: { present: 'def __post_init__\(self\)|def (parse|new|create)\w*\(cls' }
+
+- id: R2.Q1.alert-exported-fields
+  rule: R2
+  questions: [Q1]
+  files: [internal/models/alert.py, internal/services/alert_service.py]
+  anchor: '^class Alert:|Alert\($|Alert\(channel="'
+  expect:
+    review: { category: "🔴", cluster: "Alert.channel", fix: "Add validating constructor" }
+
+- id: R2.Q2.method-nil-checks
+  rule: R2
+  questions: [Q2]
+  files: [internal/services/device_service.py, internal/services/notify.py]
+  anchor: 'if self\.repo is None|if not self\.webhook_url'
+  expect:
+    review: { category: "🔴", fix: "Hoist method checks into the constructor" }
+
+- id: R2.Q2.validate-device-in-method
+  rule: R2
+  questions: [Q2]
+  files: [internal/services/device_service.py]
+  anchor: 'def _validate_device\(self, d: Device\)'
+  expect:
+    review:   { category: "🔴", cluster: "Device", fix: "Hoist method checks into the constructor" }
+    refactor: { gone: '_validate_device\(', count_max: 0 }
+
+- id: R2.Q4.caller-must-comments
+  rule: R2
+  questions: [Q4]
+  files: [internal/models/heartbeat.py, internal/services/device_service.py]
+  anchor: 'caller must ensure|assumes valid'
+  expect:
+    review:   { category: "🔴", fix: "Add validating constructor" }
+    refactor: { gone: 'caller must ensure|assumes valid', count_max: 0 }
+
+- id: CTRL.R2.window-plan
+  rule: R2
+  control: true
+  files: [internal/snapshot/schedule.py]
+  anchor: 'def parse\(cls, start: str, end: str\) -> Self:'
+  symbol: 'Window\.parse'
+  expect: { review: { findings: 0 } }
+
+- id: CTRL.R2.snapshot-repository
+  rule: R2
+  control: true
+  files: [internal/snapshot/repository.py, internal/snapshot/scheduler.py]
+  anchor: 'if not directory:|if now is None:'
+  symbol: 'now is None'
+  expect: { review: { findings: 0, note: "constructor-time checks are the healthy place" } }
+
+# ─── R3 storifying (beyond the centerpiece) ─────────────────────────────────
+
+- id: R3.Q5.dishonest-names
+  rule: R3
+  questions: [Q5]
+  files: [internal/services/device_service.py]
+  anchor: 'def (_validate_device|_is_ready|_get_or_create)\(self'
+  expect:
+    review: { category: "🟡", fix: "Honest Rename" }
+
+- id: R3.Q1.normalize-tags
+  rule: R3
+  questions: [Q1]
+  files: [internal/services/heartbeat_parser.py]
+  anchor: '^def _normalize_tags\('
+  expect:
+    review: { category: "🟡", fix: "Extract Leaf Type" }
+    lint:   { linter: "-", route: R3, note: "cyclomatic 7 under ruff's threshold of 8; complexipy's cognitive count is the postcheck's measure" }
+
+- id: CTRL.R3.orchestrator
+  rule: R3
+  control: true
+  files: [internal/snapshot/scheduler.py]
+  anchor: 'def prune\(self, raw: dict\[str, str\], device_id: str\)'
+  symbol: '\bprune\('
+  expect: { review: { findings: 0 } }
+
+# Go's guard was `ctx.Err()`; Python has no ctx, so the healthy guard clause is
+# the early return on an empty store.
+- id: CTRL.R3.guard-clauses
+  rule: R3
+  control: true
+  files: [internal/repository/file_repo.py, internal/repository/mem_store.py]
+  anchor: '^\s+if not devices:$'
+  symbol: 'not devices'
+  expect: { review: { findings: 0 } }
+
+# ─── R4 helper placement ────────────────────────────────────────────────────
+
+- id: R4.Q1.exported-for-tests
+  rule: R4
+  questions: [Q1]
+  files: [internal/services/heartbeat_parser.py, internal/services/test_service.py]
+  anchor: 'parse_heartbeat_line\('
+  expect:
+    review:   { category: "🔴", fix: "Demote (rung 1)" }
+    refactor: { gone: '^def parse_heartbeat_line\(', count_max: 0 }
+
+- id: R4.Q2.private-tested-directly
+  rule: R4
+  questions: [Q2]
+  files: [internal/services/test_service.py]
+  anchor: '^def test_normalize_tags\('
+  expect:
+    review: { category: "🔴", fix: "Promote to feature sub-package (rung 2)" }
+
+# Go had `internal/common` and `internal/utils` packages; Python's classic
+# shape of the same smell is a `utils.py` and a `common.py` module. No ruff
+# rule names a module after its role.
+- id: R4.Q3.role-named-packages
+  rule: R4
+  questions: [Q3]
+  files: [internal/utils.py, internal/common.py]
+  anchor: '^"""Shared '
+  expect:
+    review: { category: "🔴", cluster: "role packages", fix: "Split a generic package by owner", route: R5 }
+  # Reports name this cluster after the modules as often as after the smell.
+  cluster_match: 'CLUSTER[^\n]*(role packages|common\b[^\n]*utils|utils\b[^\n]*common)'
+    lint:   { linter: "-", route: R5, note: "no role-name rule in ruff" }
+
+- id: R4.Q4.single-noun-package
+  rule: R4
+  questions: [Q4]
+  files: [internal/pkg/deviceid/deviceid.py]
+  anchor: '^class DeviceID\(str\):'
+  expect:
+    review: { category: "🔴", fix: "Promote to domain package (rung 3)", note: "one type, no siblings: fold into a vocabulary package or demote" }
+
+- id: R4.Q5.feature-literal-in-common
+  rule: R4
+  questions: [Q5]
+  files: [internal/common.py]
+  anchor: 'HEARTBEAT_HEADER = "x-hb-v2"'
+  expect:
+    review:   { category: "🔴", fix: "Split policy from vocabulary during promotion" }
+    refactor: { gone: 'HEARTBEAT_HEADER', count_max: 0, scope: 'internal/common\.py' }
+
+- id: R4.Q6.feature-envy
+  rule: R4
+  questions: [Q6]
+  files: [internal/services/device_service.py]
+  anchor: 'def (summarize|export|score)\(self, d: Device\)'
+  expect:
+    review: { category: "🔴", fix: "Move Method to the Envied Type" }
+
+- id: CTRL.R4.private-helper
+  rule: R4
+  control: true
+  files: [internal/repository/store.py, internal/snapshot/schedule.py]
+  anchor: '^def (_key\(tenant: str, device_id: str\) -> str|_parse_clock\(v: str\) -> int)'
+  symbol: '_parse_clock'
+  expect: { review: { findings: 0, note: "the promotion signal must not fire" } }
+
+# ─── R5 vertical slice ──────────────────────────────────────────────────────
+
+# Python has no `package` line; the layer packages announce themselves in the
+# docstring of their __init__.py.
+- id: R5.Q1.role-layers
+  rule: R5
+  questions: [Q1]
+  files: [internal/handlers/__init__.py, internal/services/__init__.py, internal/models/__init__.py, internal/repository/__init__.py]
+  anchor: '^"""(HTTP handlers|Business logic|Domain types|Persistence)'
+  expect:
+    review: { category: "🔴", fix: "Slice out a feature", advisory: true }
+
+- id: R5.Q2.snapshot-spread
+  rule: R5
+  questions: [Q2]
+  files: [internal/services/snapshot_service.py, internal/models/snapshot.py, internal/jobs/registry.py]
+  anchor: 'Snapshot'
+  expect:
+    review: { category: "🔴", fix: "Slice out a feature", advisory: true }
+
+- id: R5.Q4.two-snapshot-homes
+  rule: R5
+  questions: [Q4]
+  files: [internal/services/snapshot_service.py, internal/snapshot/snapshot.py]
+  anchor: 'snapshot'
+  expect:
+    review: { category: "🔴", fix: "Slice out a feature", note: "services/snapshot_service.py and snapshot/ coexist" }
+
+- id: R5.Q5.no-migration-doc
+  rule: R5
+  questions: [Q5]
+  files: [internal/snapshot/snapshot.py, README.md]
+  anchor: 'snapshot'
+  expect:
+    review:   { category: "🔴", fix: "Slice out a feature", note: "mixed shape; docs/architecture/vertical-slice-migration.md missing" }
+    refactor: { present_file: 'docs/architecture/vertical-slice-migration.md' }
+
+# ruff has no file-length rule (pylint's C0302 is not ported); the god file is a
+# review finding only.
+- id: R5.Q1.god-file
+  rule: R5
+  questions: [Q1]
+  files: [internal/services/device_service.py]
+  anchor: '^class DeviceService:'
+  recall_own: 'device_service\.py[^\n]*(?i:4[5-9][0-9][ -]?(lines?|loc)\b|god[ -]file|longest)'
+  expect:
+    review: { category: "🔴", fix: "Rename layer files by role during the move", note: "the longest module in the tree, 19 methods" }
+    lint:   { linter: "-", route: R5, note: "no file-length rule in ruff" }
+    prepare: { gate: BOUNDED, spec: sms-channel, verdict: PREP-DEFERRED }
+
+- id: R5.Q1.models-red-zone
+  rule: R5
+  questions: [Q1]
+  files: [internal/models/device.py, internal/models/alert.py, internal/models/job.py]
+  anchor: '^@dataclass'
+  expect:
+    review: { category: "🔴", fix: "Slice out a feature", hook: "check-package-sizes RED (14 modules)" }
+
+- id: CTRL.R5.snapshot-slice
+  rule: R5
+  control: true
+  files: [internal/snapshot/snapshot.py, internal/snapshot/repository.py, internal/snapshot/scheduler.py]
+  anchor: '^from internal\.models\.snapshot import Snapshot'
+  symbol: 'internal/snapshot/'
+  mention_ok: true
+  expect: { review: { findings: 0 } }
+
+# ─── R6 test-only interfaces ────────────────────────────────────────────────
+
+# Go interfaces become Protocols: structural, like Go's, so FileRepo and
+# MemStore satisfy both Store and DeviceRepository without naming them, and a
+# module-level `type[Protocol]` assignment is the twin of `var _ I = (*T)(nil)`.
+- id: R6.Q1.device-repository
+  rule: R6
+  questions: [Q1, Q2]
+  files: [internal/repository/device_repository.py]
+  anchor: '^class DeviceRepository\(Protocol\):'
+  expect:
+    review:   { category: "🔴", fix: "Inline the interface" }
+    refactor: { gone: '^class DeviceRepository\(Protocol\):', count_max: 0 }
+
+- id: R6.Q2.mock-repo-double
+  rule: R6
+  questions: [Q2]
+  files: [internal/mocks/repo.py]
+  anchor: '^_double: type\[DeviceRepository\] = Repo$'
+  expect:
+    review:   { category: "🔴", fix: "Delete the double" }
+    refactor: { gone: '^class (Repo|Notifier):', count_max: 0, scope: 'internal/mocks/' }
+
+- id: R6.Q3.import-cycle-claim
+  rule: R6
+  questions: [Q3, critic]
+  files: [internal/mocks/notifier.py, internal/repository/device_repository.py]
+  anchor: 'avoids an import cycle'
+  expect:
+    review: { category: "🔴", fix: "Inline the interface", note: "no back-import exists; the claim is false" }
+
+- id: R6.Q4.sync-service-takes-interface
+  rule: R6
+  questions: [Q4]
+  files: [internal/services/sync_service.py, internal/services/snapshot_service.py]
+  anchor: 'repo: DeviceRepository'
+  expect:
+    review: { category: "🔴", fix: "Inline the interface" }
+
+- id: R6.Q5.for-testing
+  rule: R6
+  questions: [Q5, critic]
+  files: [internal/mocks/repo.py]
+  anchor: '^# for testing$'
+  expect:
+    review: { category: "🔴", fix: "Delete the double" }
+
+- id: R6.Q5.notifier-api
+  rule: R6
+  questions: [Q5]
+  files: [internal/mocks/notifier.py]
+  anchor: '^class NotifierAPI\(Protocol\):'
+  expect:
+    review: { category: "🔴", fix: "Delete the double" }
+
+# golangci's ireturn has no ruff twin; a factory annotated to return the
+# Protocol is the same disease, review-only.
+- id: R6.Q1.formatter-ireturn
+  rule: R6
+  questions: [Q1]
+  files: [internal/services/alert_service.py]
+  anchor: 'def _new_formatter\(kind: str\) -> Formatter:'
+  expect:
+    review: { category: "🔴", fix: "Inline the interface" }
+    lint:   { linter: "-", route: R6, note: "no interface-return rule in ruff" }
+
+- id: CTRL.R6.store-interface
+  rule: R6
+  control: true
+  files: [internal/repository/store.py]
+  anchor: '^class Store\(Protocol\):'
+  symbol: 'Store\(Protocol\)|Store [Pp]rotocol|class Store\b'
+  expect: { review: { findings: 0, note: "two production implementers: FileRepo and MemStore" } }
+
+- id: CTRL.R6.mem-store-in-production
+  rule: R6
+  control: true
+  files: [svc/__main__.py, internal/repository/mem_store.py]
+  anchor: 'MemStore'
+  symbol: 'MemStore'
+  mention_ok: true
+  expect: { review: { findings: 0 } }
+
+# ─── R7 test placement ──────────────────────────────────────────────────────
+
+# `wantErr` tables become a parametrize table whose rows mix success and error
+# and branch on `if expect_err:`.
+- id: R7.Q1.wanterr-tables
+  rule: R7
+  questions: [Q1]
+  files: [internal/services/test_service.py, internal/placement/test_picker.py]
+  anchor: 'if expect_err:'
+  expect:
+    review:   { category: "🔴", fix: "Split `wantErr` tables" }
+    refactor: { gone: 'expect_err', count_max: 0 }
+    lint:     { linter: "-", route: R7, note: "the type: ignore on the optional result is the mypy trace of the fused table" }
+
+# Go's internal test package is a test module importing private names.
+- id: R7.Q2.internal-test-package
+  rule: R7
+  questions: [Q2]
+  files: [internal/services/test_service.py]
+  anchor: '^from internal\.services\.\w+ import .*\b_\w+'
+  expect:
+    review:   { category: "🔴", fix: "Delete private-function tests" }
+    refactor: { gone: '^from internal\.\w+(\.\w+)* import .*\b_[a-z]\w*', count_max: 0, scope: 'test_\w+\.py' }
+
+- id: R7.Q5.call-count-assertions
+  rule: R7
+  questions: [Q5]
+  files: [internal/handlers/test_heartbeat.py, internal/jobs/test_scheduler.py]
+  anchor: 'repo\.calls\["save"\]'
+  expect:
+    review:   { category: "🔴", fix: "Replace doubles with real collaborators" }
+    refactor: { gone: 'calls\["save"\]', count_max: 0 }
+
+- id: R7.Q6.sleep-then-assert
+  rule: R7
+  questions: [Q6]
+  files: [internal/services/test_service.py, internal/handlers/test_heartbeat.py]
+  anchor: 'time\.sleep\(0\.1'
+  expect:
+    review:   { category: "🔴", fix: "Replace sleep with synchronization" }
+    refactor: { gone: 'time\.sleep\(', count_max: 0, scope: 'test_\w+\.py' }
+
+# Q7 plants are the survivors of the mutation tool over the fixture's leaf
+# packages as the tree stands: no code was planted, the comparison's boundary row
+# was never written. recall_match spans the source and its test file, since a
+# report may anchor either. Verified with mutmut 3.8 over the four leaf modules
+# (84 mutants: 58 killed, 26 lived); the survivors differ from the Go twins
+# because mutmut and gremlins mutate different things, so each entry below names
+# its own survivor. mutmut needs `source_paths` and a test selection on its
+# command line: py-mini's pyproject carries no `[tool.mutmut]` table.
+- id: R7.Q7.deviceid-maxlen-boundary
+  rule: R7
+  questions: [Q7]
+  files: [internal/pkg/deviceid/deviceid.py]
+  anchor: 'len\(raw\) > _MAX_LEN'
+  recall_match: '(test_)?deviceid\.py'
+  expect:
+    review:   { category: "🔴", fix: "Kill the surviving mutant" }
+    # Hand check only: mutmut never mutates __new__ (it is on the tool's
+    # never-mutate list), so no tool run reaches this comparison. The table has
+    # a 65-char row and no 64-char row; the hand check names the missing one.
+
+- id: R7.Q7.tenant-rune-boundary
+  rule: R7
+  questions: [Q7]
+  files: [internal/models/tenant.py]
+  anchor: 'raise ValueError\("tenant: empty"\)'
+  recall_match: '(test_)?tenant\.py'
+  expect:
+    review:   { category: "🔴", fix: "Kill the surviving mutant" }
+    postcheck: { lived_max: 0, package: internal/models, note: "the only survivor is the empty-tenant message: `match=\"tenant\"` accepts any message that contains the word, so a `match=\"tenant: empty\"` row kills it; the `in _TENANT_CHARS` test has no boundary for mutmut to move and its one mutant dies" }
+
+- id: R7.Q7.slugify-leading-separator
+  rule: R7
+  questions: [Q7]
+  files: [internal/utils.py]
+  anchor: 'return "".join\(out\).removesuffix\("-"\)'
+  recall_match: '(test_)?utils\.py'
+  expect:
+    review:   { category: "🔴", fix: "Kill the surviving mutant" }
+    postcheck: { lived_max: 7, package: internal/utils.py, note: "a trailing-separator row (slugify(\"eu \") == \"eu\") kills the two removesuffix mutants; truncate(\"hb\", 1) == \"h\" and truncate(\"hb\", 0) == \"\" kill two more; the seven that remain are equivalent (n < 0 and len(s) < n in truncate, the three dash-flag literals in slugify, b <= a and / for // in days_between) and may live only if recorded beside the tests" }
+
+- id: CTRL.R7.no-survivors-placement
+  rule: R7
+  control: true
+  files: [internal/placement/picker.py]
+  anchor: 'def pick\('
+  symbol: 'Placer\.pick|_pick_replicas'
+  precision: finding
+  expect: { review: { findings: 0 } }
+  # The picker table holds a node at each boundary of `capacity <= 0`: 0 and 1.
+  # Without the capacity-1 row the hand check would name it and the control
+  # would punish a correct report. mutmut still leaves its nine logging-literal
+  # mutants and four None/"" swaps alive; none is a missing row.
+
+- id: CTRL.R7.split-tables
+  rule: R7
+  control: true
+  files: [internal/snapshot/test_schedule.py, internal/models/test_region.py]
+  anchor: '^def test_parse_\w+_(success|error)\('
+  symbol: 'test_parse_(window|region)_(success|error)'
+  expect: { review: { findings: 0 } }
+
+- id: CTRL.R7.real-collaborators
+  rule: R7
+  control: true
+  files: [internal/snapshot/test_scheduler.py]
+  anchor: 'tmp_path'
+  symbol: 'tmp_path'
+  mention_ok: true
+  expect: { review: { findings: 0 } }
+
+# ─── R8 no globals ──────────────────────────────────────────────────────────
+
+# Go's package-level vars become module-level state; the only ruff rule near
+# it is PLW0603, which fires on the `global` statement that rebinds one.
+- id: R8.Q1.registry-globals
+  rule: R8
+  questions: [Q1]
+  files: [internal/jobs/registry.py]
+  anchor: '^(_HANDLERS: dict|_store_lock = threading\.Lock\(\)|_store: MemStore \| None = None)'
+  expect:
+    review:   { category: "🔴", fix: "Replace `init()` with a constructor" }
+    refactor: { gone: '^(_HANDLERS|_store_lock|_store)\b', count_max: 0 }
+    lint:     { linter: PLW0603, route: R8 }
+
+# `init()` is import time: the registry is filled and REGION is read when the
+# module loads. No ruff rule sees an import-time side effect.
+- id: R8.Q2.init-registration
+  rule: R8
+  questions: [Q2]
+  files: [internal/jobs/registry.py, internal/env/env.py]
+  anchor: '^_HANDLERS\["snapshot"\] = _run_snapshot|^_region = os\.environ\.get\("REGION"\)'
+  expect:
+    review:   { category: "🔴", fix: "Replace `init()` with a constructor" }
+    refactor: { gone: '^_HANDLERS\["snapshot"\] = |^_region = os\.environ\.get', count_max: 0 }
+    lint:     { linter: "-", route: R8, note: "no import-time side-effect rule in ruff" }
+
+# `sync.Once` is a module lock around a lazily built module-level store.
+- id: R8.Q4.sync-once-store
+  rule: R8
+  questions: [Q4]
+  files: [internal/jobs/registry.py]
+  anchor: 'with _store_lock:'
+  expect:
+    review:   { category: "🔴", fix: "Push the Global Up One Level" }
+    refactor: { gone: 'with _store_lock:', count_max: 0 }
+
+- id: R8.Q5.getenv-in-method
+  rule: R8
+  questions: [Q5]
+  files: [internal/services/sync_service.py, internal/services/notify.py]
+  anchor: 'os\.environ\.get\("[A-Z_]+"\)'
+  expect:
+    review:   { category: "🔴", fix: "Push the Global Up One Level" }
+    refactor: { gone: 'os\.environ\.get\(', count_max: 0, scope: 'internal/services/' }
+
+- id: CTRL.R8.err-not-found
+  rule: R8
+  control: true
+  files: [internal/repository/store.py]
+  anchor: '^class NotFoundError\(LookupError\):'
+  symbol: 'NotFoundError'
+  mention_ok: true
+  expect: { review: { findings: 0 } }
+
+# `var _ Store = (*FileRepo)(nil)` becomes a type-checked tuple of the
+# implementing classes, under TYPE_CHECKING where the import would cycle.
+- id: CTRL.R8.compile-time-check
+  rule: R8
+  control: true
+  files: [internal/repository/store.py, internal/repository/device_repository.py]
+  anchor: '^\s*_implementers: tuple\[type\[(Store|DeviceRepository)\], \.\.\.\]'
+  symbol: '_implementers'
+  expect: { review: { findings: 0 } }
+
+- id: CTRL.R8.main-composition-root
+  rule: R8
+  control: true
+  files: [svc/__main__.py]
+  anchor: 'logging\.basicConfig\(|env\.load\(\)|os\.environ\.get\("(PORT|WEBHOOK_URL|STORE_PATH)"'
+  symbol: 'svc/__main__\.py'
+  mention_ok: true
+  expect: { review: { findings: 0, note: "globals at the composition root are the pragmatic endpoint" } }
+
+# ─── R9 repo brain ──────────────────────────────────────────────────────────
+
+- id: R9.Q1.orphan-doc
+  rule: R9
+  questions: [Q1]
+  files: [docs/heartbeat-protocol.md]
+  anchor: '^# Heartbeat protocol'
+  expect:
+    review:   { category: "🟡", fix: "Rewire orphan doc" }
+    refactor: { present_file: 'docs/index.md', present: 'heartbeat-protocol\.md' }
+
+- id: R9.Q2.file-line-citation
+  rule: R9
+  questions: [Q2]
+  files: [docs/heartbeat-protocol.md]
+  anchor: 'device_service\.py:142'
+  expect:
+    review:   { category: "🟡", fix: "Update the stale doc with the behavior change", note: "file:line citations are a policy violation whether or not they resolve; cite the exported symbol" }
+    refactor: { gone: '\.py:[0-9]+', count_max: 0, scope: 'docs/' }
+
+- id: R9.Q2.phantom-symbol
+  rule: R9
+  questions: [Q2]
+  files: [docs/heartbeat-protocol.md]
+  anchor: 'SnapshotRunner'
+  expect:
+    review:   { category: "🟡", fix: "Update the stale doc with the behavior change", flag: "⚠️ unresolvable" }
+    refactor: { gone: 'SnapshotRunner', count_max: 0 }
+
+- id: R9.Q2.missing-doc-edge
+  rule: R9
+  questions: [Q2]
+  files: [internal/models/heartbeat.py]
+  anchor: 'See docs/snapshots\.md'
+  expect:
+    review:   { category: "🟡", fix: "Rewire orphan doc", flag: "⚠️ broken edge" }
+    refactor: { gone: 'docs/snapshots\.md', count_max: 0 }
+
+- id: R9.Q3.unwired-root
+  rule: R9
+  questions: [Q3]
+  files: [CLAUDE.md]
+  anchor: '^## Commands'
+  expect:
+    review:   { category: "🟡", fix: "Wire the root", note: "CLAUDE.md carries build commands only; no index import" }
+    refactor: { present: 'docs/index\.md|@docs/', scope: 'CLAUDE.md|AGENTS.md' }
+
+# WHAT-godoc becomes a WHAT-docstring: the first line restates the class name.
+- id: R9.Q4.what-comments
+  rule: R9
+  questions: [Q4]
+  files: [internal/models/device.py, internal/models/heartbeat.py, internal/models/schedule.py, internal/services/device_service.py, internal/services/notify.py, internal/services/cache.py, internal/handlers/trace.py, internal/report/reporter.py, internal/env/env.py]
+  anchor: '^\s*"""[A-Z]\w+ is (an?|the) [a-z ]+\.'
+  expect:
+    review:   { category: "🟡", fix: "Convert WHAT to WHY or delete" }
+    refactor: { gone: '^\s*"""[A-Z]\w+ is (an?|the) [a-z]+\.', count_max: 0 }
+
+- id: R9.Q4.creates-a-new
+  rule: R9
+  questions: [Q4]
+  files: [internal/services/device_service.py, internal/services/notify.py, internal/repository/mem_store.py, internal/repository/file_repo.py]
+  anchor: '^\s+"""Create a new \w+\."""$'
+  expect:
+    review:   { category: "🟡", fix: "Convert WHAT to WHY or delete" }
+    refactor: { gone: '^\s+"""Create a new \w+\."""$', count_max: 0 }
+
+# A public class or function with no docstring: pydocstyle's D101/D103 fire
+# and the plant silences them, so the noqa itself is the naked-export marker.
+- id: R9.Q5.naked-exports
+  rule: R9
+  questions: [Q5]
+  files: [internal/models/alert.py, internal/models/job.py, internal/models/snapshot.py, internal/models/tags.py, internal/models/job_kind.py, internal/services/validate.py]
+  anchor: '^(class|def) [A-Za-z]\w*.*# noqa: D10[1-3]'
+  expect:
+    review: { category: "🟡", fix: "Convert WHAT to WHY or delete", note: "public symbols with no docstring at all" }
+    lint:   { linter: D101, route: R9, also: [D103] }
+
+- id: CTRL.R9.snapshot-package-doc
+  rule: R9
+  control: true
+  files: [internal/snapshot/snapshot.py]
+  anchor: '^See docs/heartbeat-protocol\.md'
+  symbol: 'snapshot/snapshot\.py'
+  mention_ok: true
+  expect: { review: { findings: 0, note: "WHY-docstring with one resolving See-edge" } }
+
+- id: CTRL.R9.why-comments
+  rule: R9
+  control: true
+  files: [internal/repository/mem_store.py, internal/handlers/trace.py, internal/snapshot/repository.py]
+  anchor: 'store behind|can be joined later|races a manual cleanup'
+  symbol: 'store behind|can be joined later|races a manual cleanup'
+  expect: { review: { findings: 0 } }
+
+# ─── R10 concurrency ────────────────────────────────────────────────────────
+
+# Goroutines are threads: a daemon thread started in the constructor, looping
+# forever with a sleep and no stop event.
+- id: R10.Q1.unowned-loop
+  rule: R10
+  questions: [Q1]
+  files: [internal/services/device_service.py]
+  anchor: 'def _flush_loop\(self\) -> None:'
+  expect:
+    review:   { category: "🐛", fix: "Inject the Exit Path" }
+    refactor: { present: 'threading\.Event\(\)|\.is_set\(\)|\.wait\(', scope: 'internal/services/' }
+
+- id: R10.Q2.goroutine-in-constructor
+  rule: R10
+  questions: [Q2]
+  files: [internal/services/device_service.py]
+  anchor: 'threading\.Thread\(target=self\._flush_loop, daemon=True\)\.start\(\)'
+  expect:
+    review:   { category: "🐛", fix: "Make the Goroutine Joinable" }
+    refactor: { gone: 'threading\.Thread\(target=self\._flush_loop, daemon=True\)\.start\(\)', count_max: 0 }
+
+- id: R10.Q4.split-guard
+  rule: R10
+  questions: [Q4]
+  files: [internal/services/cache.py]
+  anchor: 'self\.ttl\[key\] = time\.monotonic\(\) \+ self\.span$|^\s+return self\.items$'
+  expect:
+    review: { category: "🐛", fix: "Extract Synchronized Owner", note: "put writes ttl outside the lock; all returns the dict without it" }
+
+- id: R10.Q5.production-sleep
+  rule: R10
+  questions: [Q5]
+  files: [internal/services/device_service.py, internal/services/retry.py, internal/services/sync_service.py]
+  anchor: 'time\.sleep\('
+  # every report cites these three files dozens of times; the plant is the sleep
+  # with a backoff argument, or the fix named for it, or "bare time.sleep" beside
+  # retry/backoff. Test sleeps (R7 Q6) and the flush loop's sleep (Q1/Q2) do not match.
+  recall_match: 'time\.sleep\(\(?(attempt|_retry_delay)|Replace Sleep with (Cancellable|Timer)|bare \x60?time\.sleep\x60?[^\n]{0,60}(retry|backoff)'
+  expect:
+    review:   { category: "🔴", fix: "Replace Sleep with Timer Select" }
+    refactor: { gone: 'time\.sleep\(', count_max: 0, scope: 'internal/services/' }
+
+# `govet copylocks` (a Mutex passed by value) has no Python twin; the nearest
+# disease is the guard that guards nothing: a shallow copy of the cache handed
+# to a helper that takes the copy's lock around a pure format. Review-only.
+- id: R10.lint.copylocks
+  rule: R10
+  questions: [lint]
+  files: [internal/services/cache.py]
+  anchor: '_describe\(copy\.copy\(self\)\)|^def _describe\(c: Cache\)'
+  expect:
+    review: { category: "🐛", fix: "Extract Synchronized Owner", note: "a copied Cache shares the original's lock and dicts" }
+    lint:   { linter: "-", route: R10, note: "no copylocks twin in ruff" }
+
+# errcheck's twin is the swallowed exception: `except Exception: pass`.
+- id: R10.lint.errcheck
+  rule: R10
+  questions: [lint]
+  files: [internal/services/device_service.py, internal/services/notify.py]
+  anchor: 'except Exception:  # noqa: BLE001, S110'
+  expect:
+    lint: { linter: BLE001, action: FIX, also: [S110, SIM105] }
+
+# wrapcheck's twin is a `raise` inside `except` without `from err`.
+- id: R10.lint.wrapcheck
+  rule: R10
+  questions: [lint]
+  files: [internal/services/device_service.py, internal/services/notify.py]
+  anchor: 'raise \w+Error\(.*\)  # noqa: B904'
+  expect:
+    lint: { linter: B904, action: FIX }
+
+- id: CTRL.R10.repo-mutex
+  rule: R10
+  control: true
+  files: [internal/repository/file_repo.py, internal/repository/mem_store.py]
+  anchor: 'with self\._guard:'
+  symbol: '_guard\b'
+  expect: { review: { findings: 0, note: "lock declared beside the state it guards, taken on every path" } }
+
+- id: CTRL.R10.main-jitter-sleep
+  rule: R10
+  control: true
+  files: [svc/__main__.py]
+  anchor: 'time\.sleep\(random\.randint\(0, 19\) / 1000\)'
+  symbol: 'random\.randint'
+  expect: { review: { findings: 0 } }
+
+# `for j := range jobs` exits when the channel closes; the queue twin exits on
+# a sentinel.
+- id: CTRL.R10.worker-range
+  rule: R10
+  control: true
+  files: [internal/pool/workers.py]
+  anchor: 'for job in iter\(jobs\.get, None\):'
+  symbol: 'iter\(jobs\.get'
+  expect: { review: { findings: 0, note: "exits on the None sentinel" } }
+
+# ─── R11 conditional dispatch ───────────────────────────────────────────────
+
+- id: R11.Q1.channel-switch
+  rule: R11
+  questions: [Q1, Q3]
+  files: [internal/services/notify.py, internal/services/validate.py, internal/services/retry.py]
+  anchor: 'match a\.channel:|a\.channel == "'
+  expect:
+    review:   { category: "🔴", cluster: "Alert.channel", fix: "Replace Duplicated Switch with Interface Dispatch", note: "already drifted: validate lacks pagerduty" }
+    refactor: { gone: 'match a\.channel:', count_max: 1, present: 'def parse\w*channel\w*\(|class Channel\((str, )?Enum\)|class Channel\(StrEnum\)' }
+    lint:     { linter: PLR2004, route: R1, note: "channel names are enum-shaped" }
+    prepare:  { gate: MULTIPLY, spec: sms-channel }
+
+- id: R11.Q1.job-kind-if
+  rule: R11
+  questions: [Q1]
+  files: [internal/jobs/scheduler.py, internal/services/snapshot_service.py, internal/models/job.py]
+  anchor: '\.kind == "snapshot"'
+  expect:
+    review:   { category: "🔴", cluster: "Job.kind", fix: "Replace If-Chain with Strategy Map" }
+    refactor: { gone: 'kind == "snapshot"', count_max: 1 }
+    lint:     { linter: PLR2004, route: R11 }
+
+- id: R11.Q1.status-switch
+  rule: R11
+  questions: [Q1]
+  files: [internal/handlers/status.py, internal/services/alert_service.py, internal/services/device_service.py]
+  anchor: 'match d\.status:'
+  expect:
+    review:   { category: "🔴", cluster: "Device.status", fix: "Replace Duplicated Switch with Interface Dispatch" }
+    refactor: { gone: 'match d\.status:', count_max: 1 }
+
+- id: R11.Q3.default-unknown-channel
+  rule: R11
+  questions: [Q3]
+  files: [internal/services/notify.py]
+  anchor: 'raise NotifyError\(f.unknown channel'
+  expect:
+    review:   { category: "🔴", cluster: "Alert.channel", fix: "Replace Duplicated Switch with Interface Dispatch", note: "decide once, at the edge" }
+    refactor: { gone: 'unknown channel', count_max: 1 }
+
+- id: R11.Q4.flag-arguments
+  rule: R11
+  questions: [Q4]
+  files: [internal/services/device_service.py, internal/services/sync_service.py]
+  anchor: '(short|force|dry_run): bool'
+  expect:
+    review:   { category: "🔴", fix: "Split Flag Argument" }
+    refactor: { gone: ', short: bool\)', count_max: 0 }
+    lint:     { linter: FBT001, route: R11 }
+
+- id: R11.Q5.unearned-formatter
+  rule: R11
+  questions: [Q5]
+  files: [internal/services/alert_service.py]
+  anchor: '^class Formatter\(Protocol\):'
+  expect:
+    review: { category: "🟢", fix: "Keep the Single Exhaustive Switch", skeptic: "REFUTED with the cheaper alternative" }
+
+# golangci's exhaustive has no ruff twin and mypy checks a match only when an
+# assert_never arm asks it to; the incomplete match over Priority is review-only.
+- id: R11.Q1.priority-switch-not-exhaustive
+  rule: R11
+  questions: [Q1]
+  files: [internal/services/retry.py]
+  anchor: 'match p:'
+  expect:
+    review: { category: "🔴", fix: "Keep the Single Exhaustive Switch" }
+    lint:   { linter: "-", route: R11, note: "no exhaustiveness rule without assert_never" }
+
+- id: CTRL.R11.region-zone-switch
+  rule: R11
+  control: true
+  files: [internal/models/region.py]
+  anchor: 'match self:'
+  symbol: 'zone\(\)'
+  precision: finding   # reports name .zone() when describing the Region type the bypassing code should use
+  expect: { review: { findings: 0, note: "one site, named enum, no default" } }
+
+- id: CTRL.R11.errors-is
+  rule: R11
+  control: true
+  files: [internal/repository/file_repo.py, internal/snapshot/repository.py]
+  anchor: 'except FileNotFoundError:'
+  symbol: 'FileNotFoundError'
+  mention_ok: true
+  expect: { review: { findings: 0 } }
+
+- id: CTRL.R11.value-conditional
+  rule: R11
+  control: true
+  files: [internal/snapshot/schedule.py]
+  anchor: 'if self\.start < self\.end:'
+  symbol: 'self\.start < self\.end'
+  expect: { review: { findings: 0 } }
+
+# ─── R12 mutation discipline ────────────────────────────────────────────────
+
+- id: R12.Q1.leaked-internals
+  rule: R12
+  questions: [Q1]
+  files: [internal/services/cache.py, internal/models/grants.py, internal/models/schedule.py, internal/services/snapshot_service.py]
+  anchor: 'return (self\.items|self\._perms|self\._days|self\._taken)$'
+  expect:
+    review:   { category: "🔴", fix: "Copy on the Way Out / Encapsulate Collection" }
+    refactor: { gone: 'return self\.items$', count_max: 0 }
+
+- id: R12.Q2.stored-parameter
+  rule: R12
+  questions: [Q2]
+  files: [internal/models/schedule.py, internal/models/grants.py]
+  anchor: 'self\._(days|perms) = (days|perms)$'
+  expect:
+    review:   { category: "🔴", fix: "Copy on the Way In" }
+    refactor: { present: 'list\((days|perms)\)|tuple\((days|perms)\)|(days|perms)\.copy\(\)' }
+
+- id: R12.Q3.query-that-mutates
+  rule: R12
+  questions: [Q3]
+  files: [internal/services/cache.py]
+  anchor: 'def get\(self, key: str\) -> Device \| None:'
+  expect:
+    review: { category: "🔴", fix: "Separate Query from Modifier", note: "get refreshes the TTL and evicts" }
+
+- id: R12.Q4.setter
+  rule: R12
+  questions: [Q4]
+  files: [internal/models/device.py]
+  anchor: 'def set_status\(self, s: str\) -> None:'
+  expect:
+    review:   { category: "🔴", cluster: "Device", fix: "Remove Setting Method" }
+    refactor: { gone: 'set_status\(', count_max: 0 }
+
+- id: CTRL.R12.boundary-clone
+  rule: R12
+  control: true
+  files: [internal/snapshot/schedule.py, internal/report/catalog.py]
+  anchor: 'list\((windows|devices|self\._windows)\)'
+  symbol: 'list\((windows|devices|self\._windows)\)'
+  mention_ok: true
+  expect: { review: { findings: 0 } }
+
+- id: CTRL.R12.honest-mutator
+  rule: R12
+  control: true
+  files: [internal/jobs/scheduler.py]
+  anchor: 'def _drain\(self\) -> list\[Job\]:'
+  symbol: '_drain\(\)'
+  expect: { review: { findings: 0, note: "pops and returns, named as a mutator, every caller wants both" } }
+
+# ─── Case A — retention: inline range check, duplicated, re-check, sentinel ──
+
+- id: CASE-A.retention-range-twice
+  rule: R1
+  case: A
+  questions: [Q2]
+  files: [internal/snapshot/policy.py, internal/snapshot/config.py]
+  anchor: '> 365'
+  expect:
+    review:   { category: "🔴", cluster: "retention", fix: "Replace Primitive with Domain Type", skeptic: "CONFIRMED ≥ 4" }
+    refactor: { gone: '> 365', count_max: 1, present: 'def (parse|from_\w+)\w*\(cls|def parse_\w+\(', scope: 'internal/snapshot/' }
+
+- id: CASE-A.defensive-recheck
+  rule: R2
+  case: A
+  questions: [Q2]
+  files: [internal/snapshot/policy.py]
+  anchor: 'days > 0 and days <= 365'
+  expect:
+    review:   { category: "🔴", cluster: "retention", fix: "Delete re-validation of composed types" }
+    refactor: { gone: 'days > 0 and days <= 365', count_max: 0 }
+    lint:     { linter: PLR1716, route: R2, note: "the chained-comparison rewrite is not the fix; the re-check goes" }
+
+- id: CASE-A.zero-sentinel
+  rule: R1
+  case: A
+  questions: [Q4]
+  files: [internal/snapshot/config.py]
+  anchor: 'return 0  # sentinel'
+  expect:
+    review:   { category: "🔴", cluster: "retention", fix: "Replace Sentinel with comma-ok" }
+    refactor: { gone: 'return 0  # sentinel', count_max: 0 }
+
+# ─── Case B — host/port/tls clump + stringly-typed scheme ───────────────────
+
+- id: CASE-B.host-port-tls-clump
+  rule: R1
+  case: B
+  questions: [Q5]
+  files: [internal/transport/client.py]
+  anchor: 'host: str, port: int'
+  expect:
+    review:   { category: "🔴", fix: "Introduce Parameter Object", skeptic: "CONFIRMED" }
+    refactor: { gone: 'host: str, port: int', count_max: 0, present: 'def __post_init__\(self\)|def (parse|new|from_\w+)\w*\(cls', scope: 'internal/transport/' }
+
+- id: CASE-B.scheme-decided-twice
+  rule: R1
+  case: B
+  questions: [Q3]
+  files: [internal/transport/client.py]
+  anchor: '"https"'
+  expect:
+    review:   { category: "🔴", fix: "Name enum strings" }
+    refactor: { gone: '"https"', count_max: 1 }
+
+- id: CASE-B.port-range-twice
+  rule: R1
+  case: B
+  questions: [Q2]
+  files: [internal/transport/client.py]
+  anchor: 'port <= 0 or port > 65535'
+  expect:
+    review:   { category: "🔴", fix: "Replace Primitive with Domain Type" }
+    refactor: { gone: 'port <= 0 or port > 65535', count_max: 1 }
+
+# ─── Case C — boolean flags tracking a loop → collection type ───────────────
+
+- id: CASE-C.flag-loop
+  rule: R3
+  case: C
+  questions: [Q4]
+  files: [internal/placement/picker.py]
+  anchor: '_found = (True|False)'
+  expect:
+    review:   { category: "🟡", fix: "Extract Leaf Type" }
+    refactor: { gone: '_found = (True|False)', count_max: 0, present: '^class \w+\(list\[Node\]\)|^\s+_?nodes: list\[Node\]' }
+    postcheck: { cognitive_max: 5, function: _pick_replicas }
+
+- id: CASE-C.inline-validity
+  rule: R2
+  case: C
+  questions: [Q2]
+  files: [internal/placement/picker.py]
+  anchor: 'not n\.zone or n\.capacity <= 0'
+  expect:
+    review:   { category: "🔴", fix: "Add validating constructor" }
+    refactor: { gone: 'not n\.zone', count_max: 0 }
+
+# `(Node, Node, error)` is a three-tuple with the error as a value; the honest
+# Python shapes are an exception and an optional `first()` on the collection.
+- id: CASE-C.tuple-return
+  rule: R1
+  case: C
+  questions: [Q5]
+  files: [internal/placement/picker.py]
+  anchor: '-> tuple\[Node \| None, Node \| None, str \| None\]'
+  expect:
+    review:   { category: "🔴", fix: "Introduce Parameter Object" }
+    refactor: { present: '-> Node \| None:' }
+
+# ─── Case D — ceremony must not be extracted ────────────────────────────────
+
+- id: CASE-D.replica-count
+  rule: R1
+  case: D
+  questions: [Q6]
+  files: [internal/models/grants.py]
+  anchor: '^class ReplicaCount\(int\):'
+  expect:
+    review:   { category: "🟢", fix: "Over-abstraction found instead? Apply the cheaper alternative", alternative: "delete the wrapper, keep int" }
+    refactor: { gone_or_untouched: 'class ReplicaCount\(int\)', never_grown: true }
+
+- id: CASE-D.name-wrapper
+  rule: R1
+  case: D
+  questions: [Q6]
+  files: [internal/models/grants.py]
+  anchor: '^class Name\(str\):'
+  expect:
+    review: { category: "🟢", fix: "Over-abstraction found instead? Apply the cheaper alternative" }
+
+# ─── Case E — None as field, return, and parameter ──────────────────────────
+
+- id: CASE-E.nil-field-rechecked
+  rule: R2
+  case: E
+  questions: [Q2]
+  files: [internal/report/reporter.py]
+  anchor: 'if self\.(sink|clock) is None'
+  expect:
+    review:   { category: "🔴", cluster: "Reporter", fix: "Introduce Null Object (R11)", also: "Hoist method checks into the constructor is the move only if sink were required" }
+    refactor: { gone: 'if [a-z]\w*\.\w+ is None', count_max: 0, scope: 'internal/report/', guard: '\((Protocol|ABC)\)', guard_count_max: 0 }
+
+- id: CASE-E.exported-nilable-fields
+  rule: R2
+  case: E
+  questions: [Q1]
+  files: [internal/report/reporter.py]
+  anchor: 'sink: Sink \| None|clock: Clock \| None'
+  expect:
+    review:   { category: "🔴", cluster: "Reporter", fix: "Add validating constructor" }
+    refactor: { gone: '^\s+(sink: Sink \| None|clock: Clock \| None)', count_max: 0 }
+
+# `Find` returning nil has no Python twin: `find` returning `Device | None` is
+# the declared absence, checked by mypy at every call site, and not a disease.
+# The plant is the parser beside it. `parse_device` returns None for a blank
+# line (an absence the caller skips) and again for a malformed line (a failure
+# disguised as absence, so a broken catalog file silently shrinks). The anchor
+# is the failure return; the fix raises there and keeps the blank-line None,
+# so one `return None` survives the refactor. Never `tuple[Device, bool]`.
+- id: CASE-E.nil-return
+  rule: R2
+  case: E
+  questions: [Q5]
+  files: [internal/report/catalog.py]
+  anchor: 'return None$'
+  # catalog.py is cited for its docstrings in every report; the plant is named
+  # by the function or by a line inside it (parse_device spans catalog.py:41-52).
+  recall_match: 'parse_device|catalog\.py:(4[1-9]|5[0-2])\b'
+  expect:
+    review:   { category: "🔴", fix: "Separate Failure from Absence" }
+    refactor: { gone: 'return None$', count_max: 1, scope: 'internal/report/catalog.py', present: 'raise \w*Error' }
+
+- id: CASE-E.nil-parameters
+  rule: R2
+  case: E
+  questions: [Q6]
+  files: [internal/report/wire.py, internal/report/reporter.py]
+  anchor: 'Reporter\(sink, None, None\)|if (opts|clock) is None'
+  expect:
+    review:   { category: "🔴", cluster: "Reporter", fix: "Add validating constructor" }
+    refactor: { gone: 'Reporter\([^)]*\bNone\b', count_max: 0, present: 'def (default|system|discard|nop|null)\w*\(|class (Discard|Nop|Null)\w*' }
+
+# ─── Case F — a global reached from every layer ─────────────────────────────
+
+# The global is a module-level Configuration object, rebound by load() through
+# a `global` statement (PLW0603, the one ruff rule that sees it) and mutated
+# in place by a test.
+- id: CASE-F.env-config-global
+  rule: R8
+  case: F
+  questions: [Q1]
+  files: [internal/env/env.py]
+  anchor: '^CONFIG = Configuration\(\)'
+  # Reports name this plant by its symbol as often as by its file.
+  recall_match: 'env\.py|env\.CONFIG|\bCONFIG\b'
+  expect:
+    review:   { category: "🔴", fix: "Extract Clean Island", nolint_finding: true }
+    refactor: { gone: '^(CONFIG|_region)\b', count_max: 0, scope: 'internal/env/', present: 'def load\(\) -> Configuration:' }
+    lint:     { linter: PLW0603, route: R8 }
+    prepare:  { gate: MULTIPLY, spec: per-tenant-worker-limit }
+
+- id: CASE-F.deep-reads
+  rule: R8
+  case: F
+  questions: [Q5]
+  files: [internal/pool/workers.py, internal/jobs/scheduler.py]
+  anchor: 'CONFIG\.(num_workers|batch_size)'
+  expect:
+    review:   { category: "🔴", fix: "Extract Clean Island", then: "Push the Global Up One Level" }
+    refactor: { gone: 'from internal\.env import env', count_max: 1, ratchet: "env.CONFIG refs outside cmd/ non-increasing per commit, reaching 0" }
+    shallow_fix_rejected: { gone: '\bConfiguration\b', count_max: 0, scope: 'internal/(pool|jobs|handlers)/' }
+
+# Go's payoff was `t.Parallel()`; Python's is the worker count handed to the
+# pool as a literal instead of written into the module global.
+- id: CASE-F.test-mutates-global
+  rule: R8
+  case: F
+  questions: [Q6]
+  files: [internal/pool/test_workers.py]
+  anchor: 'env\.CONFIG\.num_workers = 2'
+  expect:
+    review:   { category: "🔴", fix: "Extract Clean Island" }
+    refactor: { gone: 'CONFIG\.\w+ =', count_max: 0, scope: 'test_\w+\.py', present: '(workers|num_workers)=2|start\([a-z_]+, 2\)' }
+
+- id: CASE-F.region-read-in-init
+  rule: R8
+  case: F
+  questions: [Q2, Q5]
+  files: [internal/env/env.py]
+  anchor: '^_region = |os\.environ\.get\("REGION"\)'
+  expect:
+    review:   { category: "🔴", fix: "Replace `init()` with a constructor" }
+    lint:     { linter: "-", route: R8, note: "an import-time read has no ruff rule; PLW0603 fires on load()'s rebinding instead" }

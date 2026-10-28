@@ -1,0 +1,1 @@
+scaffolded go-mini at /tmp/ldd-eval-trigger-go-2472345648 (8333cfb)

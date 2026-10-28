@@ -1,0 +1,23 @@
+.badge {
+  display: inline-block;
+  padding: 0 0.5rem;
+  border-radius: 1rem;
+  font-size: 0.8rem;
+  color: #fff;
+}
+
+.ready {
+  background: #2a7;
+}
+
+.degraded {
+  background: #d93;
+}
+
+.down {
+  background: #c33;
+}
+
+.booting {
+  background: #777;
+}

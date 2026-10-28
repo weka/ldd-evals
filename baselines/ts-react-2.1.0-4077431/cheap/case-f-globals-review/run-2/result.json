@@ -1,0 +1,93 @@
+{
+  "case": "case-f-globals-review",
+  "run": 2,
+  "model": "claude-sonnet-5",
+  "passed": true,
+  "graders": [
+    {
+      "name": "anchor-env-global",
+      "type": "regex",
+      "passed": true,
+      "detail": "env\\.ts:[0-9]+ over last_message: 8 match(es); want at least 1"
+    },
+    {
+      "name": "evidence-protocol",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\.tsx?:[0-9]+ over last_message: 22 match(es); want at least 1"
+    },
+    {
+      "name": "fix-clean-island",
+      "type": "regex",
+      "passed": true,
+      "detail": "Extract Clean Island|Push the Global Up over last_message: 3 match(es); want at least 1"
+    },
+    {
+      "name": "no-edit",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Edit called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "no-multiedit",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "MultiEdit called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "no-write",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Write called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "nolint-is-a-finding",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i)eslint-disable|ts-expect-error|ts-ignore|suppression over last_message: 3 match(es); want at least 1"
+    },
+    {
+      "name": "r8-q2-init",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i)\\bregion\\b[^\\n]{0,80}(import|module|top[- ]level)|import[- ]time|at import|module (import|scope|load)|top[- ]level|when the module (is )?(loads|loaded|imported|evaluated) over last_message: 3 match(es); want at least 1"
+    },
+    {
+      "name": "r8-q5-jobs-read",
+      "type": "regex",
+      "passed": true,
+      "detail": "useSnapshotScheduler\\.tsx?:[0-9]+ over last_message: 4 match(es); want at least 1"
+    },
+    {
+      "name": "r8-q5-pool-read",
+      "type": "regex",
+      "passed": true,
+      "detail": "workers\\.ts:[0-9]+ over last_message: 4 match(es); want at least 1"
+    },
+    {
+      "name": "r8-q6-test-mutates-global",
+      "type": "regex",
+      "passed": true,
+      "detail": "workers\\.test\\.tsx?:[0-9]+ over last_message: 1 match(es); want at least 1"
+    },
+    {
+      "name": "refuted-carries-alternative",
+      "type": "llm",
+      "passed": true,
+      "detail": "judge claude-haiku-4-5 (PASS,PASS): --- vote 1: PASS ---\n**Analysis:**\n\nThe report examines the handling of `CONFIG.numWorkers` and `CONFIG.batchSize` in two places:\n\n1. **R1 Q1/Q2 finding** (src/hooks/useSnapshotScheduler.ts:18): The skeptic verdict is \"REFUTED (score 1)\" with the reasoning: \"no second method exists beyond unwrapping a number.\" The cheaper alternative proposed is to \"tighten `intEnv`/the CONFIG default so these fields can never be non-positive once loaded, delete the downstream re-checks.\"\n\n2. **No wrapper type proposed**: The report does not propose introducing a `WorkerCount`, `NumWorkers`, or similar wrapper type anywhere. When the skeptic addresses the validation concern around `numWorkers`, it explicitly rejects creating a wrapper abstraction and instead proposes fixing validation at the source.\n\nThe report satisfies the first pass condition: it proposes NO wrapper type for the worker count. The skeptic's verdict, when it encountered validation concerns, was to refute wrapper-type thinking and recommend a concrete cheaper alternative (upstream validation of the raw number).\n\n**VERDICT: PASS**\n\n--- vote 2: PASS ---\nLooking at the FOCUS text for mentions of worker count wrapper types:\n\n**Search for worker-count type proposals:**\n- R8 Q5 suggests \"pass `numWorkers` as a parameter\" — this is dependency injection of a raw `number`, not a wrapper type\n- R10 discusses concurrency bugs but does not propose a type\n- R7 Q7 discusses testing but does not propose a type\n- The CONFIG cluster suggestions center on: making the object immutable, adding validation, and avoiding global imports — not extracting a wrapper type\n\n**Verdict check:**\nThe hunted findings discuss `numWorkers` in three contexts:\n1. Reading it from a global `CONFIG` import (design debt, not a type proposal)\n2. Testing that `started === 2` matches `CONFIG.numWorkers` (a test assertion issue, not a type proposal)\n3. Validating that fields don't go ≤ 0 (a validation concern, not a typ…(truncated)",
+      "cost_usd": 0.0870668
+    },
+    {
+      "name": "rule-cited",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\bR(1[0-2]|[1-9])\\b over last_message: 55 match(es); want at least 1"
+    }
+  ],
+  "cost_usd": 2.7160554000000006,
+  "judge_cost_usd": 0.0870668,
+  "duration_ms": 772347,
+  "num_turns": 14,
+  "segments": 1,
+  "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-f-globals-review-3413046185"
+}

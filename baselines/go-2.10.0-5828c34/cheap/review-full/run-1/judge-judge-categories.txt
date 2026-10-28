@@ -1,0 +1,11 @@
+Looking at the report against the two criteria:
+
+**Question 1: Unguarded concurrent map write under 🐛 Bugs?**
+Yes. Under the 🐛 BUGS section, finding #1 explicitly states: "`s.lastSeen` map is written from `ProcessHeartbeat` (line 218), `Purge` (463-467), and the unlocked `flushLoop` (568-578) with **no mutex held on 3 of 4 paths** — a real `fatal error: concurrent map` crash risk." This precisely describes the concurrent map read/write race on the lastSeen map during ProcessHeartbeat and the flush goroutine.
+
+**Question 2: Production time.Sleep calls under 🔴 DESIGN DEBT?**
+Yes. Under the 🔴 DESIGN DEBT section, R10 states: "production `time.Sleep` (uncancellable backoff) in `retry.go`, `device_service.go`'s down-notification retry, and `sync_service.go`'s save-retry". This correctly categorizes the retry backoff sleep calls as design debt rather than bugs.
+
+Both questions are answered affirmatively.
+
+VERDICT: PASS

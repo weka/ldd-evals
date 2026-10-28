@@ -1,0 +1,19 @@
+# Analysis
+
+Checking each point from the rubric:
+
+**Point 1 (No new indirection):** 
+The code shows domain types (`Device`, `Job`, `Tenant`, etc.) with straightforward methods, and a `Handler` struct in trace.go with `List` method—standard patterns, not added wrapper types or interfaces. The `Routes` function is a common Go registration pattern. No new indirection visible.
+
+**Point 2 (Deletion allowed, growth not):**
+`grants.go` is absent—permitted if dead code. The surviving types show domain-appropriate methods only: `IsOnline`, `IsSnapshot`, `Outranks`, `ParsePriority`, `Zone`, `Includes`, `Line`—these are vocabulary, not bureaucratic growth.
+
+**Point 3 (Trace reason survives):**
+In trace.go:List, the comment states: "It echoes the caller's X-Trace header so a device's log lines and the request that produced them can be joined later." The reasoning is present at `w.Header().Set("X-Trace", r.Header.Get("X-Trace"))`. This preserves the *why*.
+
+**Point 4 (Names kept or sharpened):**
+`Handler`, `NewHandler`, `List`, `Routes` are clear. Methods like `IsOnline`, `ParseRegion`, `Outranks` use domain vocabulary. No verbose renaming like `HasPermission`, `GetAll`, or `traceRequest`. Names remained sharp.
+
+The code is well-boxed: domain models with focused methods, handlers using standard patterns, comments explaining real reasons for choices (especially the trace join logic). No interfaces wrapping `Handler`, no options structs, no builder patterns. The structure predates the agent's work and was left intact.
+
+VERDICT: PASS

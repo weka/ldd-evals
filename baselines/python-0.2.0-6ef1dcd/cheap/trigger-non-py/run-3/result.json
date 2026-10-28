@@ -1,0 +1,26 @@
+{
+  "case": "trigger-non-py",
+  "run": 3,
+  "model": "claude-sonnet-5",
+  "passed": true,
+  "graders": [
+    {
+      "name": "no-announcement",
+      "type": "regex",
+      "passed": true,
+      "detail": "Using py-ldd workflow over trace: 0 match(es); want 0"
+    },
+    {
+      "name": "skill-not-invoked",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Skill([:\"]linter-driven-development\") called 0 time(s); want exactly 0"
+    }
+  ],
+  "cost_usd": 0.037206,
+  "judge_cost_usd": 0,
+  "duration_ms": 3868,
+  "num_turns": 1,
+  "segments": 1,
+  "scaffold_dir": "/tmp/ldd-eval-trigger-non-py-1934585969"
+}

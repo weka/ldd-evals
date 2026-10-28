@@ -1,0 +1,38 @@
+{
+  "case": "review-clean-tree",
+  "run": 2,
+  "model": "claude-sonnet-5",
+  "passed": true,
+  "graders": [
+    {
+      "name": "names-all-form",
+      "type": "regex",
+      "passed": true,
+      "detail": "--all over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "no-agents-spawned",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Agent called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "no-whole-repo-review",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i)\\bcluster\\b|\\bR[0-9]{1,2}: [0-9]+ finding over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "nothing-to-review",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i)nothing (to|in scope to) (review|analy[sz]e)|no files? (in scope|to review)|scope[^\\n]{0,40}\\b(empty|none)\\b over last_message: 2 match(es); want at least 1"
+    }
+  ],
+  "cost_usd": 0.12264199999999999,
+  "judge_cost_usd": 0,
+  "duration_ms": 38843,
+  "num_turns": 7,
+  "segments": 1,
+  "scaffold_dir": "/tmp/ldd-eval-review-clean-tree-1270123007"
+}

@@ -1,0 +1,37 @@
+--- vote 1: PASS ---
+Searching the report for the two required concurrency bugs:
+
+**Question 1 — Bugs category:**
+- `src/hooks/useDeviceFeed.ts:13-22 | R10 Q2`: setInterval with no cleanup return ✓ Listed under 🐛 BUGS
+- `src/hooks/useDeviceSearch.ts:13-29 | R10 Q2`: fetchDevices with no AbortController, later response overwrites earlier one ✓ Listed under 🐛 BUGS
+- `src/pages/Heartbeats/heartbeatFeed.ts:141-144 | R10 Q1`: FeedStore's unowned setInterval (variant of Q2) ✓ Listed under 🐛 BUGS
+
+**Question 2 — Design Debt category:**
+- `src/services/retry.ts:49,64, heartbeatFeed.ts:667, syncService.ts:144 | R10 Q5`: `setTimeout`-sleep in retry loops ✓ Listed under 🔴 DESIGN DEBT
+- `src/pages/Heartbeats/HeartbeatsPage.test.tsx:51, Settings/ExportPanel.test.tsx:16,24, deviceService.test.ts:55 | R7 Q7`: `await new Promise(resolve => setTimeout(resolve, N))` for test synchronization ✓ Listed under 🔴 DESIGN DEBT
+
+Both real concurrency bugs are correctly filed under Bugs. Production sleeps are correctly filed under Design Debt.
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+Looking at the report against the rubric criteria:
+
+**Question 1: Are the concurrency bugs under 🐛 Bugs?**
+
+Examining the 🐛 BUGS section, I find:
+- `src/hooks/useDeviceFeed.ts:13-22` — unowned `setInterval` in effect, no cleanup ✓
+- `src/hooks/useDeviceSearch.ts:13-29` — out-of-order response, later request overwrites earlier, no `AbortController`/`ignore` flag ✓
+
+Both real concurrency bugs are correctly filed under 🐛 Bugs, not Design Debt.
+
+**Question 2: Are the production sleeps under 🔴 Design Debt (not Bugs)?**
+
+In the 🔴 DESIGN DEBT section:
+- `src/services/retry.ts:49,64, heartbeatFeed.ts:667, syncService.ts:144` — R10 Q5 describes "`setTimeout`-sleep in a loop" across `withRetry`, `sendWithRetry`, and `saveWithRetry` with no `AbortSignal`. This is filed under Design Debt. ✓
+
+(The `await new Promise(resolve => setTimeout(resolve, N))` sleeps at line 51 of HeartbeatsPage.test.tsx are test synchronization sleeps, correctly in 🟡 READABILITY DEBT, not production sleeps.)
+
+Both conditions satisfied: concurrency bugs in 🐛 Bugs, production sleeps in 🔴 Design Debt.
+
+VERDICT: PASS

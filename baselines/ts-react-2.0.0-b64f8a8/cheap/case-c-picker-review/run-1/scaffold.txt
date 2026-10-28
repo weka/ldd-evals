@@ -1,0 +1,1 @@
+scaffolded ts-react-mini at /tmp/ldd-eval-case-c-picker-review-4074203694 (59cc859; node_modules from /tmp/ts-react-mini-npm-cache)

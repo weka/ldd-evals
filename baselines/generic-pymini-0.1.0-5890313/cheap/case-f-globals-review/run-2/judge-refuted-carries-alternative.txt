@@ -1,0 +1,19 @@
+--- vote 1: PASS ---
+The report proposes no wrapper type for worker count or batch size. All recommendations for `num_workers` and `batch_size` are to pass them as plain `int` parameters via constructor/function arguments (e.g., `start(jobs, num_workers: int)` and `Scheduler.__init__`), not to introduce types like `WorkerCount` or `NumWorkers`.
+
+The skeptic section explicitly confirms this is outside the skeptic's trigger set: "no finding in this batch is an R1/R2/R4 create-a-type proposal." The R8 findings that touch worker count and batch size all recommend dependency-injection with primitive `int` types, not domain wrappers.
+
+Per the rubric's first condition: "If the report proposes NO wrapper type for the worker count / batch size, PASS."
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+Looking at the report for any proposal of a wrapper type (like `WorkerCount` or `NumWorkers`) for worker count:
+
+The R8 finding for `internal/pool/workers.py` identifies that `env.CONFIG.num_workers` is a global dependency and proposes the fix: **"Push the Global Up One Level: `start(jobs, num_workers: int)`"** — passing `num_workers` as a plain `int` parameter, not wrapping it in a type.
+
+The skeptic section confirms: "Skeptic: n/a (no new type proposed; the existing `Configuration` dataclass is fine, the fix is where it's held/read, not its shape)".
+
+The report proposes **no wrapper type** for the worker count. The solution is dependency injection of a primitive `int` parameter. This satisfies the rubric's first condition.
+
+VERDICT: PASS

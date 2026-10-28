@@ -1,0 +1,44 @@
+--- vote 1: PASS ---
+Reading the report for the two required placements:
+
+**Question 1 — Unguarded concurrent map write under 🐛 Bugs?**
+
+Under the 🐛 Bugs section, I find:
+```
+`internal/services/device_service.go:218,463-467,572-576` | R10 Q3,Q4: `s.lastSeen[id] = ...` written unguarded 
+in `ProcessHeartbeat` (218, reachable from concurrent HTTP goroutines), in `flushLoop`'s delete loop (572-576, no lock at all)...
+```
+
+This is exactly the lastSeen map race (ProcessHeartbeat writes, flushLoop reads unguarded). ✓
+
+**Question 2 — Production time.Sleep under 🔴 Design Debt?**
+
+Under Design Debt, I find:
+```
+`internal/services/device_service.go:181`, `internal/services/retry.go:40,52`, `internal/services/sync_service.go:122` | R10 Q5: bare `time.Sleep` on cancellable retry paths...
+```
+
+The production time.Sleep calls in retry.go and sync_service.go are filed under Design Debt, not Bugs. ✓
+
+Both conditions satisfied.
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+**Question 1: Unguarded concurrent map write under 🐛 Bugs?**
+
+Yes. The report lists under 🐛 Bugs:
+> `internal/services/device_service.go:218,463-467,572-576` | R10 Q3,Q4: `s.lastSeen[id] = ...` written unguarded in `ProcessHeartbeat` (218, reachable from concurrent HTTP goroutines), in `flushLoop`'s delete loop (572-576, no lock at all) and in `Purge`'s second loop (463-467, after `s.mu.Unlock()`) — three unguarded writers to one map
+
+This correctly identifies the data race on the `lastSeen` map and files it as a bug, not design debt.
+
+**Question 2: Production time.Sleep under 🔴 Design Debt?**
+
+Yes. The report lists under 🔴 Design Debt:
+> `internal/services/device_service.go:181`, `internal/services/retry.go:40,52`, `internal/services/sync_service.go:122` | R10 Q5: bare `time.Sleep` on cancellable retry paths, none selecting on a cancellation signal
+
+This correctly files the production time.Sleep calls (in ProcessHeartbeat/retry.go/sync_service.go) as design debt, not bugs.
+
+Both criteria are satisfied.
+
+VERDICT: PASS

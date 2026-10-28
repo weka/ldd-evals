@@ -1,0 +1,39 @@
+{
+  "case": "case-d-ceremony-refactor",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": false,
+  "graders": [
+    {
+      "name": "art-judge",
+      "type": "llm",
+      "passed": false,
+      "detail": "judge claude-haiku-4-5 (FAIL,FAIL): --- vote 1: FAIL ---\nLooking at the FOCUS code against the RUBRIC:\n\n**Point 1 (No new indirection):** FAIL\n\nThe current `internal/handlers/trace.go` introduces significant new structure that wasn't supposed to be there:\n- Lines 6-8: `Handler` struct wrapping `store` — this is new indirection\n- Lines 10-12: `NewHandler` constructor — new factory pattern\n- Lines 14-20: `List` method — new method on Handler struct  \n- Lines 27-35: `Routes` orchestration function — new structure\n\nThe rubric explicitly states the original held \"a one-line `trace` helper with a comment stating a real reason.\" The current code has wrapped that in a full struct-based architecture with constructor, methods, and routing orchestration. This is exactly the kind of added indirection the control measures against — an object-oriented layer where a simple helper sufficed.\n\nComparison to `internal/handlers/devices.go` reinforces this: handlers there remain standalone functions (Register, Status) returning `http.HandlerFunc`, not methods on a struct. The architectural shift in `trace.go` adds unnecessary abstraction layers.\n\n**Point 3 (Trace reason survives):** PASS\n\nLines 23-25: The comment \"trace echoes the caller's trace id so a device's log lines and the request that produced them can be joined later\" is preserved verbatim next to the header write.\n\n**Point 2 (Deletion is allowed):** PASS  \n\nIn `internal/models/grants.go`, the unreferenced `ReplicaCount` and `Name` are gone (dead-code removal). `Grants` survived with `Has`/`All` unchanged, plus a new `NewGrants` constructor and `Permission` type that don't violate growth — those are legitimate domain additions, not wrapping.\n\n**Point 4 (Names kept or sharpened):** Moot given Point 1 failure.\n\nThe added identifiers (`Handler`, `NewHandler`, `List`, `Routes`) are meaningful on their own, but their *presence* violates the no-new-indirection rule.\n\nVERDICT: FAIL\n\n--- vote 2: FAIL ---\nLooking at the FOCU…(truncated)",
+      "cost_usd": 0.0689695
+    },
+    {
+      "name": "no-traceid-type",
+      "type": "regex",
+      "passed": true,
+      "detail": "type TraceID over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "trace-header-still-set",
+      "type": "regex",
+      "passed": true,
+      "detail": "Header\\(\\)\\.Set\\(\"X-Trace\" over files: 1 match(es); want at least 1"
+    },
+    {
+      "name": "postcheck",
+      "type": "postcheck",
+      "passed": true,
+      "detail": "task test: ok\nPASS  task test green\ntask lint: ok\nPASS  task lint green\nPASS  ReplicaCount has at most its original single method (deleted or untouched, never grown) (0 \u003c= 1)\nPASS  ReplicaCount is declared at most once (0 \u003c= 1)\nPASS  no TraceID-like wrapper appeared anywhere (0)\n== black-box suite: builds cmd/svc, replays the recorded heartbeats ==\n--- PASS: TestHeartbeatContract (1.04s)\n--- PASS: TestExpectedTSVMatchesTable (0.00s)\nok  \texample.com/heartbeat-blackbox\t1.042s\nblack-box: PASS\nPASS  black-box heartbeat suite\npostcheck: all checks passed"
+    }
+  ],
+  "cost_usd": 0.43612500000000004,
+  "judge_cost_usd": 0.0689695,
+  "duration_ms": 152294,
+  "num_turns": 18,
+  "segments": 1,
+  "scaffold_dir": "/tmp/ldd-eval-case-d-ceremony-refactor-142003557"
+}

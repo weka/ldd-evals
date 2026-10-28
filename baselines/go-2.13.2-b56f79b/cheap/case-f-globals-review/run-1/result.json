@@ -1,0 +1,99 @@
+{
+  "case": "case-f-globals-review",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": true,
+  "graders": [
+    {
+      "name": "anchor-env-global",
+      "type": "regex",
+      "passed": true,
+      "detail": "env\\.go:[0-9]+ over last_message: 7 match(es); want at least 1"
+    },
+    {
+      "name": "evidence-protocol",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\.go:[0-9]+ over last_message: 45 match(es); want at least 1"
+    },
+    {
+      "name": "fix-clean-island",
+      "type": "regex",
+      "passed": true,
+      "detail": "Extract Clean Island|Push the Global Up over last_message: 5 match(es); want at least 1"
+    },
+    {
+      "name": "no-edit",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Edit called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "no-multiedit",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "MultiEdit called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "no-write",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Write called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "nolint-is-a-finding",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i)nolint over last_message: 10 match(es); want at least 1"
+    },
+    {
+      "name": "precision-drain-clean",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?m)^[^|\\n]*\\bdrain\\(\\)[^|\\n]*\\| over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "r8-q2-init",
+      "type": "regex",
+      "passed": true,
+      "detail": "init\\(\\) over last_message: 7 match(es); want at least 1"
+    },
+    {
+      "name": "r8-q5-jobs-read",
+      "type": "regex",
+      "passed": true,
+      "detail": "scheduler\\.go:[0-9]+ over last_message: 13 match(es); want at least 1"
+    },
+    {
+      "name": "r8-q5-pool-read",
+      "type": "regex",
+      "passed": true,
+      "detail": "workers\\.go:[0-9]+ over last_message: 4 match(es); want at least 1"
+    },
+    {
+      "name": "r8-q6-test-mutates-global",
+      "type": "regex",
+      "passed": true,
+      "detail": "workers_test\\.go:[0-9]+ over last_message: 1 match(es); want at least 1"
+    },
+    {
+      "name": "refuted-carries-alternative",
+      "type": "llm",
+      "passed": true,
+      "detail": "judge claude-haiku-4-5 (PASS,PASS): --- vote 1: PASS ---\nThe report proposes **no wrapper type** for worker count or batch size. \n\nThe pool.Start cluster discusses extracting `numWorkers` as a parameter to `Start()`, but that is a plain `int` parameter, not a wrapper type like `WorkerCount` or `NumWorkers`. Similarly, env.Config refers to an existing `NumWorkers` field within the `Configuration` struct, but makes no proposal to create a standalone wrapper type.\n\nThe two skeptic verdicts in the report address entirely different findings: the dispatch cluster (Job.Kind strategy map) and the region tagging cluster, neither involving worker count wrapper types.\n\nPer the rubric: \"If the report proposes NO wrapper type for the worker count / batch size, PASS.\"\n\nVERDICT: PASS\n\n--- vote 2: PASS ---\nThe report proposes a `numWorkers` **parameter** to `Start()` in the pool.Start cluster, not a wrapper type. A wrapper type in Go terminology means a named type (e.g., `type WorkerCount int`), not a simple parameter.\n\nThe hunter's finding states: \"Extract Clean Island (add a `numWorkers` parameter to `Start`)\" — this adds a parameter of an existing type, not a new named type that wraps worker count.\n\nThe rubric says: \"If the report proposes NO wrapper type for the worker count / batch size, PASS.\" Since no wrapper type was proposed, the skeptic verdict requirement does not apply.\n\nVERDICT: PASS",
+      "cost_usd": 0.0778774
+    },
+    {
+      "name": "rule-cited",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\bR(1[0-2]|[1-9])\\b over last_message: 59 match(es); want at least 1"
+    }
+  ],
+  "cost_usd": 2.6277810000000006,
+  "judge_cost_usd": 0.0778774,
+  "duration_ms": 802007,
+  "num_turns": 18,
+  "segments": 1,
+  "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-f-globals-review-4077202895"
+}

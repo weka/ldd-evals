@@ -1,0 +1,44 @@
+--- vote 1: PASS ---
+Looking at the FOCUS report for the two specific categorizations:
+
+**Question 1: Is the unguarded concurrent dict access listed under 🐛 Bugs?**
+
+Yes. Under the "🐛 BUGS" section:
+- `internal/services/device_service.py:194,383-385,458-460` | R10 Q3: "`self.last_seen` is written from `process_heartbeat` (per-request thread, `ThreadingMixIn`), `purge()`, and `_flush_loop` (background thread) — three write paths, none holding `self.mu` — `del` during a concurrent iteration is a directly reachable `RuntimeError`/corruption path."
+
+This correctly identifies the race condition where a background thread iterates and deletes from the dict while the request thread writes to it.
+
+**Question 2: Is the production `time.sleep` listed under 🔴 Design Debt, not Bugs?**
+
+Yes. Under the "🔴 DESIGN DEBT" section, in **R10 (Concurrency Safety)**:
+- `internal/services/device_service.py:156-168` | Q5: "`time.sleep(attempt * 0.2)` inside `process_heartbeat`'s DOWN-notification retry..."
+
+This retry backoff sleep is categorized under Design Debt (concurrency handling), not under Bugs. The report also notes in the R10 header that "crash/leak findings are in 🐛 Bugs above; sleep findings are in Cluster 5"—distinguishing the sleep issues (design/blocking) from the actual race condition (bugs).
+
+Both categorizations are correct and distinct.
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+Reading through the report to answer the two rubric questions:
+
+**Question 1: Is the unguarded concurrent dict access listed under 🐛 Bugs?**
+
+YES. Under the **🐛 BUGS** section:
+> `internal/services/device_service.py:194,383-385,458-460` | R10 Q3: `self.last_seen` is written from `process_heartbeat` (per-request thread, `ThreadingMixIn`), `purge()`, and `_flush_loop` (background thread) — three write paths, none holding `self.mu` — `del` during a concurrent iteration is a directly reachable `RuntimeError`/corruption path.
+
+This is the exact concurrent dict access race being tested for.
+
+**Question 2: Is the production `time.sleep` listed under 🔴 Design Debt (not 🐛 Bugs)?**
+
+YES. Under **🔴 DESIGN DEBT** → **R10 (Concurrency Safety)** section:
+> `internal/services/device_service.py:156-168` | Q5: `time.sleep(attempt * 0.2)` inside `process_heartbeat`'s DOWN-notification retry...
+
+And in **CLUSTER 5** (`internal/services/retry.py`):
+> `with_retry()`/`send_with_retry()` both use a bare `time.sleep()` in a cancellable retry loop with no stop signal (R10).
+
+Both time.sleep findings are routed to Design Debt/refactoring, not listed under Bugs.
+
+Both conditions are satisfied.
+
+VERDICT: PASS

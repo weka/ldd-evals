@@ -1,0 +1,22 @@
+schema_version: "1.1"
+context:
+  scaffold_script: ../scaffold/gate-failed.sh
+postcheck: ./postcheck.sh
+tier: cheap
+env:
+  CHECK_REPO_BRAIN_FAULT: the review-gate-failed eval
+notes: |
+  The repo-brain gate fails on this case: case.yaml sets CHECK_REPO_BRAIN_FAULT,
+  which makes the gate exit 2 before any check. The review must keep running:
+  the detection pass marks R9's gate questions inconclusive, the documentation
+  family gets a hunter on those rows alone (the code carries no other lead), the
+  hunter answers them from R9's prose, and the report names the failed gate.
+  Three defects only the gate's questions find are planted: the orphan
+  docs/retention.md (Q1), `store.flush_all` that no code declares (Q2), and a CLAUDE.md that
+  does not import docs/index.md (Q3). The postcheck proves that the gate finds
+  the three plants when it runs, and that the variable still makes it fail.
+  Calibrated on one run (py-ldd from buzzdan/ai-coding-rules#115,
+  claude-sonnet-5, $0.65, 7 turns): every grader passed on the evidence it
+  names. The header carried the failed-gate line verbatim, one documentation
+  hunter ran, and the report found the three plants with R9 Q1, Q2 (`store.flush_all`)
+  and Q3.

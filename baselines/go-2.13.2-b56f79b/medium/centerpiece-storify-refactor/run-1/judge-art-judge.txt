@@ -1,0 +1,74 @@
+--- vote 1: FAIL ---
+Looking at `ProcessHeartbeat` against the rubric:
+
+**Criterion 1 (the story):** Partial. The function shows three explicit named chapters—`ParseHeartbeatLine`, `loadOrCreateDevice`, `applyStatusTransition`—but the final steps remain inlined:
+- Version/tags update (lines 17–21): mechanical if-blocks, not extracted
+- Persist (lines 24–31): repo.Save and cache mutation are inline within an if-guard, not a named helper
+- Score (lines 34–39): computed in the return statement, not an explicit step
+
+The RUBRIC asks for six steps as named chapters; only three are explicit calls here. A reader cannot cleanly predict "and next we persist" from scanning the function.
+
+**Criterion 2 (concepts have boxes):** Not satisfied. Status remains a string type, not a type with methods:
+- In `ProcessHeartbeat`: `status, changed := s.applyStatusTransition(&d, parsed.Status, force)` — status is a plain string
+- Scoring: `scoreForStatus(status, len(parsed.Tags))` — status passed to a function, not a method like `status.Score()`
+- Elsewhere in the codebase (e.g., `alert_service.go`): `switch d.Status { case "READY": ... case "DEGRADED": ... }` — string literals compared inline, not via `IsDown()` methods
+- No `Status` type with `IsDown()`, `Score()`, or similar behavior exists
+
+The rubric explicitly asks for "status is a type with named constants and behavior (`Status`, `IsDown()`, `Score()` or `Weight()`), not string literals compared inline." This is not present.
+
+**Criterion 3 (names are domain words):** Mostly satisfied for named calls, but the inlined logic lacks names, breaking the narrative flow.
+
+**Criterion 4 (comments earned their place):** Satisfied. No inline "parse the line" markers in `ProcessHeartbeat`; comments elsewhere explain why (e.g., `applyStatusTransition` documents the side effect of notifying on down).
+
+**Criterion 5 (nothing ugly hid elsewhere):** Mostly satisfied. No `goto`, no `//nolint:gocognit` on `ProcessHeartbeat`, no numbered helpers. `notifyDown` has inline `time.Sleep` retry rather than using the `withRetry` helper, but not egregiously so.
+
+Since the rubric requires all five criteria to be satisfied, and criteria 1 and 2 are clearly not met:
+
+VERDICT: FAIL
+
+--- vote 2: FAIL ---
+Looking at `ProcessHeartbeat` in device_service.go, the code is *partially* refactored but falls short of the RUBRIC.
+
+**What works:**
+- Parse is extracted: `ParseHeartbeatLine()`
+- Find/register is extracted: `loadOrCreateDevice()`
+- Status transition is extracted: `applyStatusTransition()` (which also handles notify-on-down)
+- Scoring is extracted: `scoreForStatus()`
+- Domain names throughout (no `helper`, `step3`, `tmp`, etc.)
+- Helpful comments removed from orchestration level (the code itself says what happens)
+
+**What breaks the story:**
+The version/tag updating, LastSeen update, and persistence are still **inline** in ProcessHeartbeat:
+
+```go
+if parsed.Version != "" && d.Version != parsed.Version {
+    d.Version = parsed.Version
+    changed = true
+}
+if len(parsed.Tags) > 0 {
+    d.Tags = parsed.Tags
+    changed = true
+}
+d.LastSeen = time.Now()
+
+if changed || force {
+    if err := s.repo.Save(context.Background(), d); err != nil {
+        return HeartbeatResult{ID: parsed.ID}, fmt.Errorf("save %s: %w", cacheKey(tenant, parsed.ID), err)
+    }
+    s.mu.Lock()
+    s.cache[cacheKey(tenant, parsed.ID)] = d
+    s.mu.Unlock()
+}
+s.lastSeen[parsed.ID] = d.LastSeen
+```
+
+These concepts should each have their own box—something like `updateVersionAndTags()`, `persistDevice()`. Right now ProcessHeartbeat is ~30 lines with inline logic mixed among the helper calls. A reader cannot predict the story top-down; they must parse conditional persistence and cache locking inline.
+
+**Rubric failure:**
+- ❌ **The story:** Not five or six clean chapters—version/tag/LastSeen/persistence muddies the orchestration
+- ❌ **Concepts have boxes:** Persistence and version/tag updating lack their own named helpers  
+- ✓ Domain names
+- ✓ Comments earned their place
+- ✓ Nothing ugly hid elsewhere (notifyDown retry is localized)
+
+VERDICT: FAIL

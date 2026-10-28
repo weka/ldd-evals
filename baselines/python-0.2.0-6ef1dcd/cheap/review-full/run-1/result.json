@@ -1,0 +1,675 @@
+{
+  "case": "review-full",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": false,
+  "graders": [
+    {
+      "name": "bugs-section",
+      "type": "regex",
+      "passed": true,
+      "detail": "🐛 over last_message: 4 match(es); want at least 1"
+    },
+    {
+      "name": "cluster-alert-channel",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i:\\bcluster\\b)[^\\n]*\\b(?i:(Alert\\.channel|channel))\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*•]|[0-9]+[.)])[ \\t]*\\**\\x60?(?i:(Alert\\.channel|channel))\\b over last_message: 5 match(es); want at least 1"
+    },
+    {
+      "name": "cluster-device-status",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i:\\bcluster\\b)[^\\n]*\\b(?i:(Device\\.status|status))\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*•]|[0-9]+[.)])[ \\t]*\\**\\x60?(?i:(Device\\.status|status))\\b over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "cluster-device",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i:\\bcluster\\b)[^\\n]*\\b(?i:Device)\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*•]|[0-9]+[.)])[ \\t]*\\**\\x60?(?i:Device)\\b over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "cluster-job-kind",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i:\\bcluster\\b)[^\\n]*\\b(?i:(Job\\.kind|kind))\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*•]|[0-9]+[.)])[ \\t]*\\**\\x60?(?i:(Job\\.kind|kind))\\b over last_message: 1 match(es); want at least 1"
+    },
+    {
+      "name": "cluster-process-heartbeat",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i:\\bcluster\\b)[^\\n]*\\b(?i:process_heartbeat)\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*•]|[0-9]+[.)])[ \\t]*\\**\\x60?(?i:process_heartbeat)\\b over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "cluster-reporter",
+      "type": "regex",
+      "passed": false,
+      "detail": "(?i:\\bcluster\\b)[^\\n]*\\b(?i:Reporter)\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*•]|[0-9]+[.)])[ \\t]*\\**\\x60?(?i:Reporter)\\b over last_message: 0 match(es); want at least 1"
+    },
+    {
+      "name": "cluster-retention",
+      "type": "regex",
+      "passed": false,
+      "detail": "(?i:\\bcluster\\b)[^\\n]*\\b(?i:retention)\\b|(?i:\\bclusters?\\b)[^\\n]*(?:\\n[^\\n]*){0,8}?\\n[ \\t]*(?:[-*•]|[0-9]+[.)])[ \\t]*\\**\\x60?(?i:retention)\\b over last_message: 0 match(es); want at least 1"
+    },
+    {
+      "name": "cluster-role-packages",
+      "type": "regex",
+      "passed": true,
+      "detail": "CLUSTER[^\\n]*(role packages|common\\b[^\\n]*utils|utils\\b[^\\n]*common) over last_message: 1 match(es); want at least 1"
+    },
+    {
+      "name": "evidence-protocol",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\.py:[0-9]+ over last_message: 173 match(es); want at least 1"
+    },
+    {
+      "name": "hunters-spawned",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Agent(rule-hunter) called 14 time(s); want \u003e= 3"
+    },
+    {
+      "name": "judge-categories",
+      "type": "llm",
+      "passed": false,
+      "detail": "judge claude-haiku-4-5 (FAIL,FAIL): --- vote 1: FAIL ---\nLooking at the report against the RUBRIC:\n\n**Question 1: Is the unguarded concurrent dict access listed under 🐛 Bugs?**\n\nYES. The report explicitly lists under 🐛 Bugs:\n```\n`internal/services/device_service.py:194,383-385,436-439,458-460` | R10 Q3/Q4: `self.last_seen` is written with no lock in `process_heartbeat` (request-handler threads), independently read-and-deleted with no lock in the background `_flush_loop`, and deleted again with no lock in `purge()` — the field is never declared beside a lock that actually guards every access path\n```\n\nThis is correctly categorized as a real concurrent dict access bug.\n\n**Question 2: Is the production `time.sleep` (retry backoff / polling sleep) listed under 🔴 Design Debt rather than 🐛 Bugs?**\n\nNO. Searching the entire report, `time.sleep` is mentioned only in the 🟡 Readability Debt section under R7, and only in reference to test code:\n- `test_service.py:61-67` — testing artifact\n- `test_heartbeat.py:109-119` — testing artifact\n\nThe report makes no mention of production `time.sleep` calls (retry backoff or polling sleep) in `retry.py`, `sync_service.py`, or `process_heartbeat` anywhere. These findings are absent from the report entirely, and therefore not filed under Design Debt.\n\nBoth questions must answer yes; only the first does.\n\nVERDICT: FAIL\n\n--- vote 2: FAIL ---\nLooking at the report against the CRITERIA:\n\n**Question 1: Is the unguarded concurrent dict access listed under 🐛 Bugs?**\n\nYES. The report clearly lists it under the Bugs section:\n\u003e `` `internal/services/device_service.py:194,383-385,436-439,458-460` | R10 Q3/Q4: `self.last_seen` is written with no lock in `process_heartbeat` (request-handler threads), independently read-and-deleted with no lock in the background `_flush_loop`, and deleted again with no lock in `purge()` ``\n\nThis exactly matches the concurrent dict access problem described in the criteria.\n\n**Question 2: Are the …(truncated)",
+      "cost_usd": 0.0787594
+    },
+    {
+      "name": "no-edit",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Edit called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "no-write",
+      "type": "tool_used",
+      "passed": true,
+      "detail": "Write called 0 time(s); want exactly 0"
+    },
+    {
+      "name": "nolint-finding",
+      "type": "regex",
+      "passed": true,
+      "detail": "noqa|type: ignore over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "precision-CTRL.R1.named-const",
+      "type": "regex",
+      "passed": true,
+      "detail": "_MAX_LEN|_MINUTES_PER_DAY over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R1.tenant-type",
+      "type": "regex",
+      "passed": false,
+      "detail": "Tenant\\.parse over last_message: 2 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R1.trace-id-string",
+      "type": "regex",
+      "passed": true,
+      "detail": "TraceI[Dd]\\b over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R10.main-jitter-sleep",
+      "type": "regex",
+      "passed": true,
+      "detail": "random\\.randint over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R10.repo-mutex",
+      "type": "regex",
+      "passed": true,
+      "detail": "_guard\\b over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R10.worker-range",
+      "type": "regex",
+      "passed": true,
+      "detail": "iter\\(jobs\\.get over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R11.region-zone-switch",
+      "type": "regex",
+      "passed": true,
+      "detail": "zone\\(\\) over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R11.value-conditional",
+      "type": "regex",
+      "passed": true,
+      "detail": "self\\.start \u003c self\\.end over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R12.honest-mutator",
+      "type": "regex",
+      "passed": true,
+      "detail": "_drain\\(\\) over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R2.snapshot-repository",
+      "type": "regex",
+      "passed": true,
+      "detail": "now is None over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R2.window-plan",
+      "type": "regex",
+      "passed": true,
+      "detail": "Window\\.parse over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R3.guard-clauses",
+      "type": "regex",
+      "passed": true,
+      "detail": "not devices over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R3.orchestrator",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\bprune\\( over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R4.private-helper",
+      "type": "regex",
+      "passed": true,
+      "detail": "_parse_clock over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R6.store-interface",
+      "type": "regex",
+      "passed": true,
+      "detail": "Store\\(Protocol\\)|Store [Pp]rotocol|class Store\\b over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R7.split-tables",
+      "type": "regex",
+      "passed": true,
+      "detail": "test_parse_\\w+_(success|error) over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R8.compile-time-check",
+      "type": "regex",
+      "passed": true,
+      "detail": "_implementers over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "precision-CTRL.R9.why-comments",
+      "type": "regex",
+      "passed": true,
+      "detail": "store behind|can be joined later|races a manual cleanup over last_message: 0 match(es); want 0"
+    },
+    {
+      "name": "recall-CASE-A.defensive-recheck",
+      "type": "regex",
+      "passed": true,
+      "detail": "policy\\.py over last_message: 4 match(es); want at least 1"
+    },
+    {
+      "name": "recall-CASE-A.retention-range-twice",
+      "type": "regex",
+      "passed": true,
+      "detail": "(policy\\.py|config\\.py) over last_message: 6 match(es); want at least 1"
+    },
+    {
+      "name": "recall-CASE-A.zero-sentinel",
+      "type": "regex",
+      "passed": true,
+      "detail": "config\\.py over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "recall-CASE-B.host-port-tls-clump",
+      "type": "regex",
+      "passed": true,
+      "detail": "client\\.py over last_message: 3 match(es); want at least 1"
+    },
+    {
+      "name": "recall-CASE-C.flag-loop",
+      "type": "regex",
+      "passed": true,
+      "detail": "picker\\.py over last_message: 4 match(es); want at least 1"
+    },
+    {
+      "name": "recall-CASE-D.replica-count",
+      "type": "regex",
+      "passed": true,
+      "detail": "grants\\.py over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "recall-CASE-E.nil-field-rechecked",
+      "type": "regex",
+      "passed": true,
+      "detail": "reporter\\.py over last_message: 4 match(es); want at least 1"
+    },
+    {
+      "name": "recall-CASE-E.nil-parameters",
+      "type": "regex",
+      "passed": true,
+      "detail": "(wire\\.py|reporter\\.py) over last_message: 6 match(es); want at least 1"
+    },
+    {
+      "name": "recall-CASE-E.nil-return",
+      "type": "regex",
+      "passed": true,
+      "detail": "catalog\\.py over last_message: 1 match(es); want at least 1"
+    },
+    {
+      "name": "recall-CASE-F.deep-reads",
+      "type": "regex",
+      "passed": true,
+      "detail": "(workers\\.py|scheduler\\.py) over last_message: 16 match(es); want at least 1"
+    },
+    {
+      "name": "recall-CASE-F.env-config-global",
+      "type": "regex",
+      "passed": true,
+      "detail": "env\\.py|env\\.CONFIG|\\bCONFIG\\b over last_message: 5 match(es); want at least 1"
+    },
+    {
+      "name": "recall-CASE-F.test-mutates-global",
+      "type": "regex",
+      "passed": true,
+      "detail": "test_workers\\.py over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R1.Q1.handler-inline-checks",
+      "type": "regex",
+      "passed": true,
+      "detail": "devices\\.py over last_message: 4 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R1.Q1.settings-blob",
+      "type": "regex",
+      "passed": true,
+      "detail": "(job\\.py|registry\\.py|device_service\\.py|snapshot_service\\.py) over last_message: 48 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R1.Q2.email-contains-twice",
+      "type": "regex",
+      "passed": true,
+      "detail": "(devices\\.py|validate\\.py) over last_message: 11 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R1.Q3.raw-channel-string",
+      "type": "regex",
+      "passed": true,
+      "detail": "(alert\\.py|channel\\.py) over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R1.Q3.region-byte-slices",
+      "type": "regex",
+      "passed": true,
+      "detail": "(device_service\\.py|heartbeat_parser\\.py|tags\\.py) over last_message: 36 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R1.Q3.status-enum-goconst",
+      "type": "regex",
+      "passed": true,
+      "detail": "(alert_service\\.py|device_service\\.py|status\\.py) over last_message: 31 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R1.Q3.tags-loop",
+      "type": "regex",
+      "passed": true,
+      "detail": "(device_service\\.py|heartbeat_parser\\.py|tags\\.py|sync_service\\.py) over last_message: 44 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R1.Q5.heartbeat-clump",
+      "type": "regex",
+      "passed": true,
+      "detail": "(device_service\\.py|heartbeat\\.py) over last_message: 35 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R1.Q5.new-sync-service-six-params",
+      "type": "regex",
+      "passed": true,
+      "detail": "sync_service\\.py over last_message: 8 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R1.Q5.tenant-id-clump",
+      "type": "regex",
+      "passed": true,
+      "detail": "(device_service\\.py|store\\.py|file_repo\\.py|mem_store\\.py) over last_message: 31 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R1.lint.run-loop-dupl",
+      "type": "regex",
+      "passed": true,
+      "detail": "(snapshot_service\\.py|sync_service\\.py) over last_message: 16 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R10.Q4.split-guard",
+      "type": "regex",
+      "passed": true,
+      "detail": "cache\\.py over last_message: 3 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R10.Q5.production-sleep",
+      "type": "regex",
+      "passed": true,
+      "detail": "(device_service\\.py|retry\\.py|sync_service\\.py) over last_message: 41 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R11.Q1.channel-switch",
+      "type": "regex",
+      "passed": true,
+      "detail": "(notify\\.py|validate\\.py|retry\\.py) over last_message: 23 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R11.Q1.job-kind-if",
+      "type": "regex",
+      "passed": true,
+      "detail": "(scheduler\\.py|snapshot_service\\.py|job\\.py) over last_message: 24 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R11.Q1.priority-switch-not-exhaustive",
+      "type": "regex",
+      "passed": true,
+      "detail": "retry\\.py over last_message: 6 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R11.Q1.status-switch",
+      "type": "regex",
+      "passed": true,
+      "detail": "(status\\.py|alert_service\\.py|device_service\\.py) over last_message: 31 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R11.Q3.default-unknown-channel",
+      "type": "regex",
+      "passed": true,
+      "detail": "notify\\.py over last_message: 10 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R11.Q4.flag-arguments",
+      "type": "regex",
+      "passed": true,
+      "detail": "(device_service\\.py|sync_service\\.py) over last_message: 35 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R12.Q1.leaked-internals",
+      "type": "regex",
+      "passed": true,
+      "detail": "(cache\\.py|grants\\.py|schedule\\.py|snapshot_service\\.py) over last_message: 15 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R12.Q2.stored-parameter",
+      "type": "regex",
+      "passed": true,
+      "detail": "(schedule\\.py|grants\\.py) over last_message: 4 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R12.Q5.n-reused",
+      "type": "regex",
+      "passed": true,
+      "detail": "(device_service\\.py|cache\\.py) over last_message: 30 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R2.Q1.alert-exported-fields",
+      "type": "regex",
+      "passed": true,
+      "detail": "(alert\\.py|alert_service\\.py) over last_message: 5 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R2.Q1.device-exported-fields",
+      "type": "regex",
+      "passed": true,
+      "detail": "device\\.py over last_message: 4 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R2.Q1.device-literal-in-service",
+      "type": "regex",
+      "passed": true,
+      "detail": "(device_service\\.py|devices\\.py) over last_message: 31 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R2.Q2.method-nil-checks",
+      "type": "regex",
+      "passed": true,
+      "detail": "(device_service\\.py|notify\\.py) over last_message: 37 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R3.Q1.normalize-tags",
+      "type": "regex",
+      "passed": true,
+      "detail": "heartbeat_parser\\.py over last_message: 6 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R3.Q1.process-heartbeat",
+      "type": "regex",
+      "passed": true,
+      "detail": "device_service\\.py over last_message: 27 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R3.Q2.parse-beside-decision",
+      "type": "regex",
+      "passed": true,
+      "detail": "(device_service\\.py|heartbeat_parser\\.py) over last_message: 33 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R4.Q1.exported-for-tests",
+      "type": "regex",
+      "passed": true,
+      "detail": "(heartbeat_parser\\.py|test_service\\.py) over last_message: 11 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R4.Q2.private-tested-directly",
+      "type": "regex",
+      "passed": true,
+      "detail": "test_service\\.py over last_message: 5 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R4.Q3.role-named-packages",
+      "type": "regex",
+      "passed": true,
+      "detail": "(utils\\.py|common\\.py) over last_message: 4 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R4.Q4.single-noun-package",
+      "type": "regex",
+      "passed": true,
+      "detail": "deviceid\\.py over last_message: 4 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R4.Q5.feature-literal-in-common",
+      "type": "regex",
+      "passed": true,
+      "detail": "common\\.py over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R5.Q1.models-red-zone",
+      "type": "regex",
+      "passed": true,
+      "detail": "(device\\.py|alert\\.py|job\\.py) over last_message: 10 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R5.Q1.role-layers",
+      "type": "regex",
+      "passed": true,
+      "detail": "(__init__\\.py|__init__\\.py|__init__\\.py|__init__\\.py) over last_message: 1 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R5.Q2.snapshot-spread",
+      "type": "regex",
+      "passed": true,
+      "detail": "(snapshot_service\\.py|snapshot\\.py|registry\\.py) over last_message: 19 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R5.Q4.two-snapshot-homes",
+      "type": "regex",
+      "passed": true,
+      "detail": "(snapshot_service\\.py|snapshot\\.py) over last_message: 10 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R5.Q5.no-migration-doc",
+      "type": "regex",
+      "passed": true,
+      "detail": "(snapshot\\.py|README\\.md) over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R6.Q1.device-repository",
+      "type": "regex",
+      "passed": true,
+      "detail": "device_repository\\.py over last_message: 3 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R6.Q1.formatter-ireturn",
+      "type": "regex",
+      "passed": true,
+      "detail": "alert_service\\.py over last_message: 3 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R6.Q2.mock-repo-double",
+      "type": "regex",
+      "passed": true,
+      "detail": "repo\\.py over last_message: 4 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R6.Q3.import-cycle-claim",
+      "type": "regex",
+      "passed": true,
+      "detail": "(notifier\\.py|device_repository\\.py) over last_message: 5 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R6.Q4.sync-service-takes-interface",
+      "type": "regex",
+      "passed": true,
+      "detail": "(sync_service\\.py|snapshot_service\\.py) over last_message: 16 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R6.Q5.notifier-api",
+      "type": "regex",
+      "passed": true,
+      "detail": "notifier\\.py over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R7.Q1.wanterr-tables",
+      "type": "regex",
+      "passed": true,
+      "detail": "(test_service\\.py|test_picker\\.py) over last_message: 6 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R7.Q3.big-object-leaf-test",
+      "type": "regex",
+      "passed": true,
+      "detail": "test_heartbeat\\.py over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R7.Q5.call-count-assertions",
+      "type": "regex",
+      "passed": true,
+      "detail": "(test_heartbeat\\.py|test_scheduler\\.py) over last_message: 5 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R7.Q6.sleep-then-assert",
+      "type": "regex",
+      "passed": true,
+      "detail": "(test_service\\.py|test_heartbeat\\.py) over last_message: 7 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R8.Q1.registry-globals",
+      "type": "regex",
+      "passed": true,
+      "detail": "registry\\.py over last_message: 9 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R8.Q2.init-registration",
+      "type": "regex",
+      "passed": true,
+      "detail": "(registry\\.py|env\\.py) over last_message: 11 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R8.Q3.context-background-in-service",
+      "type": "regex",
+      "passed": true,
+      "detail": "(device_service\\.py|sync_service\\.py|registry\\.py) over last_message: 44 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R8.Q5.flap-window-from-service",
+      "type": "regex",
+      "passed": true,
+      "detail": "(device_service\\.py|snapshot_service\\.py) over last_message: 35 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R8.Q5.getenv-in-method",
+      "type": "regex",
+      "passed": true,
+      "detail": "(sync_service\\.py|notify\\.py) over last_message: 18 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R9.Q1.orphan-doc",
+      "type": "regex",
+      "passed": true,
+      "detail": "heartbeat-protocol\\.md over last_message: 4 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R9.Q2.missing-doc-edge",
+      "type": "regex",
+      "passed": true,
+      "detail": "heartbeat\\.py over last_message: 8 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R9.Q3.unwired-root",
+      "type": "regex",
+      "passed": true,
+      "detail": "CLAUDE\\.md over last_message: 2 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R9.Q4.creates-a-new",
+      "type": "regex",
+      "passed": true,
+      "detail": "(device_service\\.py|notify\\.py|mem_store\\.py|file_repo\\.py) over last_message: 41 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R9.Q4.what-comments",
+      "type": "regex",
+      "passed": true,
+      "detail": "(device\\.py|heartbeat\\.py|schedule\\.py|device_service\\.py|notify\\.py|cache\\.py|trace\\.py|reporter\\.py|env\\.py) over last_message: 62 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R9.Q5.naked-exports",
+      "type": "regex",
+      "passed": true,
+      "detail": "(alert\\.py|job\\.py|snapshot\\.py|tags\\.py|job_kind\\.py|validate\\.py) over last_message: 19 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R9.critic.caller-must",
+      "type": "regex",
+      "passed": true,
+      "detail": "(heartbeat\\.py|device_service\\.py) over last_message: 35 match(es); want at least 1"
+    },
+    {
+      "name": "recall-R9.critic.restated-idiom",
+      "type": "regex",
+      "passed": true,
+      "detail": "(device_service\\.py|snapshot_service\\.py|sync_service\\.py) over last_message: 43 match(es); want at least 1"
+    },
+    {
+      "name": "report-header",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i)CODE REVIEW REPORT|Commit Readiness Report over last_message: 1 match(es); want at least 1"
+    },
+    {
+      "name": "rule-cited",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\bR(1[0-2]|[1-9])\\b over last_message: 102 match(es); want at least 1"
+    },
+    {
+      "name": "skeptic-refuted",
+      "type": "regex",
+      "passed": true,
+      "detail": "REFUTED over last_message: 7 match(es); want at least 1"
+    }
+  ],
+  "cost_usd": 9.6195741,
+  "judge_cost_usd": 0.0787594,
+  "duration_ms": 2090427,
+  "num_turns": 55,
+  "segments": 1,
+  "scaffold_dir": "/tmp/ldd-eval-review-full-136844268"
+}

@@ -1,0 +1,11 @@
+.form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+
+  h2,
+  p {
+    flex-basis: 100%;
+  }
+}

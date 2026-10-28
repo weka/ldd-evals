@@ -1,0 +1,28 @@
+schema_version: "1.1"
+context:
+  scaffold_script: ../scaffold/red-lint.sh
+postcheck: ./postcheck.sh
+tier: medium
+notes: |
+  Scoped to src/pages/Heartbeats, src/services and src/config, a PR's worth of
+  directories: quickfix resolves its scope by the ladder (argument, working tree,
+  branch, nothing) and the red-lint scaffold's stripped state is the committed
+  state, so the bare command would reach "nothing in scope" (see
+  quickfix-clean-tree). Within the scope, every `eslint-disable` and
+  `@ts-expect-error` directive and the god file's `/* eslint sonarjs/max-lines:
+  "off" */` comment are stripped → ESLint and tsc are red on the design plants:
+  45 of the red state's 62 ESLint findings fall in scope (no-magic-numbers 24,
+  sonarjs/nested-control-flow 4, max-params 3, no-explicit-any 2,
+  no-floating-promises 2, sonarjs/cognitive-complexity 2,
+  sonarjs/cyclomatic-complexity 2, and one each of import/no-mutable-exports,
+  no-else-return, sonarjs/elseif-without-else, sonarjs/max-lines,
+  sonarjs/no-identical-functions, sonarjs/no-redundant-assignments) plus two of
+  the three tsc errors. The lint-fixer must FIX the mechanical class
+  (no-floating-promises with an await, no-else-return, elseif-without-else,
+  no-redundant-assignments, the no-magic-numbers that are not enum-shaped) and
+  ESCALATE the design class with a rule route (sonarjs/cognitive-complexity,
+  cyclomatic-complexity and nested-control-flow → R3, max-lines → R5,
+  max-params and no-identical-functions → R1, import/no-mutable-exports on the
+  config global → R8, the 'READY' literals → R1 "Name enum strings", never a
+  bare constant), never re-suppress, never touch eslint.config.js or
+  package.json, never weaken a test assertion.

@@ -1,0 +1,48 @@
+--- vote 1: PASS ---
+I'll check the report against the two rubric questions.
+
+**Question 1: Are the concurrency bugs under 🐛 Bugs?**
+
+The report lists both bugs under the Bugs section:
+- `src/hooks/useDeviceFeed.ts:12-22` — the unowned `setInterval` with no cleanup 
+- `src/hooks/useDeviceSearch.ts:13-30` — the out-of-order response race with no `AbortController`/ignore flag
+
+Both are filed under 🐛 BUGS, not under Design Debt or other categories. ✓
+
+**Question 2: Are production sleeps under 🔴 Design Debt (not Bugs)?**
+
+The report lists production sleeps under R10 within 🔴 DESIGN DEBT:
+```
+src/pages/Heartbeats/heartbeatFeed.ts:667, src/services/retry.ts:49,64, src/services/syncService.ts:144 | R10 Q4: backoff retry loops `await new Promise(resolve => setTimeout(...))` with no cancellation...
+```
+
+This covers all the required places: `services/retry.ts`, `services/syncService.ts`, and the heartbeat feed. They are filed under Design Debt, not Bugs. ✓
+
+Both rubric conditions are satisfied.
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+Looking at the report against the two critical questions:
+
+**Question 1: Concurrency bugs under 🐛 Bugs**
+
+The report lists both required findings in the 🐛 BUGS section:
+- `src/hooks/useDeviceFeed.ts:12-22` — "the interval is never cleared" (unowned setInterval)
+- `src/hooks/useDeviceSearch.ts:13-30` — "a slower, superseded request can overwrite `results` with stale data" (out-of-order response race)
+
+✓ Both are correctly filed under Bugs, not Design Debt.
+
+**Question 2: Production sleeps under 🔴 Design Debt**
+
+The report lists production sleeps under the 🔴 DESIGN DEBT section under R10:
+- `src/pages/Heartbeats/heartbeatFeed.ts:667, src/services/retry.ts:49,64, src/services/syncService.ts:144`
+- Finding: "backoff retry loops `await new Promise(resolve => setTimeout(...))` with no cancellation"
+- Verdict: "Replace Sleep with Cancellable Wait"
+- Severity: M (Medium)
+
+✓ The production sleeps are correctly filed under Design Debt, not Bugs.
+
+Both required conditions are satisfied.
+
+VERDICT: PASS

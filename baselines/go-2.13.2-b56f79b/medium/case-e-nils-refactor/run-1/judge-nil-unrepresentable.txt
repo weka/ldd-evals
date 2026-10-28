@@ -1,0 +1,57 @@
+--- vote 1: FAIL ---
+Looking at the FOCUS file against the RUBRIC requirements:
+
+**Requirement 1 (unexported fields)**: ✓ PASS
+- `sink` and `clock` are lowercase, unexported. Callers cannot build invalid reporters with struct literals.
+
+**Requirement 2 (non-nilable types, not just runtime checks)**: ✗ FAIL
+- `sink` is typed as `*Sink` — a nil-able pointer. The code assigns `DiscardSink()` as a default (correct Null Object pattern), but the **type itself remains nil-able**. nil is representable at the type level.
+- `clock` is typed as `func() time.Time` — a nil-able function. Assigned `time.Now` as a default, but still a nil-able function type.
+- This is the "shallow fix" described in the rubric: nil is rejected at runtime (via error collection in options) but remains representable at the type level. True satisfaction requires changing the field types themselves — either `sink Sink` (non-pointer value), or `clock` as a concrete type that can't be nil, not a function pointer.
+
+**Requirement 3 (no nil re-checks in methods)**: ✓ PASS
+- `Record()` does not check `if r.sink == nil` or `if r.clock == nil`. Constructor branches don't turn nil into defaults; they record errors instead.
+
+**Requirement 4 (error return only if something can fail)**: ✓ PASS
+- Constructor can fail (invalid nil passed to options), so returning error is correct.
+
+All four requirements must pass. Requirement 2 is not satisfied — the code keeps nil-able types and merely rejects nil at runtime, not making it impossible by type design.
+
+VERDICT: FAIL
+
+--- vote 2: PASS ---
+**Analysis:**
+
+Checking each rubric item:
+
+1. **Unexported fields** — Both `sink` and `clock` are lowercase (unexported). A caller cannot build `Reporter{sink: ..., clock: ...}` with a struct literal. ✓
+
+2. **Non-nil-able fields with real defaults** — 
+   - `sink` is a pointer, but paired with Null Object pattern: initialized to `DiscardSink()`, a real no-op value. WithSink rejects nil (records error, doesn't store). ✓
+   - `clock` is a func value (non-pointer value type), initialized to `time.Now`, a real default. WithClock rejects nil. ✓
+
+3. **No nil checks in methods** — Record() and FlushEvery() don't check if sink or clock are nil. Constructor options reject nil by recording errors (not by turning nil into a default). ✓
+
+4. **Error return behavior** — Constructor still returns error, but correctly: it joins errors *recorded by options* (not nil checks in methods). The rubric explicitly allows this pattern: "A constructor that applies functional options and returns `errors.Join` of what the options recorded... is a construction failure, not a nil check in a method: it satisfies this item." ✓
+
+After successful construction, sink and clock are guaranteed non-nil. Nil is not representable, not just rejected.
+
+VERDICT: PASS
+
+--- vote 3: PASS ---
+Checking each rubric requirement:
+
+1. **Unexported fields**: `sink` and `clock` are lowercase (unexported). Callers cannot set them via struct literals. ✓
+
+2. **Real default values, not merely checked**: 
+   - `sink` starts as `DiscardSink()` (a Null Object, not nil). If `WithSink(nil)` is passed, the error is recorded but `sink` stays at `DiscardSink()`.
+   - `clock` starts as `time.Now`. If `WithClock(nil)` is passed, the error is recorded but `clock` stays at `time.Now`.
+   - The constructor returns `(nil, error)` if any option failed, never returning a Reporter with nil fields. ✓
+
+3. **No nil re-checks in methods**: `Record()` calls `r.sink.Write()` and `r.clock()` without any `if r.sink == nil` or `if r.clock == nil` checks. `FlushEvery()` has no checks either. ✓
+
+4. **Error return for construction failures**: The constructor uses `errors.Join(r.errs...)` to return construction failures (when options recorded errors). Per the rubric, this is a construction failure pattern (options record errors instead of storing nil), not a nil check in a method. ✓
+
+The code properly uses defaults + validation to make nil non-representable in the returned Reporter, not merely rejected at construction time.
+
+VERDICT: PASS

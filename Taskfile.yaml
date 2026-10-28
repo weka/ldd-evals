@@ -1,0 +1,46 @@
+version: '3'
+
+includes:
+  go:
+    taskfile: go/Taskfile.yaml
+  py:
+    taskfile: py/Taskfile.yaml
+  ts-react:
+    taskfile: ts-react/Taskfile.yaml
+
+vars:
+  # Path to the plugin directory a run measures. Each suite's Taskfile defaults
+  # its own PLUGIN to the sibling checkout of buzzdan/ai-coding-rules and lets
+  # PLUGIN=<dir> on the command line win. The include must not set PLUGIN: a
+  # var passed through an include's vars block shadows the command line for
+  # every task in that suite, so PLUGIN=<dir> would be ignored.
+  GO_PLUGIN: '{{.PLUGIN | default (printf "%s/../ai-coding-rules/go-linter-driven-development" .ROOT_DIR)}}'
+  # Agent model. Always pinned on the command line so a baseline names it.
+  MODEL: '{{.MODEL | default "claude-sonnet-5"}}'
+
+tasks:
+  build:
+    desc: Build the runner into bin/ldd-eval
+    cmds:
+      - cd runner && go build -o ../bin/ldd-eval .
+    sources:
+      - runner/**/*.go
+      - runner/go.mod
+      - runner/go.sum
+    generates:
+      - bin/ldd-eval
+
+  test:
+    desc: Run the runner's tests
+    cmds:
+      - cd runner && go test ./...
+
+  lint:
+    desc: Lint the runner
+    cmds:
+      - cd runner && golangci-lint run ./...
+
+  docs:check:
+    desc: Run the Go plugin's documentation conformance gate over this repository
+    cmds:
+      - bash scripts/check-docs.sh {{.GO_PLUGIN}}

@@ -1,0 +1,38 @@
+--- vote 1: PASS ---
+**Analysis:**
+
+The report examines the handling of `CONFIG.numWorkers` and `CONFIG.batchSize` in two places:
+
+1. **R1 Q1/Q2 finding** (src/hooks/useSnapshotScheduler.ts:18): The skeptic verdict is "REFUTED (score 1)" with the reasoning: "no second method exists beyond unwrapping a number." The cheaper alternative proposed is to "tighten `intEnv`/the CONFIG default so these fields can never be non-positive once loaded, delete the downstream re-checks."
+
+2. **No wrapper type proposed**: The report does not propose introducing a `WorkerCount`, `NumWorkers`, or similar wrapper type anywhere. When the skeptic addresses the validation concern around `numWorkers`, it explicitly rejects creating a wrapper abstraction and instead proposes fixing validation at the source.
+
+The report satisfies the first pass condition: it proposes NO wrapper type for the worker count. The skeptic's verdict, when it encountered validation concerns, was to refute wrapper-type thinking and recommend a concrete cheaper alternative (upstream validation of the raw number).
+
+**VERDICT: PASS**
+
+--- vote 2: PASS ---
+Looking at the FOCUS text for mentions of worker count wrapper types:
+
+**Search for worker-count type proposals:**
+- R8 Q5 suggests "pass `numWorkers` as a parameter" — this is dependency injection of a raw `number`, not a wrapper type
+- R10 discusses concurrency bugs but does not propose a type
+- R7 Q7 discusses testing but does not propose a type
+- The CONFIG cluster suggestions center on: making the object immutable, adding validation, and avoiding global imports — not extracting a wrapper type
+
+**Verdict check:**
+The hunted findings discuss `numWorkers` in three contexts:
+1. Reading it from a global `CONFIG` import (design debt, not a type proposal)
+2. Testing that `started === 2` matches `CONFIG.numWorkers` (a test assertion issue, not a type proposal)
+3. Validating that fields don't go ≤ 0 (a validation concern, not a type proposal)
+
+None propose a `WorkerCount`, `NumWorkers`, or similar wrapper class/interface.
+
+**Against rubric:**
+The rubric's first pass condition states: "If the report proposes NO wrapper type for the worker count / batch size, PASS."
+
+The report proposes no wrapper type — only parameter passing and better validation of the numeric value itself.
+
+---
+
+VERDICT: PASS

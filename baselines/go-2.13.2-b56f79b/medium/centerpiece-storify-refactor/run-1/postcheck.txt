@@ -1,0 +1,31 @@
+task test: ok
+PASS  task test green
+task lint: ok
+PASS  task lint green
+== complexity ==
+PASS  gocognit(ProcessHeartbeat) (was 76) (9 <= 10)
+FAIL  gocyclo(ProcessHeartbeat) (was 40) (got '9', want <= 8)
+PASS  ProcessHeartbeat still defined in internal/services
+PASS  R1 Q3: no status string-literal comparison inside ProcessHeartbeat (0)
+PASS  R3 Q2: no strings./index manipulation inside ProcessHeartbeat (0)
+PASS  no //nolint on ProcessHeartbeat (0)
+== services-scoped oracles (baseline = scaffold base commit) ==
+FAIL  R8 Q3: context.Background() gone from internal/services (got '3', want '0')
+PASS  context.TODO() not used as an escape hatch (1 <= 1)
+FAIL  R10 Q5: the retry sleep is gone (time.Sleep count below baseline) (got '5', want <= 4)
+PASS  R1 Q5: functions returning >3 values (ProcessHeartbeat's gone) (0 <= 1)
+PASS  R1 Q3: "READY" literal has one owner on the heartbeat path (3 fewer than baseline) (2 <= 3)
+PASS  R3 Q4: the labeled-continue dedupe left ProcessHeartbeat (0 <= 1)
+== the parse leaf ==
+PASS  production code CALLS a Parse*Heartbeat* constructor (declarations and comments excluded) (1 >= 1)
+FAIL  R7: an external-package _test.go calls Parse*Heartbeat*( with a literal (got '0', want >= 1)
+== shipped ==
+PASS  at least one commit after the scaffold base (the green tree is committed) (3 >= 1)
+PASS  working tree clean at the end (nothing left uncommitted) (0)
+== black-box suite: builds cmd/svc, replays the recorded heartbeats ==
+--- PASS: TestHeartbeatContract (1.67s)
+--- PASS: TestExpectedTSVMatchesTable (0.00s)
+ok  	example.com/heartbeat-blackbox	2.243s
+black-box: PASS
+PASS  black-box heartbeat suite
+postcheck: 4 check(s) failed

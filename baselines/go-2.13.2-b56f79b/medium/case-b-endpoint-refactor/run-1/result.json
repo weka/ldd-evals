@@ -1,0 +1,45 @@
+{
+  "case": "case-b-endpoint-refactor",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": true,
+  "graders": [
+    {
+      "name": "art-judge",
+      "type": "llm",
+      "passed": true,
+      "detail": "judge claude-haiku-4-5 (PASS,PASS): --- vote 1: PASS ---\n**Rubric assessment:**\n\n1. **One box** — ✓ `Endpoint` type holds host, port, tls. `NewEndpoint` owns the port-range rule once: `if port \u003c= 0 || port \u003e 65535 { port = defaultPort }`. Methods answer own questions: `Addr()`, `URL(path)`, `HealthURL()`. `dial` takes `Endpoint`, not separate params. No branching on `c.tls` in Client methods; scheme logic centralized in `schemeFor()`.\n\n2. **Scheme decided once** — ✓ Constants `schemeHTTP` and `schemeHTTPS` defined once. Single decision point: `schemeFor(tls bool)` in endpoint.go. No other \"http\"/\"https\" branches in the codebase.\n\n3. **Names speak intent** — ✓ `Get`: `url := c.endpoint.URL(path); resp, err := c.http.Get(url)` reads as \"get URL, then GET it\". `Ping`: `conn, err := dial(c.endpoint); conn.Close()` reads as \"dial endpoint, close it\". `HealthURL`: delegates to `c.endpoint.HealthURL()`. No `fmt.Sprintf` assembly inside.\n\n4. **No leftover ceremony** — ✓ Port validation only in `NewEndpoint()` constructor. `dial()` assumes port valid (no re-check), uses `e.Addr()` directly. Comments describe contracts and intent (\"A zero-value Endpoint is never used directly\", \"performs a GET against path\"), not names.\n\nBonus (not required): `Ping` on TLS endpoint wraps with `cryptotls.Client()` but closes immediately without forcing handshake.\n\nVERDICT: PASS\n\n--- vote 2: PASS ---\nReading the code against the rubric:\n\n1. **One box.** `Endpoint` holds host, port, tls. `NewEndpoint()` owns the port-range rule: `if port \u003c= 0 || port \u003e 65535 { port = defaultPort }`. Methods answer questions: `Addr()` (dial address), `URL(path)` (full URL), `HealthURL()` (health check URL), and `schemeFor()` determines scheme. No free functions taking raw `(host, port, tls)` triplets remain. **PASS:** `type Endpoint struct { host string; port int; tls bool }` with constructor and methods.\n\n2. **Scheme decided once.** `\"http\"` and `\"https\"` appear only in the const block, and the d…(truncated)",
+      "cost_usd": 0.0754598
+    },
+    {
+      "name": "gone-host-port-clump",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?m)^func [a-z][A-Za-z]*\\(host string, port int, tls bool\\) \\(?(net\\.Conn|string) over files: 0 match(es); want exactly 0"
+    },
+    {
+      "name": "one-https-owner",
+      "type": "regex",
+      "passed": true,
+      "detail": "\"https(://)?\" over files: 1 match(es); want exactly 1"
+    },
+    {
+      "name": "stop-check",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?ims)Stop check.*?^\\W{0,6}1\\W{1,6}gates\\b.*?^\\W{0,6}2\\W{1,6}re-run\\b.*?^\\W{0,6}3\\W{1,6}nouns?\\b.*?^\\W{0,6}4\\W{1,6}critic\\b.*?^\\W{0,6}5\\W{1,6}STOP\\b.*?^\\W{0,6}6\\W{1,6}commit\\b over last_message: 1 match(es); want at least 1"
+    },
+    {
+      "name": "postcheck",
+      "type": "postcheck",
+      "passed": true,
+      "detail": "task test: ok\nPASS  task test green\ntask lint: ok\nPASS  task lint green\nPASS  port range predicate (65535 or a named max port) has one owner (1 \u003c= 1)\nPASS  scheme decided once inside transport (1 \u003c= 1)\nnew constructors: NewEndpoint\nPASS  a new constructor for the endpoint value exists in internal/transport (1 \u003e= 1)\nPASS  no //nolint added to internal/transport (0)\n== black-box suite: builds cmd/svc, replays the recorded heartbeats ==\n--- PASS: TestHeartbeatContract (1.64s)\n--- PASS: TestExpectedTSVMatchesTable (0.00s)\nok  \texample.com/heartbeat-blackbox\t2.202s\nblack-box: PASS\nPASS  black-box heartbeat suite\npostcheck: all checks passed"
+    }
+  ],
+  "cost_usd": 1.0905901,
+  "judge_cost_usd": 0.0754598,
+  "duration_ms": 405795,
+  "num_turns": 28,
+  "segments": 1,
+  "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-b-endpoint-refactor-3477356964"
+}

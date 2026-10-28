@@ -1,0 +1,35 @@
+--- vote 1: PASS ---
+**Rubric check, top-down:**
+
+1. **Root is a wiring diagram.** `main.go` loads `cfg := env.Load()` once, then extracts specific values: `flapWindow := time.Duration(cfg.FlapWindowSec) * time.Second` → `services.NewDeviceService(...)`, and `cfg.BatchSize, cfg.NumWorkers` → `jobs.NewScheduler(...)`. No other file touches `env.Load()` or the `Configuration` value. ✓
+
+2. **Islands are clean.** `pool` imports nothing but `"log"`. Signature: `Start(jobs <-chan Job, numWorkers int)` — explicit, named. `jobs` has no `env` import. Signature: `NewScheduler(batchSize, numWorkers int)` — explicit, named. No package-level config var that main sets externally. ✓
+
+3. **Env only loads.** No `func init()` in `env.go`. No mutable package-level `Config` or `region`. `Load()` returns a value. Defaults colocated with keys: `intEnv("NUM_WORKERS", 4)`, `intEnv("BATCH", 64)`, `intEnv("FLAP_WINDOW_SEC", 30)`. Helper `regionOrDefault()` is a function, not a var. ✓
+
+4. **Names carry meaning.** Parameters: `numWorkers`, `batchSize`, `flapWindow time.Duration`. No bare `cfg` passed to leaf packages. No bare `n` or `opts interface{}`. ✓
+
+No file other than `main.go` references `env.Config`, and `env.go` has no `func init()`.
+
+VERDICT: PASS
+
+--- vote 2: PASS ---
+Reading top-down through the four packages:
+
+**1. The root reads like a wiring diagram.**
+Main loads config once: `cfg := env.Load()`. Hands specific values downward: `jobs.NewScheduler(cfg.BatchSize, cfg.NumWorkers)` and `flapWindow := time.Duration(cfg.FlapWindowSec) * time.Second` passed to `services.NewDeviceService(...)`. No `env.Config.` read elsewhere in the file. ✓
+
+**2. Islands are clean.**
+`pool` imports nothing from `env`; `jobs` imports nothing from `env`. Pool's signature: `Start(jobs <-chan Job, numWorkers int)` names the dependency. Scheduler's signature: `NewScheduler(batchSize, numWorkers int)` names both dependencies explicitly. No package-level mutable `var` in either package that main sets from outside. ✓
+
+**3. The env package only loads.**
+No `func init()` in `env.go`. No mutable `Config` or `region` package-level variable. `Load()` returns a `Configuration` value. Defaults live next to keys: `intEnv("NUM_WORKERS", 4)` and `regionOrDefault()`. ✓
+
+**4. Names carry meaning.**
+Parameters are `batchSize`, `numWorkers`, `flapWindow time.Duration` — specific and clear, not generic `cfg` or bare `int` values. ✓
+
+Checked FAIL conditions:
+- No file other than `cmd/svc/main.go` references `env.Config`. ✓
+- No `func init()` in `env.go`. ✓
+
+VERDICT: PASS

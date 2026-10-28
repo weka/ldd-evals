@@ -1,0 +1,1 @@
+scaffolded ts-react-mini at /tmp/ldd-eval-case-f-globals-review-neutral-506853062 (16ef009; node_modules from /tmp/ts-react-mini-npm-cache)

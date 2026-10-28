@@ -1,0 +1,10 @@
+schema_version: "1.1"
+context:
+  scaffold_script: ../scaffold/default.sh
+tier: cheap
+notes: |
+  Negative control for the review command's scope ladder. The fixture is a clean
+  single-commit tree with no base branch, so every rung below "an argument names
+  it" is empty: the bare command must say "nothing to review", name the --all
+  form, and spawn no agent. A run that reviews the whole repository unasked is
+  the defect the go-2.10.0-5828c34 baseline recorded as finding 1 (see its errata).

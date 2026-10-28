@@ -1,0 +1,56 @@
+{
+  "case": "case-f-globals-review-neutral",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": true,
+  "graders": [
+    {
+      "name": "anchor-env-global",
+      "type": "regex",
+      "passed": true,
+      "detail": "env\\.ts:[0-9]+ over last_message: 9 match(es); want at least 1"
+    },
+    {
+      "name": "evidence-protocol",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\.tsx?:[0-9]+ over last_message: 24 match(es); want at least 1"
+    },
+    {
+      "name": "nolint-is-a-finding",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i)eslint-disable|ts-expect-error|ts-ignore|suppression over last_message: 6 match(es); want at least 1"
+    },
+    {
+      "name": "r8-q2-init",
+      "type": "regex",
+      "passed": true,
+      "detail": "(?i)\\bregion\\b[^\\n]{0,80}(import|module|top[- ]level)|import[- ]time|at import|module (import|scope|load)|top[- ]level|when the module (is )?(loads|loaded|imported|evaluated) over last_message: 1 match(es); want at least 1"
+    },
+    {
+      "name": "r8-q5-jobs-read",
+      "type": "regex",
+      "passed": true,
+      "detail": "useSnapshotScheduler\\.tsx?:[0-9]+ over last_message: 5 match(es); want at least 1"
+    },
+    {
+      "name": "r8-q5-pool-read",
+      "type": "regex",
+      "passed": true,
+      "detail": "workers\\.ts:[0-9]+ over last_message: 6 match(es); want at least 1"
+    },
+    {
+      "name": "r8-q6-test-mutates-global",
+      "type": "regex",
+      "passed": true,
+      "detail": "workers\\.test\\.tsx?:[0-9]+ over last_message: 2 match(es); want at least 1"
+    }
+  ],
+  "cost_usd": 2.29626,
+  "judge_cost_usd": 0,
+  "duration_ms": 833660,
+  "num_turns": 17,
+  "segments": 1,
+  "scaffold_dir": "/tmp/ldd-eval-case-f-globals-review-neutral-506853062"
+}

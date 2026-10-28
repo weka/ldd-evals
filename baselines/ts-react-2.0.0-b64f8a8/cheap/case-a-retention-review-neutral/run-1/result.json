@@ -1,0 +1,38 @@
+{
+  "case": "case-a-retention-review-neutral",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": true,
+  "graders": [
+    {
+      "name": "anchor-config",
+      "type": "regex",
+      "passed": true,
+      "detail": "config\\.ts:[0-9]+ over last_message: 7 match(es); want at least 1"
+    },
+    {
+      "name": "anchor-policy",
+      "type": "regex",
+      "passed": true,
+      "detail": "policy\\.ts:[0-9]+ over last_message: 10 match(es); want at least 1"
+    },
+    {
+      "name": "evidence-protocol",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\.tsx?:[0-9]+ over last_message: 17 match(es); want at least 1"
+    },
+    {
+      "name": "precision-schedule-clean",
+      "type": "regex",
+      "passed": true,
+      "detail": "schedule(\\.test)?\\.tsx?:[0-9]+ over last_message: 0 match(es); want 0"
+    }
+  ],
+  "cost_usd": 2.1301155,
+  "judge_cost_usd": 0,
+  "duration_ms": 485659,
+  "num_turns": 17,
+  "segments": 1,
+  "scaffold_dir": "/tmp/ldd-eval-case-a-retention-review-neutral-2833062629"
+}

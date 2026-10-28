@@ -1,0 +1,26 @@
+{
+  "case": "case-e-nils-review-neutral",
+  "run": 1,
+  "model": "claude-sonnet-5",
+  "passed": true,
+  "graders": [
+    {
+      "name": "anchor-report",
+      "type": "regex",
+      "passed": true,
+      "detail": "(reporter|catalog|wire)\\.ts:[0-9]+ over last_message: 29 match(es); want at least 1"
+    },
+    {
+      "name": "evidence-protocol",
+      "type": "regex",
+      "passed": true,
+      "detail": "\\.tsx?:[0-9]+ over last_message: 29 match(es); want at least 1"
+    }
+  ],
+  "cost_usd": 2.5603813,
+  "judge_cost_usd": 0,
+  "duration_ms": 871002,
+  "num_turns": 15,
+  "segments": 1,
+  "scaffold_dir": "/tmp/ldd-eval-case-e-nils-review-neutral-2632386874"
+}

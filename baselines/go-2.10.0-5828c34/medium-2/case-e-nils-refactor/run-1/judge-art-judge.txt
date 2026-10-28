@@ -1,0 +1,13 @@
+Looking at the code against the rubric requirements:
+
+**1. Absence has a name** — Passes cleanly. `Find` returns `(Device, bool)` not nil, `Record` has no nil checks on unexported `sink`/`clock`, and the constructor owns all defaults.
+
+**2. Constructor owns invariants** — Passes. `sink` and `clock` are unexported, `NewReporter` rejects nil with explicit errors, and `wire.go` calls `NewReporter(NewSink(w), time.Now, Options{})` with no positional nils.
+
+**3. Methods read as sentences** — Passes. `Record` is one clean line: `r.sink.Write(ev.At(r.clock()))`. `Announce` uses comma-ok on `Find`, not pointer nil checks.
+
+**4. Comments earn their place** — **Fails.** The comment `// Sink is where events are written.` is explicitly listed in the rubric as something that should be gone, and it's present in the code. Beyond that fail case, many comments just restate what names already say (`// Device is a device known to the catalog.`, `// Event is a reported event.`, `// Record records the event.`, `// At returns the event stamped with t.`, etc.) without stating contracts the names cannot convey.
+
+The rubric requires all four to pass. Criterion 4 does not.
+
+**VERDICT: FAIL**

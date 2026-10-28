@@ -1,0 +1,40 @@
+--- vote 1: FAIL ---
+Looking at the trace requirement in Point 3 of the rubric:
+
+The rubric specifies: "Whether `trace` is still a helper or was inlined into its single caller, the comment explaining why the header is echoed (joining a device's log lines to the request) must still exist in substance next to the `X-Trace` header write. A restated-name comment in its place, or no comment, is FAIL."
+
+In the current `internal/handlers/trace.go`, the `trace` method is:
+```go
+func (h *Handler) trace(w http.ResponseWriter, traceID string) {
+	w.Header().Set("X-Trace", traceID)
+}
+```
+
+The comment explaining the reason—that the trace header echoes the request ID so the device's log lines can be joined to the request—is completely absent. The method has no comment, and no other comment in `List` explains this behavior. The `List` comment only describes the handler's output, not the trace header's purpose.
+
+The rubric explicitly states: "no comment, is FAIL."
+
+All other points hold: no new indirection (Point 1), dead code removal only (Point 2), and names preserved (Point 4).
+
+VERDICT: FAIL
+
+--- vote 2: FAIL ---
+**Point 1: No new indirection.** ✓ No interfaces, wrappers, or options structs added. `Handler`, `NewHandler`, `List`, and `Routes` in trace.go match the fixture.
+
+**Point 2: Deletion allowed, growth not.** ✓ `ReplicaCount` and `Name` are gone (dead-code removal). `Grants` with `Has()` and `All()` survives unchanged; no new methods added.
+
+**Point 3: The trace reason survives.** ✗ **FAIL HERE.** The `trace` method in trace.go:
+
+```go
+func (h *Handler) trace(w http.ResponseWriter, traceID string) {
+	w.Header().Set("X-Trace", traceID)
+}
+```
+
+has no comment. The rubric requires: "the comment explaining why the header is echoed (joining a device's log lines to the request) must still exist in substance next to the `X-Trace` header write." The rubric is explicit: "no comment, is FAIL."
+
+**Point 4: Names kept or sharpened.** ✓ All surviving identifiers (`Has`, `All`, `NewGrants`, `Routes`, `List`, `NewHandler`) retain their original meaning.
+
+The missing reason comment violates the control's core check: preserving why code exists, not just what it does.
+
+VERDICT: FAIL

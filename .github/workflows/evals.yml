@@ -1,0 +1,152 @@
+name: evals
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      plugin_ref:
+        description: buzzdan/ai-coding-rules ref (branch, tag or sha) to measure
+        required: true
+        default: main
+      language:
+        description: suite to run (the <lang>/ directory)
+        required: true
+        default: go
+        type: choice
+        options: [go, py, ts-react]
+      tier:
+        description: case tier
+        required: true
+        default: cheap
+        type: choice
+        options: [cheap, medium, expensive]
+      cost_cap_usd:
+        description: abort once cumulative agent and judge cost passes this
+        required: true
+        default: "5"
+      plugin:
+        description: plugin directory in ai-coding-rules to measure (the generic plugin runs any suite; the suite's cases take its command prefix)
+        required: true
+        default: go-linter-driven-development
+        type: choice
+        options: [go-linter-driven-development, python-linter-driven-development, ts-react-linter-driven-development, linter-driven-development]
+      case:
+        description: optional glob over case names (e.g. trigger-go, 'case-e-*'); empty runs the whole tier
+        required: false
+        default: ""
+
+env:
+  GO_VERSION: "1.24"
+
+jobs:
+  # Free checks on every pull request: the runner builds, tests and lints, the
+  # manifest matches the fixture, and the generated review graders match the manifest.
+  runner:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: runner/go.sum
+      - uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: golangci/golangci-lint-action@v7
+        with:
+          version: v2.8
+          working-directory: runner
+          args: --help
+      - run: task test
+      - run: task lint
+
+  suite:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - run: task go:manifest
+      - run: task py:manifest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: the TypeScript fixture's lint config is unchanged and its assertion counts are current
+        run: task ts-react:manifest
+      - name: generated review graders match the manifest (all three suites)
+        run: |
+          task go:graders
+          task py:graders
+          task ts-react:graders
+          git diff --exit-code -- go/cases/review-full/graders py/cases/review-full/graders ts-react/cases/review-full/graders 'ts-react/cases/*-neutral/graders'
+
+  # Costs money: manual only. Checks out the plugin at the requested ref, runs one
+  # tier with the model pinned and the cap set, and uploads results/ so a killed run
+  # can be resumed or promoted from the artifact.
+  run:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: ldd-evals
+      - uses: actions/checkout@v4
+        with:
+          repository: buzzdan/ai-coding-rules
+          ref: ${{ inputs.plugin_ref }}
+          path: ai-coding-rules
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: ldd-evals/runner/go.sum
+      - uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: golangci/golangci-lint-action@v7
+        with:
+          version: v2.8
+          working-directory: ldd-evals/runner
+          args: --help
+      - uses: actions/setup-python@v5
+        if: inputs.language == 'py'
+        with:
+          python-version: "3.11"
+      - uses: astral-sh/setup-uv@v5
+        if: inputs.language == 'py'
+      - uses: actions/setup-node@v4
+        if: inputs.language == 'ts-react'
+        with:
+          node-version: "22"
+      - name: install the Python suite's tools (ruff, mypy with pytest, pytest; complexipy and radon run through uvx)
+        if: inputs.language == 'py'
+        run: |
+          uv tool install ruff
+          uv tool install mypy --with pytest
+          uv tool install pytest
+      - name: install the Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+      - name: run the tier
+        working-directory: ldd-evals
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          IS_SANDBOX: "1"
+        run: >-
+          task ${{ inputs.language }}:run
+          TIER=${{ inputs.tier }}
+          CAP=${{ inputs.cost_cap_usd }}
+          OUT=results/${{ inputs.language }}-${{ inputs.plugin }}-${{ inputs.plugin_ref }}-${{ github.run_id }}
+          PLUGIN=${{ github.workspace }}/ai-coding-rules/${{ inputs.plugin }}
+          CASE=${{ inputs.case }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: results-${{ inputs.language }}-${{ inputs.tier }}-${{ github.run_id }}
+          path: ldd-evals/results/
+          if-no-files-found: warn

@@ -1,0 +1,1 @@
+scaffolded ts-react-mini at /tmp/ldd-eval-centerpiece-storify-review-2197435591 (cd53ebf; node_modules from /tmp/ts-react-mini-npm-cache)

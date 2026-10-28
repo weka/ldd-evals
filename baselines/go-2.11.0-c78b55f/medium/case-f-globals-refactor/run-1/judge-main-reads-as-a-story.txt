@@ -1,0 +1,52 @@
+--- vote 1: FAIL ---
+Looking at the FOCUS file against the RUBRIC:
+
+**RUBRIC Point 1 - Configuration obtained once at top:**
+The code loads configuration through multiple paths:
+- Line 32: `cfg := env.Load()` loads some configuration
+- Line 57: `os.Getenv("WEBHOOK_URL")` reads configuration mid-construction, not at top
+- Line 66 (via `listenAddr()`): `os.Getenv("PORT")` reads configuration in a helper function
+- Flag parsing for `--store`, `--dry-run`, `--read-only`
+
+This violates the requirement that "Configuration is obtained once at the top of main... and then individual values are handed to constructors." The WEBHOOK_URL should come from cfg, not be read via os.Getenv in the middle of service construction.
+
+**RUBRIC Point 2 - Story at one altitude:**
+The flow mostly follows the pattern, but is disrupted:
+- Load config ✓
+- Build leaf values (store) ✓
+- Build services (notifier, audit, svc, scheduler) - mostly, but notifier gets WEBHOOK_URL via direct os.Getenv instead of from cfg
+- Build handlers ✓
+- Serve - but listenAddr() reads PORT from environment rather than using a value from cfg
+
+**RUBRIC Point 3 - No business logic:**
+The code is clean here—no parsing, no status comparisons. Helper functions like `listenAddr()` are appropriate, but they read environment directly instead of accepting configured values.
+
+**Key issue:** The configuration loading is split across `env.Load()` (which returns cfg with some values) and direct `os.Getenv()` calls. The criteria requires env.Load() to be *the* configuration source, with individual values from it handed to constructors.
+
+VERDICT: FAIL
+
+--- vote 2: FAIL ---
+## Analysis
+
+Looking at the FOCUS file against the rubric requirements:
+
+**Requirement 1 - Configuration loaded once at top, values handed to constructors:**
+
+This is **violated**. The code reads environment configuration in multiple places:
+- Line 20: `defaultStorePath()` calls `os.Getenv("STORE_PATH")` *before* `env.Load()` is called (in the flag definition itself)
+- Line 38: `os.Getenv("WEBHOOK_URL")` is read directly inline instead of through `cfg`
+- Line 75 (listenAddr): `os.Getenv("PORT")` is read directly in a helper, not extracted from cfg
+
+Configuration should all be loaded once at the top via `env.Load()`, then individual values extracted and passed to constructors. Instead, this code reads environment scattered across flag setup, inline calls, and helper functions.
+
+**Requirement 2 - Body reads as story at one altitude:**
+
+Mostly satisfies this. The core flow (store → context → services → scheduler → mux → serve) is clear and at consistent altitude. However, the configuration scattering undermines the narrative.
+
+**Requirement 3 - No business logic:**
+
+Satisfies this. The jitter sleep and store health check are acceptable wiring concerns; no parsing, status comparisons, or retry logic are present.
+
+The core violation: all configuration should flow through a single `cfg := env.Load()` call at the top, with individual values extracted once and passed down. This code instead reads environment in defaultStorePath (before cfg load), via direct os.Getenv calls (after cfg load), breaking the principle of "configuration obtained once at the top."
+
+`VERDICT: FAIL`

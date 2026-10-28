@@ -1,0 +1,12 @@
+schema_version: "1.1"
+context:
+  scaffold_script: ../scaffold/default.sh
+postcheck: ./postcheck.sh
+tier: cheap
+notes: |
+  Negative control for the quickfix command's scope ladder. The fixture is a clean
+  single-commit tree with no base branch, so every rung below "an argument names
+  it" is empty: the bare command must say "nothing in scope to fix", name the --all
+  form, spawn no agent and edit nothing. A run that lints and fixes the whole
+  repository unasked is the go-2.10.0-5828c34 baseline's finding 7 (26 escalations
+  executed to the turn cap).

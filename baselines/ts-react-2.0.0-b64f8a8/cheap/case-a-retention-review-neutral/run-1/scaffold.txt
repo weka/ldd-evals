@@ -1,0 +1,1 @@
+scaffolded ts-react-mini at /tmp/ldd-eval-case-a-retention-review-neutral-2833062629 (0bd037c; node_modules from /tmp/ts-react-mini-npm-cache)
