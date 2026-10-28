@@ -35,6 +35,9 @@ on:
         required: false
         default: ""
 
+permissions:
+  contents: read
+
 env:
   GO_VERSION: "1.24"
 
@@ -93,14 +96,29 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 300
     steps:
+      # The free-text inputs reach shell commands and paths: reject anything outside
+      # a plain ref, a number and a case glob before any later step reads them.
+      - name: validate the inputs
+        env:
+          PLUGIN_REF: ${{ inputs.plugin_ref }}
+          COST_CAP_USD: ${{ inputs.cost_cap_usd }}
+          CASE_GLOB: ${{ inputs.case }}
+        run: |
+          [[ $PLUGIN_REF =~ ^[A-Za-z0-9._][A-Za-z0-9._/-]*$ && $PLUGIN_REF != *..* ]] || { echo "::error::plugin_ref must be a branch, tag or sha"; exit 1; }
+          [[ $COST_CAP_USD =~ ^[0-9]+(\.[0-9]+)?$ ]] || { echo "::error::cost_cap_usd must be a number"; exit 1; }
+          [[ $CASE_GLOB =~ ^[A-Za-z0-9._*?-]*$ ]] || { echo "::error::case must be a glob over case names"; exit 1; }
+      # persist-credentials: false keeps the job token out of .git/config, where the
+      # agent under test could read it.
       - uses: actions/checkout@v4
         with:
           path: ldd-evals
+          persist-credentials: false
       - uses: actions/checkout@v4
         with:
           repository: buzzdan/ai-coding-rules
           ref: ${{ inputs.plugin_ref }}
           path: ai-coding-rules
+          persist-credentials: false
       - uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
@@ -137,13 +155,19 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           IS_SANDBOX: "1"
+          SUITE: ${{ inputs.language }}
+          TIER: ${{ inputs.tier }}
+          COST_CAP_USD: ${{ inputs.cost_cap_usd }}
+          PLUGIN_DIR: ${{ inputs.plugin }}
+          PLUGIN_REF: ${{ inputs.plugin_ref }}
+          CASE_GLOB: ${{ inputs.case }}
         run: >-
-          task ${{ inputs.language }}:run
-          TIER=${{ inputs.tier }}
-          CAP=${{ inputs.cost_cap_usd }}
-          OUT=results/${{ inputs.language }}-${{ inputs.plugin }}-${{ inputs.plugin_ref }}-${{ github.run_id }}
-          PLUGIN=${{ github.workspace }}/ai-coding-rules/${{ inputs.plugin }}
-          CASE=${{ inputs.case }}
+          task "$SUITE:run"
+          "TIER=$TIER"
+          "CAP=$COST_CAP_USD"
+          "OUT=results/$SUITE-$PLUGIN_DIR-$PLUGIN_REF-$GITHUB_RUN_ID"
+          "PLUGIN=$GITHUB_WORKSPACE/ai-coding-rules/$PLUGIN_DIR"
+          "CASE=$CASE_GLOB"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
