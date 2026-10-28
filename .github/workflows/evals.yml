@@ -106,7 +106,8 @@ jobs:
         run: |
           [[ $PLUGIN_REF =~ ^[A-Za-z0-9._][A-Za-z0-9._/-]*$ && $PLUGIN_REF != *..* ]] || { echo "::error::plugin_ref must be a branch, tag or sha"; exit 1; }
           [[ $COST_CAP_USD =~ ^[0-9]+(\.[0-9]+)?$ ]] || { echo "::error::cost_cap_usd must be a number"; exit 1; }
-          [[ $CASE_GLOB =~ ^[A-Za-z0-9._*?-]*$ ]] || { echo "::error::case must be a glob over case names"; exit 1; }
+          case_re='^[]A-Za-z0-9._*?[^-]*$'
+          [[ $CASE_GLOB =~ $case_re ]] || { echo "::error::case must be a glob over case names"; exit 1; }
       # persist-credentials: false keeps the job token out of .git/config, where the
       # agent under test could read it.
       - uses: actions/checkout@v4
