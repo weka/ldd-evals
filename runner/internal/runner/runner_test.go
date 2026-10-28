@@ -240,8 +240,11 @@ func TestNew_Error(t *testing.T) {
 
 func TestRunner_AgentDoesNotInheritAutoBackground(t *testing.T) {
 	t.Setenv("CLAUDE_AUTO_BACKGROUND_TASKS", "true")
+	t.Setenv("ENABLE_CLAUDEAI_MCP_SERVERS", "true")
 	fakeClaude(t, "#!/bin/bash\necho \"autobg=${CLAUDE_AUTO_BACKGROUND_TASKS-unset} sandbox=${IS_SANDBOX-unset} connectors=${ENABLE_CLAUDEAI_MCP_SERVERS-unset}\" >&2\n")
-	evalsDir := evalsWithCase(t, "mkdir -p \"$1\"\n", map[string]string{"prompt.md": promptWithModel, "graders/g.md": regexGrader})
+	// The case tries to turn the connectors back on; the runner's value must win.
+	caseYAML := "schema_version: \"1.1\"\ncontext:\n  scaffold_script: ../scaffold/default.sh\ntier: cheap\nenv:\n  ENABLE_CLAUDEAI_MCP_SERVERS: \"true\"\n"
+	evalsDir := evalsWithCase(t, "mkdir -p \"$1\"\n", map[string]string{"prompt.md": promptWithModel, "graders/g.md": regexGrader, "case.yaml": caseYAML})
 	_, res := runProbe(t, runner.Options{EvalsDir: evalsDir, Threshold: 1})
 	if !strings.Contains(res.Error, "autobg=unset sandbox=1 connectors=false") {
 		t.Errorf("agent env (from stderr in Error) = %q, want the auto-background flag stripped, IS_SANDBOX set and the claude.ai connectors off", res.Error)
