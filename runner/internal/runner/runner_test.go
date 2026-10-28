@@ -240,10 +240,10 @@ func TestNew_Error(t *testing.T) {
 
 func TestRunner_AgentDoesNotInheritAutoBackground(t *testing.T) {
 	t.Setenv("CLAUDE_AUTO_BACKGROUND_TASKS", "true")
-	fakeClaude(t, "#!/bin/bash\necho \"autobg=${CLAUDE_AUTO_BACKGROUND_TASKS-unset} sandbox=${IS_SANDBOX-unset}\" >&2\n")
+	fakeClaude(t, "#!/bin/bash\necho \"autobg=${CLAUDE_AUTO_BACKGROUND_TASKS-unset} sandbox=${IS_SANDBOX-unset} connectors=${ENABLE_CLAUDEAI_MCP_SERVERS-unset}\" >&2\n")
 	evalsDir := evalsWithCase(t, "mkdir -p \"$1\"\n", map[string]string{"prompt.md": promptWithModel, "graders/g.md": regexGrader})
 	_, res := runProbe(t, runner.Options{EvalsDir: evalsDir, Threshold: 1})
-	if !strings.Contains(res.Error, "autobg=unset sandbox=1") {
-		t.Errorf("agent env (from stderr in Error) = %q, want the auto-background flag stripped and IS_SANDBOX set", res.Error)
+	if !strings.Contains(res.Error, "autobg=unset sandbox=1 connectors=false") {
+		t.Errorf("agent env (from stderr in Error) = %q, want the auto-background flag stripped, IS_SANDBOX set and the claude.ai connectors off", res.Error)
 	}
 }

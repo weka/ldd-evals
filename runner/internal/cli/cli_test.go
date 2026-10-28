@@ -206,6 +206,8 @@ func assertAgentArgs(t *testing.T, argsOut, suite string) {
 		"--max-turns", "5",
 		"--no-session-persistence",
 		"--setting-sources", "project,local",
+		"--settings", `{"disableClaudeAiConnectors":true,"syncClaudeAiSkills":false,"syncClaudeAiPlugins":false,"crossSessionInbound":"refuse"}`,
+		"--disallowedTools", "ListAgents",
 		"--append-system-prompt", "Be brief.", "", // the multi-line value spans two recorded lines
 		"--allowedTools", "Bash,Read,Write,Skill",
 	}
