@@ -55,9 +55,13 @@ Exit codes: 0 every case ≥ threshold · 1 some case below · 2 budget exceeded
   The agent runs with `IS_SANDBOX=1` because `--permission-mode bypassPermissions` is refused for root without it
   (harmless for other users), and without `CLAUDE_AUTO_BACKGROUND_TASKS`: cloud sessions export that flag, and
   under it claude turns any foreground `Agent` call still running after 120 seconds into a background task
-  answered "Async agent launched", which a developer's shell never does. A case's `case.yaml` `env:` map
+  answered "Async agent launched", which a developer's shell never does. The agent also runs without the
+  machine's claude.ai account: `ENABLE_CLAUDEAI_MCP_SERVERS=false` and `--settings` turn off its connectors,
+  synced skills and plugins, and messages from other sessions, and `--disallowedTools ListAgents` hides the
+  other local sessions. A trace is committed evidence, so none of these may reach it. A case's `case.yaml` `env:` map
   adds its variables to the agent's environment, after the runner's own, so a case value wins over the runner's,
-  except that a case cannot set `CLAUDE_AUTO_BACKGROUND_TASKS` or override `IS_SANDBOX=1`. The postcheck does
+  except that a case cannot set `CLAUDE_AUTO_BACKGROUND_TASKS` or override `IS_SANDBOX=1` or
+  `ENABLE_CLAUDEAI_MCP_SERVERS=false`. The postcheck does
   not get the map. Runs recorded before this was stripped
   (every baseline up to go-2.10.0-5828c34) carry that host behavior in their `segments` and polling counts.
 

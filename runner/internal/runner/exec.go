@@ -70,6 +70,11 @@ func (s agentSpec) args() []string {
 		// hooks, plugins or output-style settings; only the scaffold's own
 		// project settings apply.
 		"--setting-sources", "project,local",
+		// Nor this machine's claude.ai account: its connectors, synced skills
+		// and plugins, and the other local sessions. A trace is committed
+		// evidence, and none of these may reach it.
+		"--settings", accountIsolationSettings,
+		"--disallowedTools", "ListAgents",
 	}
 	if s.AppendSystemPrompt != "" {
 		args = append(args, "--append-system-prompt", s.AppendSystemPrompt)
@@ -80,6 +85,12 @@ func (s agentSpec) args() []string {
 	return args
 }
 
+// accountIsolationSettings keeps the claude.ai account out of the agent session.
+const accountIsolationSettings = `{"disableClaudeAiConnectors":true,"syncClaudeAiSkills":false,"syncClaudeAiPlugins":false,"crossSessionInbound":"refuse"}`
+
+// connectorsOffVar turns the claude.ai connectors off in the environment too.
+const connectorsOffVar = "ENABLE_CLAUDEAI_MCP_SERVERS=false"
+
 // autoBackgroundVar is the claude setting under which a foreground Agent call
 // still running after 120 seconds is turned into a background task and answered
 // "Async agent launched". Cloud sessions export it; a developer's shell does not.
@@ -87,9 +98,9 @@ const autoBackgroundVar = "CLAUDE_AUTO_BACKGROUND_TASKS"
 
 // agentEnv is the environment the agent runs in: the runner's own, then the
 // case's variables, which win over the runner's, with IS_SANDBOX=1 added
-// (bypassPermissions is refused for root without it) and autoBackgroundVar
-// removed from both, so a run measures the plugin's waiting behavior rather
-// than the host's.
+// (bypassPermissions is refused for root without it), connectorsOffVar added,
+// and autoBackgroundVar removed from both, so a run measures the plugin's
+// waiting behavior rather than the host's.
 func agentEnv(environ, caseEnv []string) []string {
 	env := make([]string, 0, len(environ)+len(caseEnv)+1)
 	for _, kv := range slices.Concat(environ, caseEnv) {
@@ -98,7 +109,7 @@ func agentEnv(environ, caseEnv []string) []string {
 		}
 		env = append(env, kv)
 	}
-	return append(env, "IS_SANDBOX=1")
+	return append(env, "IS_SANDBOX=1", connectorsOffVar)
 }
 
 // runAgent executes claude inside WorkDir with agentEnv, streaming stdout to
