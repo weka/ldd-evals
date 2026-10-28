@@ -25,7 +25,7 @@ on:
         required: true
         default: "5"
       plugin:
-        description: plugin directory in ai-coding-rules to measure (the generic plugin runs any suite; the suite's cases take its command prefix)
+        description: plugin directory in linter-driven-development to measure (the generic plugin runs any suite; the suite's cases take its command prefix)
         required: true
         default: go-linter-driven-development
         type: choice
@@ -117,7 +117,7 @@ jobs:
         with:
           repository: buzzdan/ai-coding-rules
           ref: ${{ inputs.plugin_ref }}
-          path: ai-coding-rules
+          path: linter-driven-development
           persist-credentials: false
       - uses: actions/setup-go@v5
         with:
@@ -166,7 +166,7 @@ jobs:
           "TIER=$TIER"
           "CAP=$COST_CAP_USD"
           "OUT=results/$SUITE-$PLUGIN_DIR-$PLUGIN_REF-$GITHUB_RUN_ID"
-          "PLUGIN=$GITHUB_WORKSPACE/ai-coding-rules/$PLUGIN_DIR"
+          "PLUGIN=$GITHUB_WORKSPACE/linter-driven-development/$PLUGIN_DIR"
           "CASE=$CASE_GLOB"
       - uses: actions/upload-artifact@v4
         if: always()
