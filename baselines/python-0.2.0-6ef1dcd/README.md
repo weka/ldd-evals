@@ -27,7 +27,7 @@ was about $81. The generic plugin's run on the same fixture cost $62.42.
 **Verdicts are as recorded.** No grader changed between this run and its promotion; the
 three fixes the generic baseline lists (#28, #29, #30) were in the suite before this run.
 The trace archive `traces.tar.zst` is not in this repo. Copy it from the same path
-in the private `weka/ldd-evals-traces` repo, then unpack it beside the verdicts before regrading:
+in the internal `weka/ldd-evals-traces` repo, which only WEKA members can open, then unpack it beside the verdicts before regrading:
 
     cd baselines/python-0.2.0-6ef1dcd && zstd -dc traces.tar.zst | tar -xf - -C .
 

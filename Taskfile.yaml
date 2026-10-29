@@ -44,3 +44,8 @@ tasks:
     desc: Run the Go plugin's documentation conformance gate over this repository
     cmds:
       - bash scripts/check-docs.sh {{.GO_PLUGIN}}
+
+  leaks:check:
+    desc: Fail when a tracked file holds a home path, a Weka email, a connector tool name, a credential or a trace
+    cmds:
+      - bash scripts/check-leaks.sh

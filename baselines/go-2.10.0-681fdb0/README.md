@@ -10,7 +10,7 @@ re-applied by `ldd-eval regrade` (no agent re-spend). Agent model pinned to
     ldd-eval regrade --tag cheap --out baselines/go-2.10.0-681fdb0/cheap <cases>
 
 Every run's `result.json` is the regraded verdict. The trace archive `traces.tar.zst` is not in this repo. Copy it from the same path
-in the private `weka/ldd-evals-traces` repo, then unpack it beside the verdicts before regrading:
+in the internal `weka/ldd-evals-traces` repo, which only WEKA members can open, then unpack it beside the verdicts before regrading:
 
     cd baselines/go-2.10.0-681fdb0 && zstd -dc traces.tar.zst | tar -xf - -C .
     task go:regrade OUT=baselines/go-2.10.0-681fdb0 TIER=cheap PLUGIN=<plugin dir>

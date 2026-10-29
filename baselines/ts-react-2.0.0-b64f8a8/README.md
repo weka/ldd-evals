@@ -32,7 +32,7 @@ unchanged" beside "travels together" (run 1 wrote the former), and
 `case-b-endpoint-review/graders/evidence-newclient.md` accepts the word `constructor`
 without a parenthesis (found during the neutral A/B). The regrade flipped case B run 1
 to a pass; nothing else moved. The trace archive `traces.tar.zst` is not in this repo. Copy it from the same path
-in the private `weka/ldd-evals-traces` repo, then unpack it beside the verdicts before regrading:
+in the internal `weka/ldd-evals-traces` repo, which only WEKA members can open, then unpack it beside the verdicts before regrading:
 
     cd baselines/ts-react-2.0.0-b64f8a8 && zstd -dc traces.tar.zst | tar -xf - -C .
 

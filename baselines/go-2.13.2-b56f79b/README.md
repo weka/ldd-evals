@@ -23,7 +23,7 @@ Spend (agent plus judge): cheap **$51.28** over 32 runs, medium **$41.54** over 
 Billed tokens: cheap 42.5M, medium 101.2M (the spend section below).
 
 The trace archive `traces.tar.zst` is not in this repo. Copy it from the same path
-in the private `weka/ldd-evals-traces` repo, then unpack it beside the verdicts before regrading:
+in the internal `weka/ldd-evals-traces` repo, which only WEKA members can open, then unpack it beside the verdicts before regrading:
 
     cd baselines/go-2.13.2-b56f79b && zstd -dc traces.tar.zst | tar -xf - -C .
 

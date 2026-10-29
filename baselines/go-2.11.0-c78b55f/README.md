@@ -24,7 +24,7 @@ adds the same-head swings observed during the Phase 2 PRs. Spend (agent plus jud
 cheap **$54.36** over 29 runs, medium **$24.83** over 10 runs; judges $0.29 and $0.68.
 
 The trace archive `traces.tar.zst` is not in this repo. Copy it from the same path
-in the private `weka/ldd-evals-traces` repo, then unpack it beside the verdicts before regrading:
+in the internal `weka/ldd-evals-traces` repo, which only WEKA members can open, then unpack it beside the verdicts before regrading:
 
     cd baselines/go-2.11.0-c78b55f && zstd -dc traces.tar.zst | tar -xf - -C .
 

@@ -65,6 +65,16 @@ jobs:
       - run: task test
       - run: task lint
 
+  # No tracked file may hold data from the machine or the account that ran an eval.
+  leaks:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: bash scripts/check-leaks.sh
+
   suite:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
