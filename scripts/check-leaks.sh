@@ -9,7 +9,8 @@
 # /home/runner (GitHub Actions); neither holds personal data.
 #
 # The patterns are written so that no pattern matches its own text, so the
-# script scans itself like any other file.
+# script scans itself like any other file. A finding names the file, the line and
+# the rule, never the matched text, so the CI log holds no copy of the leak.
 #
 # Usage: bash scripts/check-leaks.sh
 # Exit status: 0 clean, 1 findings, 2 the scan could not run.
@@ -18,36 +19,47 @@ root=$(cd "$(dirname "$0")/.." && pwd)
 cd "$root" || exit 2
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 || { echo "check-leaks: $root is not a git work tree" >&2; exit 2; }
 
+# Each rule is "<name>|<extended regular expression>"; the name holds no "|".
 sep='[\\/]+'
-patterns=(
-  "${sep}Users${sep}[A-Za-z0-9._-]+"
-  "${sep}home${sep}[A-Za-z0-9._-]+"
-  '%2F(Users|home)%2F[A-Za-z0-9._-]+'
-  '-(Users|home)-[A-Za-z0-9._]+-'
-  "${sep}var${sep}folders${sep}[A-Za-z0-9_]+${sep}[A-Za-z0-9_]+"
-  '[A-Za-z0-9._%+-]+@([A-Za-z0-9-]+\.)*weka(io)?\.(io|com)'
-  'mcp__[0-9a-f]{8}-[0-9a-f]{4}-'
-  'mcp__claude[_]ai_'
-  'sk-ant-[A-Za-z0-9_-]{10}'
-  'gh[pousr]_[A-Za-z0-9]{30}'
-  'github_pat_[A-Za-z0-9_]{20}'
-  'xox[abpr]-[A-Za-z0-9-]{10}'
-  'xapp-[0-9]-'
-  '(AKIA|ASIA)[0-9A-Z]{16}'
-  'aws_secret_access_key.{0,3}[=:]'
-  'AIza[0-9A-Za-z_-]{35}'
-  '-----BEGIN [A-Z ]*PRIVATE KEY-----'
+rules=(
+  "home folder path|${sep}Users${sep}[A-Za-z0-9._-]+"
+  "home folder path|${sep}home${sep}[A-Za-z0-9._-]+"
+  'home folder path|%2F(Users|home)%2F[A-Za-z0-9._-]+'
+  'home folder path|-(Users|home)-[A-Za-z0-9._]+-'
+  "macOS temp folder|${sep}var${sep}folders${sep}[A-Za-z0-9_]+${sep}[A-Za-z0-9_]+"
+  'Weka email address|[A-Za-z0-9._%+-]+@([A-Za-z0-9-]+\.)*weka(io)?\.(io|com)'
+  'claude.ai connector tool name|mcp__[0-9a-f]{8}-[0-9a-f]{4}-'
+  'claude.ai connector tool name|mcp__claude[_]ai_'
+  'Anthropic API key|sk-ant-[A-Za-z0-9_-]{10}'
+  'GitHub token|gh[pousr]_[A-Za-z0-9]{30}'
+  'GitHub token|github_pat_[A-Za-z0-9_]{20}'
+  'Slack token|xox[abpr]-[A-Za-z0-9-]{10}'
+  'Slack token|xapp-[0-9]-'
+  'AWS access key|(AKIA|ASIA)[0-9A-Z]{16}'
+  'AWS secret key|aws_secret_access_key.{0,3}[=:]'
+  'Google API key|AIza[0-9A-Za-z_-]{35}'
+  'private key|-----BEGIN [A-Z ]*PRIVATE KEY-----'
 )
 allowed_homes='(([\\/]+|%2F)home([\\/]+|%2F)|-home-)(user|runner)-?$'
 
-args=()
-for p in "${patterns[@]}"; do args+=(-e "$p"); done
-
-# git grep exits 1 when nothing matches; any higher status means the scan failed.
-matches=$(git grep -I -i -n -o -E "${args[@]}" -- .)
-status=$?
-(( status > 1 )) && { echo "check-leaks: git grep failed with status $status" >&2; exit 2; }
-hits=$(printf '%s\n' "$matches" | grep -viE ":$allowed_homes" | grep . || true)
+hits=""
+for rule in "${rules[@]}"; do
+  name=${rule%%|*}
+  # -z prints "<file>NUL<line>NUL<match>": the match decides the allow list,
+  # and only the file and the line reach the output. git grep exits 1 when
+  # nothing matches; any higher status means the scan failed.
+  found=$(
+    git grep -z -I -i -n -o -E -e "${rule#*|}" -- . |
+      ALLOWED=$allowed_homes NAME=$name perl -ne '
+        chomp; my ($file, $line, $match) = split /\0/, $_, 3;
+        next if $match =~ /$ENV{ALLOWED}/i or $seen{"$file:$line"}++;
+        print "$file:$line: $ENV{NAME}\n";
+      '
+    status=("${PIPESTATUS[@]}")
+    (( status[0] <= 1 && status[1] == 0 ))
+  ) || { echo "check-leaks: the scan for \"$name\" failed" >&2; exit 2; }
+  hits+=$found$'\n'
+done
 
 files=$(git ls-files) || { echo "check-leaks: git ls-files failed" >&2; exit 2; }
 traces=$(printf '%s\n' "$files" | grep -iE '(^|/)traces?\.(jsonl?|tar)(\.[a-z0-9]+)*$' || true)
