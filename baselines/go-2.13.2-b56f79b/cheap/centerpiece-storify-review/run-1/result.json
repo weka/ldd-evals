@@ -82,5 +82,5 @@
   "duration_ms": 1123896,
   "num_turns": 14,
   "segments": 1,
-  "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-centerpiece-storify-review-1180780895"
+  "scaffold_dir": "$TMPDIR/ldd-eval-centerpiece-storify-review-1180780895"
 }

@@ -695,5 +695,5 @@
   "duration_ms": 2336998,
   "num_turns": 19,
   "segments": 1,
-  "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-review-full-2151450150"
+  "scaffold_dir": "$TMPDIR/ldd-eval-review-full-2151450150"
 }

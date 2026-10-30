@@ -47,5 +47,5 @@
   "duration_ms": 656891,
   "num_turns": 52,
   "segments": 1,
-  "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-a-retention-refactor-946498943"
+  "scaffold_dir": "$TMPDIR/ldd-eval-case-a-retention-refactor-946498943"
 }

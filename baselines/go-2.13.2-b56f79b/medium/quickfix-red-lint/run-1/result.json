@@ -64,5 +64,5 @@
   "duration_ms": 1919755,
   "num_turns": 121,
   "segments": 1,
-  "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-quickfix-red-lint-147831725"
+  "scaffold_dir": "$TMPDIR/ldd-eval-quickfix-red-lint-147831725"
 }

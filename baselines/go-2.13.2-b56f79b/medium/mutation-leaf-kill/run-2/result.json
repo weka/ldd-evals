@@ -34,5 +34,5 @@
   "duration_ms": 479784,
   "num_turns": 63,
   "segments": 1,
-  "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-mutation-leaf-kill-1740616295"
+  "scaffold_dir": "$TMPDIR/ldd-eval-mutation-leaf-kill-1740616295"
 }

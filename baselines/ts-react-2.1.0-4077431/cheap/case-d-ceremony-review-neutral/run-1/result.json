@@ -28,5 +28,5 @@
   "duration_ms": 769531,
   "num_turns": 26,
   "segments": 2,
-  "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-d-ceremony-review-neutral-1101112809"
+  "scaffold_dir": "$TMPDIR/ldd-eval-case-d-ceremony-review-neutral-1101112809"
 }

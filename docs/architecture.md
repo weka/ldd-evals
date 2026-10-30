@@ -69,7 +69,7 @@ per case run and one `aggregate-result.json` per tier.
 
 `task <lang>:baseline OUT=<run dir> PLUGIN=<plugin dir>` promotes a run: it
 copies the verdicts, archives every trace into one local `traces.tar.zst` that git
-ignores, and writes
+ignores, writes the system temp folder in the verdicts as `$TMPDIR`, and writes
 a README stub with the pass-rate table pre-filled (`go-…` for the Go suite,
 `python-…` for the Python one, `ts-react-…` for the TypeScript + React one). `task <lang>:regrade OUT=<baseline> TIER=<tier>`
 re-applies the current graders to the recorded traces after the archive is

@@ -57,8 +57,9 @@ scaffold installs the fixture's `node_modules` from a shared npm cache under `$T
 
 Verdicts are always committed. Traces are not committed, because a trace can hold
 data from the machine that ran it. `task leaks:check`, which CI runs on every pull
-request, fails when a tracked file holds a home folder path, a Weka email address, a
-claude.ai connector tool name, a credential or a trace file. A regrade needs the baseline's
+request and on every push to `main`, fails when a tracked file holds a home folder
+path, a per-user macOS temp folder, a Weka email address, a claude.ai connector tool
+name or a credential, and when a trace file or a binary file is tracked. A regrade needs the baseline's
 `traces.tar.zst` from the internal `weka/ldd-evals-traces` repo, which only WEKA members can open, at the same path;
 unpack it beside the verdicts before `task go:regrade`.
 Scaffolds are not committed, so graders that read the working tree report
