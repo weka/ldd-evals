@@ -36,7 +36,7 @@ rules=(
   'Slack token|xox[abpr]-[A-Za-z0-9-]{10}'
   'Slack token|xapp-[0-9]-'
   'AWS access key|(AKIA|ASIA)[0-9A-Z]{16}'
-  'AWS secret key|aws_secret_access_key.{0,3}[=:]'
+  "AWS secret key|aws_secret_access_key[[:space:]\"']*[=:]"
   'Google API key|AIza[0-9A-Za-z_-]{35}'
   'private key|-----BEGIN [A-Z ]*PRIVATE KEY-----'
 )
