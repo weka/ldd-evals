@@ -66,7 +66,7 @@
           "duration_ms": 656891,
           "num_turns": 52,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-a-retention-refactor-946498943"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-a-retention-refactor-946498943"
         }
       ]
     },
@@ -126,7 +126,7 @@
           "duration_ms": 405795,
           "num_turns": 28,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-b-endpoint-refactor-3477356964"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-b-endpoint-refactor-3477356964"
         }
       ]
     },
@@ -211,7 +211,7 @@
           "duration_ms": 855162,
           "num_turns": 49,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-c-picker-refactor-4195949150"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-c-picker-refactor-4195949150"
         }
       ]
     },
@@ -272,7 +272,7 @@
           "duration_ms": 829271,
           "num_turns": 56,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-d-ceremony-refactor-2210634487"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-d-ceremony-refactor-2210634487"
         }
       ]
     },
@@ -363,7 +363,7 @@
           "duration_ms": 1077491,
           "num_turns": 55,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-e-nils-refactor-3490015069"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-e-nils-refactor-3490015069"
         }
       ]
     },
@@ -436,7 +436,7 @@
           "duration_ms": 1273413,
           "num_turns": 123,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-f-globals-refactor-58104895"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-f-globals-refactor-58104895"
         }
       ]
     },
@@ -539,7 +539,7 @@
           "duration_ms": 1918994,
           "num_turns": 85,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-centerpiece-storify-refactor-3701850508"
+          "scaffold_dir": "$TMPDIR/ldd-eval-centerpiece-storify-refactor-3701850508"
         }
       ]
     },
@@ -591,7 +591,7 @@
           "duration_ms": 678333,
           "num_turns": 64,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-mutation-leaf-kill-2013924698"
+          "scaffold_dir": "$TMPDIR/ldd-eval-mutation-leaf-kill-2013924698"
         },
         {
           "case": "mutation-leaf-kill",
@@ -629,7 +629,7 @@
           "duration_ms": 479784,
           "num_turns": 63,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-mutation-leaf-kill-1740616295"
+          "scaffold_dir": "$TMPDIR/ldd-eval-mutation-leaf-kill-1740616295"
         }
       ]
     },
@@ -686,7 +686,7 @@
           "duration_ms": 1250536,
           "num_turns": 105,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-prepare-sms-2937369893"
+          "scaffold_dir": "$TMPDIR/ldd-eval-prepare-sms-2937369893"
         }
       ]
     },
@@ -767,7 +767,7 @@
           "duration_ms": 1919755,
           "num_turns": 121,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-quickfix-red-lint-147831725"
+          "scaffold_dir": "$TMPDIR/ldd-eval-quickfix-red-lint-147831725"
         }
       ]
     },
@@ -854,7 +854,7 @@
           "duration_ms": 229255,
           "num_turns": 34,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-wire-repo-brain-960252128"
+          "scaffold_dir": "$TMPDIR/ldd-eval-wire-repo-brain-960252128"
         }
       ]
     }

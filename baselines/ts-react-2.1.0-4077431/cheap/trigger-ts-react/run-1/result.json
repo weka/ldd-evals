@@ -28,5 +28,5 @@
   "duration_ms": 19532,
   "num_turns": 6,
   "segments": 1,
-  "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-trigger-ts-react-2999621315"
+  "scaffold_dir": "$TMPDIR/ldd-eval-trigger-ts-react-2999621315"
 }

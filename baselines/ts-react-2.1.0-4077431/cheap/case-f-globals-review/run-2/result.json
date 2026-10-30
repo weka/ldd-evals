@@ -89,5 +89,5 @@
   "duration_ms": 772347,
   "num_turns": 14,
   "segments": 1,
-  "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-f-globals-review-3413046185"
+  "scaffold_dir": "$TMPDIR/ldd-eval-case-f-globals-review-3413046185"
 }

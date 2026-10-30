@@ -107,7 +107,7 @@
           "duration_ms": 689556,
           "num_turns": 23,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-a-retention-review-1606245152"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-a-retention-review-1606245152"
         },
         {
           "case": "case-a-retention-review",
@@ -199,7 +199,7 @@
           "duration_ms": 645129,
           "num_turns": 16,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-a-retention-review-1144611080"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-a-retention-review-1144611080"
         }
       ]
     },
@@ -251,7 +251,7 @@
           "duration_ms": 705180,
           "num_turns": 19,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-a-retention-review-neutral-891975564"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-a-retention-review-neutral-891975564"
         }
       ]
     },
@@ -370,7 +370,7 @@
           "duration_ms": 733195,
           "num_turns": 17,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-b-endpoint-review-1402469562"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-b-endpoint-review-1402469562"
         },
         {
           "case": "case-b-endpoint-review",
@@ -474,7 +474,7 @@
           "duration_ms": 654663,
           "num_turns": 17,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-b-endpoint-review-1740090072"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-b-endpoint-review-1740090072"
         }
       ]
     },
@@ -538,7 +538,7 @@
           "duration_ms": 860027,
           "num_turns": 17,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-b-endpoint-review-neutral-3795488238"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-b-endpoint-review-neutral-3795488238"
         }
       ]
     },
@@ -633,7 +633,7 @@
           "duration_ms": 544958,
           "num_turns": 13,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-c-picker-review-1551658284"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-c-picker-review-1551658284"
         },
         {
           "case": "case-c-picker-review",
@@ -713,7 +713,7 @@
           "duration_ms": 578574,
           "num_turns": 15,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-c-picker-review-2749128677"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-c-picker-review-2749128677"
         }
       ]
     },
@@ -771,7 +771,7 @@
           "duration_ms": 622011,
           "num_turns": 15,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-c-picker-review-neutral-1572471358"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-c-picker-review-neutral-1572471358"
         }
       ]
     },
@@ -874,7 +874,7 @@
           "duration_ms": 623218,
           "num_turns": 13,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-d-ceremony-review-2854140574"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-d-ceremony-review-2854140574"
         },
         {
           "case": "case-d-ceremony-review",
@@ -961,7 +961,7 @@
           "duration_ms": 524700,
           "num_turns": 12,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-d-ceremony-review-3547326662"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-d-ceremony-review-3547326662"
         }
       ]
     },
@@ -1008,7 +1008,7 @@
           "duration_ms": 769531,
           "num_turns": 26,
           "segments": 2,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-d-ceremony-review-neutral-1101112809"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-d-ceremony-review-neutral-1101112809"
         }
       ]
     },
@@ -1121,7 +1121,7 @@
           "duration_ms": 812157,
           "num_turns": 14,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-e-nils-review-4220822067"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-e-nils-review-4220822067"
         },
         {
           "case": "case-e-nils-review",
@@ -1219,7 +1219,7 @@
           "duration_ms": 815264,
           "num_turns": 19,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-e-nils-review-1253417499"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-e-nils-review-1253417499"
         }
       ]
     },
@@ -1259,7 +1259,7 @@
           "duration_ms": 888451,
           "num_turns": 16,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-e-nils-review-neutral-2188929635"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-e-nils-review-neutral-2188929635"
         }
       ]
     },
@@ -1367,7 +1367,7 @@
           "duration_ms": 729446,
           "num_turns": 14,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-f-globals-review-2562227106"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-f-globals-review-2562227106"
         },
         {
           "case": "case-f-globals-review",
@@ -1460,7 +1460,7 @@
           "duration_ms": 772347,
           "num_turns": 14,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-f-globals-review-3413046185"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-f-globals-review-3413046185"
         }
       ]
     },
@@ -1530,7 +1530,7 @@
           "duration_ms": 793296,
           "num_turns": 16,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-f-globals-review-neutral-1311219195"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-f-globals-review-neutral-1311219195"
         }
       ]
     },
@@ -1613,7 +1613,7 @@
           "duration_ms": 740033,
           "num_turns": 18,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-g-leaf-mutants-review-2825396357"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-g-leaf-mutants-review-2825396357"
         },
         {
           "case": "case-g-leaf-mutants-review",
@@ -1681,7 +1681,7 @@
           "duration_ms": 775678,
           "num_turns": 20,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-g-leaf-mutants-review-1569340431"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-g-leaf-mutants-review-1569340431"
         }
       ]
     },
@@ -1788,7 +1788,7 @@
           "duration_ms": 1359380,
           "num_turns": 15,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-centerpiece-storify-review-3856285501"
+          "scaffold_dir": "$TMPDIR/ldd-eval-centerpiece-storify-review-3856285501"
         },
         {
           "case": "centerpiece-storify-review",
@@ -1880,7 +1880,7 @@
           "duration_ms": 1546577,
           "num_turns": 21,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-centerpiece-storify-review-2798372184"
+          "scaffold_dir": "$TMPDIR/ldd-eval-centerpiece-storify-review-2798372184"
         }
       ]
     },
@@ -1932,7 +1932,7 @@
           "duration_ms": 1389365,
           "num_turns": 15,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-centerpiece-storify-review-neutral-2716060834"
+          "scaffold_dir": "$TMPDIR/ldd-eval-centerpiece-storify-review-neutral-2716060834"
         }
       ]
     },
@@ -1996,7 +1996,7 @@
           "duration_ms": 14465,
           "num_turns": 2,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-quickfix-clean-tree-919514428"
+          "scaffold_dir": "$TMPDIR/ldd-eval-quickfix-clean-tree-919514428"
         },
         {
           "case": "quickfix-clean-tree",
@@ -2046,7 +2046,7 @@
           "duration_ms": 13416,
           "num_turns": 3,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-quickfix-clean-tree-1170340720"
+          "scaffold_dir": "$TMPDIR/ldd-eval-quickfix-clean-tree-1170340720"
         },
         {
           "case": "quickfix-clean-tree",
@@ -2096,7 +2096,7 @@
           "duration_ms": 13991,
           "num_turns": 3,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-quickfix-clean-tree-2989004653"
+          "scaffold_dir": "$TMPDIR/ldd-eval-quickfix-clean-tree-2989004653"
         }
       ]
     },
@@ -2148,7 +2148,7 @@
           "duration_ms": 13300,
           "num_turns": 2,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-review-clean-tree-1407834326"
+          "scaffold_dir": "$TMPDIR/ldd-eval-review-clean-tree-1407834326"
         },
         {
           "case": "review-clean-tree",
@@ -2186,7 +2186,7 @@
           "duration_ms": 17847,
           "num_turns": 3,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-review-clean-tree-251112700"
+          "scaffold_dir": "$TMPDIR/ldd-eval-review-clean-tree-251112700"
         },
         {
           "case": "review-clean-tree",
@@ -2224,7 +2224,7 @@
           "duration_ms": 16406,
           "num_turns": 2,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-review-clean-tree-4098431790"
+          "scaffold_dir": "$TMPDIR/ldd-eval-review-clean-tree-4098431790"
         }
       ]
     },
@@ -3020,7 +3020,7 @@
           "duration_ms": 2079323,
           "num_turns": 29,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-review-full-921466054"
+          "scaffold_dir": "$TMPDIR/ldd-eval-review-full-921466054"
         },
         {
           "case": "review-full",
@@ -3803,7 +3803,7 @@
           "duration_ms": 2664081,
           "num_turns": 38,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-review-full-3969903952"
+          "scaffold_dir": "$TMPDIR/ldd-eval-review-full-3969903952"
         },
         {
           "case": "review-full",
@@ -4586,7 +4586,7 @@
           "duration_ms": 2263638,
           "num_turns": 26,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-review-full-3455656921"
+          "scaffold_dir": "$TMPDIR/ldd-eval-review-full-3455656921"
         }
       ]
     },
@@ -5250,7 +5250,7 @@
           "duration_ms": 2103004,
           "num_turns": 19,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-review-full-neutral-2197622468"
+          "scaffold_dir": "$TMPDIR/ldd-eval-review-full-neutral-2197622468"
         }
       ]
     },
@@ -5289,7 +5289,7 @@
           "duration_ms": 5288,
           "num_turns": 1,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-trigger-non-ts-react-3058419100"
+          "scaffold_dir": "$TMPDIR/ldd-eval-trigger-non-ts-react-3058419100"
         },
         {
           "case": "trigger-non-ts-react",
@@ -5315,7 +5315,7 @@
           "duration_ms": 4612,
           "num_turns": 1,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-trigger-non-ts-react-4117450639"
+          "scaffold_dir": "$TMPDIR/ldd-eval-trigger-non-ts-react-4117450639"
         },
         {
           "case": "trigger-non-ts-react",
@@ -5341,7 +5341,7 @@
           "duration_ms": 5126,
           "num_turns": 1,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-trigger-non-ts-react-2199543741"
+          "scaffold_dir": "$TMPDIR/ldd-eval-trigger-non-ts-react-2199543741"
         }
       ]
     },
@@ -5386,7 +5386,7 @@
           "duration_ms": 19532,
           "num_turns": 6,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-trigger-ts-react-2999621315"
+          "scaffold_dir": "$TMPDIR/ldd-eval-trigger-ts-react-2999621315"
         },
         {
           "case": "trigger-ts-react",
@@ -5418,7 +5418,7 @@
           "duration_ms": 19267,
           "num_turns": 4,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-trigger-ts-react-4030053513"
+          "scaffold_dir": "$TMPDIR/ldd-eval-trigger-ts-react-4030053513"
         },
         {
           "case": "trigger-ts-react",
@@ -5450,7 +5450,7 @@
           "duration_ms": 16837,
           "num_turns": 4,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-trigger-ts-react-2719735748"
+          "scaffold_dir": "$TMPDIR/ldd-eval-trigger-ts-react-2719735748"
         }
       ]
     }

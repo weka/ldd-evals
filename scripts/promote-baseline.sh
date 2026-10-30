@@ -4,9 +4,10 @@
 # Copies everything under <run-dir> except the traces into
 # baselines/<lang>-<plugin version>-<plugin sha>/, archives every trace.jsonl
 # (at any depth) into one traces.tar.zst there (git ignores it: traces can hold
-# data from the machine that ran them), records the plugin pin in
-# plugin.json, and writes a README stub with the pass-rate table pre-filled
-# from each tier's aggregate-result.json unless the run already has a README.
+# data from the machine that ran them), writes the system temp folder as $TMPDIR,
+# records the plugin pin in plugin.json, and writes a README stub with the
+# pass-rate table pre-filled from each tier's aggregate-result.json unless the
+# run already has a README.
 #
 # Usage: scripts/promote-baseline.sh <run-dir> <plugin-dir> [lang]
 #   <plugin-dir>  the go-linter-driven-development checkout the run measured;
@@ -29,7 +30,7 @@ plugin=${2:?usage: promote-baseline.sh <run-dir> <plugin-dir> [lang]}
 lang=${3:-go}
 
 [[ -d $run ]] || { echo "promote-baseline: run dir not found: $run" >&2; exit 2; }
-for tool in jq zstd rsync tar; do
+for tool in jq zstd rsync tar perl; do
   command -v "$tool" >/dev/null || { echo "promote-baseline: $tool is required" >&2; exit 2; }
 done
 
@@ -42,6 +43,17 @@ dest="$root/baselines/$name"
 
 mkdir -p "$dest"
 rsync -a --exclude=trace.jsonl "$run/" "$dest/"
+# The scaffolds live in the system temp folder. On macOS its path is per user, so
+# the baseline records it as the placeholder $TMPDIR. The physical path goes first,
+# because it holds the logical path.
+tmp=${TMPDIR:-/tmp}
+tmp=${tmp%/}
+if [[ $tmp != /tmp ]]; then
+  real=$(cd "$tmp" && pwd -P)
+  { grep -rlF -e "$tmp" -e "$real" "$dest" || true; } | while IFS= read -r f; do
+    TMP_LOGICAL=$tmp TMP_REAL=$real perl -pi -e 's/\Q$ENV{TMP_REAL}\E/\$TMPDIR/g; s/\Q$ENV{TMP_LOGICAL}\E/\$TMPDIR/g' "$f"
+  done
+fi
 traces=$(cd "$run" && find . -type f -name trace.jsonl | sort)
 if [[ -n $traces ]]; then
   (cd "$run" && printf '%s\n' "$traces" | tar -cf - -T -) | zstd -q -19 -T0 -o "$dest/traces.tar.zst"

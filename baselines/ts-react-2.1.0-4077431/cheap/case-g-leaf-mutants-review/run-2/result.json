@@ -64,5 +64,5 @@
   "duration_ms": 775678,
   "num_turns": 20,
   "segments": 1,
-  "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-g-leaf-mutants-review-1569340431"
+  "scaffold_dir": "$TMPDIR/ldd-eval-case-g-leaf-mutants-review-1569340431"
 }

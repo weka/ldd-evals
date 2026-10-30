@@ -26,7 +26,7 @@ same kind of environment, and the comparison below is the acceptance of Phase 1.
     task go:baseline OUT=results/go-rebaseline-5828c34 PLUGIN=../ai-coding-rules/go-linter-driven-development
 
 Every run's `result.json` is the regraded verdict. The trace archive `traces.tar.zst` is not in this repo. Copy it from the same path
-in the private `weka/ldd-evals-traces` repo, then unpack it beside the verdicts before regrading:
+in the internal `weka/ldd-evals-traces` repo, which only WEKA members can open, then unpack it beside the verdicts before regrading:
 
     cd baselines/go-2.10.0-5828c34 && zstd -dc traces.tar.zst | tar -xf - -C .
     task go:regrade OUT=baselines/go-2.10.0-5828c34 TIER=cheap PLUGIN=<plugin dir>

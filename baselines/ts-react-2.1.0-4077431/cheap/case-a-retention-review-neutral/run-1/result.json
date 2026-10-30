@@ -34,5 +34,5 @@
   "duration_ms": 705180,
   "num_turns": 19,
   "segments": 1,
-  "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-a-retention-review-neutral-891975564"
+  "scaffold_dir": "$TMPDIR/ldd-eval-case-a-retention-review-neutral-891975564"
 }

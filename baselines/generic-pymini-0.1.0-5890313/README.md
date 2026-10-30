@@ -22,7 +22,7 @@ Cheap tier only, one invocation, the cap never tripped. Spend (agent plus judge)
 **Verdicts are as recorded, not regraded.** Three grader fixes landed after this run and
 before promotion (#28, #29, #30, "Grader changes" below); the owner chose to keep the
 recorded verdicts. The tables say per case what a regrade would change. The trace archive `traces.tar.zst` is not in this repo. Copy it from the same path
-in the private `weka/ldd-evals-traces` repo, then unpack it beside the verdicts before regrading:
+in the internal `weka/ldd-evals-traces` repo, which only WEKA members can open, then unpack it beside the verdicts before regrading:
 
     cd baselines/generic-pymini-0.1.0-5890313 && zstd -dc traces.tar.zst | tar -xf - -C .
 

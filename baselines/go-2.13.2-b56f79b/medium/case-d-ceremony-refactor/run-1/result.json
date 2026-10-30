@@ -41,5 +41,5 @@
   "duration_ms": 829271,
   "num_turns": 56,
   "segments": 1,
-  "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-d-ceremony-refactor-2210634487"
+  "scaffold_dir": "$TMPDIR/ldd-eval-case-d-ceremony-refactor-2210634487"
 }

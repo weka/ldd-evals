@@ -40,5 +40,5 @@
   "duration_ms": 622011,
   "num_turns": 15,
   "segments": 1,
-  "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-c-picker-review-neutral-1572471358"
+  "scaffold_dir": "$TMPDIR/ldd-eval-case-c-picker-review-neutral-1572471358"
 }

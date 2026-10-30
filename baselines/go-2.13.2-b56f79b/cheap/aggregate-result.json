@@ -107,7 +107,7 @@
           "duration_ms": 417697,
           "num_turns": 15,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-a-retention-review-3464256128"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-a-retention-review-3464256128"
         },
         {
           "case": "case-a-retention-review",
@@ -199,7 +199,7 @@
           "duration_ms": 530039,
           "num_turns": 15,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-a-retention-review-2180290666"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-a-retention-review-2180290666"
         }
       ]
     },
@@ -318,7 +318,7 @@
           "duration_ms": 504155,
           "num_turns": 13,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-b-endpoint-review-2628478500"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-b-endpoint-review-2628478500"
         },
         {
           "case": "case-b-endpoint-review",
@@ -422,7 +422,7 @@
           "duration_ms": 700181,
           "num_turns": 11,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-b-endpoint-review-1334042142"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-b-endpoint-review-1334042142"
         }
       ]
     },
@@ -511,7 +511,7 @@
           "duration_ms": 404894,
           "num_turns": 14,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-c-picker-review-3165371953"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-c-picker-review-3165371953"
         },
         {
           "case": "case-c-picker-review",
@@ -585,7 +585,7 @@
           "duration_ms": 409213,
           "num_turns": 13,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-c-picker-review-2535824705"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-c-picker-review-2535824705"
         }
       ]
     },
@@ -688,7 +688,7 @@
           "duration_ms": 516025,
           "num_turns": 14,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-d-ceremony-review-315766200"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-d-ceremony-review-315766200"
         },
         {
           "case": "case-d-ceremony-review",
@@ -775,7 +775,7 @@
           "duration_ms": 475205,
           "num_turns": 13,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-d-ceremony-review-1449892335"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-d-ceremony-review-1449892335"
         }
       ]
     },
@@ -888,7 +888,7 @@
           "duration_ms": 693897,
           "num_turns": 14,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-e-nils-review-457716536"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-e-nils-review-457716536"
         },
         {
           "case": "case-e-nils-review",
@@ -986,7 +986,7 @@
           "duration_ms": 628150,
           "num_turns": 14,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-e-nils-review-2075294000"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-e-nils-review-2075294000"
         }
       ]
     },
@@ -1100,7 +1100,7 @@
           "duration_ms": 802007,
           "num_turns": 18,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-f-globals-review-4077202895"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-f-globals-review-4077202895"
         },
         {
           "case": "case-f-globals-review",
@@ -1199,7 +1199,7 @@
           "duration_ms": 725988,
           "num_turns": 13,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-f-globals-review-3785822079"
+          "scaffold_dir": "$TMPDIR/ldd-eval-case-f-globals-review-3785822079"
         }
       ]
     },
@@ -1300,7 +1300,7 @@
           "duration_ms": 1123896,
           "num_turns": 14,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-centerpiece-storify-review-1180780895"
+          "scaffold_dir": "$TMPDIR/ldd-eval-centerpiece-storify-review-1180780895"
         },
         {
           "case": "centerpiece-storify-review",
@@ -1386,7 +1386,7 @@
           "duration_ms": 1197767,
           "num_turns": 17,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-centerpiece-storify-review-2285267450"
+          "scaffold_dir": "$TMPDIR/ldd-eval-centerpiece-storify-review-2285267450"
         }
       ]
     },
@@ -1486,7 +1486,7 @@
           "duration_ms": 852679,
           "num_turns": 25,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-mutation-leaf-review-3035847967"
+          "scaffold_dir": "$TMPDIR/ldd-eval-mutation-leaf-review-3035847967"
         },
         {
           "case": "mutation-leaf-review",
@@ -1572,7 +1572,7 @@
           "duration_ms": 647900,
           "num_turns": 18,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-mutation-leaf-review-1806570394"
+          "scaffold_dir": "$TMPDIR/ldd-eval-mutation-leaf-review-1806570394"
         },
         {
           "case": "mutation-leaf-review",
@@ -1658,7 +1658,7 @@
           "duration_ms": 616586,
           "num_turns": 12,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-mutation-leaf-review-2807581445"
+          "scaffold_dir": "$TMPDIR/ldd-eval-mutation-leaf-review-2807581445"
         }
       ]
     },
@@ -1722,7 +1722,7 @@
           "duration_ms": 18927,
           "num_turns": 4,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-quickfix-clean-tree-3863194222"
+          "scaffold_dir": "$TMPDIR/ldd-eval-quickfix-clean-tree-3863194222"
         },
         {
           "case": "quickfix-clean-tree",
@@ -1772,7 +1772,7 @@
           "duration_ms": 14532,
           "num_turns": 2,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-quickfix-clean-tree-2279446"
+          "scaffold_dir": "$TMPDIR/ldd-eval-quickfix-clean-tree-2279446"
         },
         {
           "case": "quickfix-clean-tree",
@@ -1822,7 +1822,7 @@
           "duration_ms": 25727,
           "num_turns": 2,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-quickfix-clean-tree-4192345113"
+          "scaffold_dir": "$TMPDIR/ldd-eval-quickfix-clean-tree-4192345113"
         }
       ]
     },
@@ -1874,7 +1874,7 @@
           "duration_ms": 18056,
           "num_turns": 3,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-review-clean-tree-4013751515"
+          "scaffold_dir": "$TMPDIR/ldd-eval-review-clean-tree-4013751515"
         },
         {
           "case": "review-clean-tree",
@@ -1912,7 +1912,7 @@
           "duration_ms": 12059,
           "num_turns": 2,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-review-clean-tree-853284979"
+          "scaffold_dir": "$TMPDIR/ldd-eval-review-clean-tree-853284979"
         },
         {
           "case": "review-clean-tree",
@@ -1950,7 +1950,7 @@
           "duration_ms": 12994,
           "num_turns": 2,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-review-clean-tree-2930091629"
+          "scaffold_dir": "$TMPDIR/ldd-eval-review-clean-tree-2930091629"
         }
       ]
     },
@@ -2662,7 +2662,7 @@
           "duration_ms": 1711931,
           "num_turns": 17,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-review-full-1401442354"
+          "scaffold_dir": "$TMPDIR/ldd-eval-review-full-1401442354"
         },
         {
           "case": "review-full",
@@ -3361,7 +3361,7 @@
           "duration_ms": 1850806,
           "num_turns": 17,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-review-full-3363201386"
+          "scaffold_dir": "$TMPDIR/ldd-eval-review-full-3363201386"
         },
         {
           "case": "review-full",
@@ -4060,7 +4060,7 @@
           "duration_ms": 2336998,
           "num_turns": 19,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-review-full-2151450150"
+          "scaffold_dir": "$TMPDIR/ldd-eval-review-full-2151450150"
         }
       ]
     },
@@ -4105,7 +4105,7 @@
           "duration_ms": 19257,
           "num_turns": 4,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-trigger-go-4098045161"
+          "scaffold_dir": "$TMPDIR/ldd-eval-trigger-go-4098045161"
         },
         {
           "case": "trigger-go",
@@ -4137,7 +4137,7 @@
           "duration_ms": 12897,
           "num_turns": 4,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-trigger-go-1491421090"
+          "scaffold_dir": "$TMPDIR/ldd-eval-trigger-go-1491421090"
         },
         {
           "case": "trigger-go",
@@ -4169,7 +4169,7 @@
           "duration_ms": 18205,
           "num_turns": 4,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-trigger-go-1938676188"
+          "scaffold_dir": "$TMPDIR/ldd-eval-trigger-go-1938676188"
         }
       ]
     },
@@ -4208,7 +4208,7 @@
           "duration_ms": 4344,
           "num_turns": 1,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-trigger-non-go-3594416968"
+          "scaffold_dir": "$TMPDIR/ldd-eval-trigger-non-go-3594416968"
         },
         {
           "case": "trigger-non-go",
@@ -4234,7 +4234,7 @@
           "duration_ms": 4347,
           "num_turns": 1,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-trigger-non-go-672704417"
+          "scaffold_dir": "$TMPDIR/ldd-eval-trigger-non-go-672704417"
         },
         {
           "case": "trigger-non-go",
@@ -4260,7 +4260,7 @@
           "duration_ms": 5436,
           "num_turns": 1,
           "segments": 1,
-          "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-trigger-non-go-881191947"
+          "scaffold_dir": "$TMPDIR/ldd-eval-trigger-non-go-881191947"
         }
       ]
     }

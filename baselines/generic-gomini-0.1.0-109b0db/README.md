@@ -27,7 +27,7 @@ Spend (agent plus judge): **$64.86** over 29 runs, judges $0.32. The reference c
 cost $54.36 for the same 29 runs.
 
 The trace archive `traces.tar.zst` is not in this repo. Copy it from the same path
-in the private `weka/ldd-evals-traces` repo, then unpack it beside the verdicts before regrading:
+in the internal `weka/ldd-evals-traces` repo, which only WEKA members can open, then unpack it beside the verdicts before regrading:
 
     cd baselines/generic-gomini-0.1.0-109b0db && zstd -dc traces.tar.zst | tar -xf - -C .
 

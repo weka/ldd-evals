@@ -94,5 +94,5 @@
   "duration_ms": 815264,
   "num_turns": 19,
   "segments": 1,
-  "scaffold_dir": "/var/folders/w4/wb1ryhrj5x3fsk0cz8h5p_vm0000gn/T/ldd-eval-case-e-nils-review-1253417499"
+  "scaffold_dir": "$TMPDIR/ldd-eval-case-e-nils-review-1253417499"
 }

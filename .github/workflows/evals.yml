@@ -2,6 +2,8 @@ name: evals
 
 on:
   pull_request:
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       plugin_ref:
@@ -48,7 +50,7 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
@@ -65,11 +67,23 @@ jobs:
       - run: task test
       - run: task lint
 
+  # No tracked file may hold data from the machine or the account that ran an eval.
+  # The job also runs on every push to main, so a commit that skips a pull request
+  # is checked too.
+  leaks:
+    if: github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - run: bash scripts/check-leaks.sh
+
   suite:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: arduino/setup-task@v2
         with:
           version: 3.x
@@ -110,11 +124,11 @@ jobs:
           [[ $CASE_GLOB =~ $case_re ]] || { echo "::error::case must be a glob over case names"; exit 1; }
       # persist-credentials: false keeps the job token out of .git/config, where the
       # agent under test could read it.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           path: ldd-evals
           persist-credentials: false
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           repository: weka/linter-driven-development
           ref: ${{ inputs.plugin_ref }}
