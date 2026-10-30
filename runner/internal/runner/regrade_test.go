@@ -91,6 +91,39 @@ func TestRegrade_ScaffoldReadersFailClearlyWithoutKeptScaffold(t *testing.T) {
 	}
 }
 
+func TestRegrade_ResolvesTheTempDirPlaceholderOfAPromotedBaseline(t *testing.T) {
+	fileGrader := "---\ntype: file_exists\npath: 'hello.go'\n---\n"
+	evalsDir := evalsWithCase(t, "mkdir -p \"$1\"\n", map[string]string{"prompt.md": promptWithModel, "graders/f.md": fileGrader})
+	outDir := t.TempDir()
+	recorded := recordRun(t, evalsDir, outDir)
+	scaffold, err := os.MkdirTemp("", "ldd-eval-kept-")
+	if err != nil {
+		t.Fatalf("make scaffold: %v", err)
+	}
+	t.Cleanup(func() { _ = os.RemoveAll(scaffold) })
+	if err := os.WriteFile(filepath.Join(scaffold, "hello.go"), []byte("package main\n"), 0o600); err != nil {
+		t.Fatalf("write scaffold file: %v", err)
+	}
+	recorded.ScaffoldDir = "$TMPDIR/" + filepath.Base(scaffold)
+	if err := report.WriteJSON(filepath.Join(outDir, "probe", "run-1", "result.json"), recorded); err != nil {
+		t.Fatalf("write promoted result: %v", err)
+	}
+	r, err := runner.New(runner.Options{EvalsDir: evalsDir, OutDir: outDir, Threshold: 1})
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	if _, err := r.Regrade(context.Background()); err != nil {
+		t.Fatalf("Regrade: %v", err)
+	}
+	after, err := report.ReadRunResult(filepath.Join(outDir, "probe", "run-1", "result.json"))
+	if err != nil {
+		t.Fatalf("read regraded result: %v", err)
+	}
+	if !after.Passed {
+		t.Errorf("regraded result = %+v, want the file_exists grader to read the kept scaffold under the system temp dir", after)
+	}
+}
+
 func TestRegrade_SkipsRunStillInFlight(t *testing.T) {
 	evalsDir := evalsWithCase(t, "mkdir -p \"$1\"\n", map[string]string{"prompt.md": promptWithModel, "graders/g.md": passingGrader})
 	outDir := t.TempDir()

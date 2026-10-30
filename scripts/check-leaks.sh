@@ -61,10 +61,18 @@ for rule in "${rules[@]}"; do
   hits+=$found$'\n'
 done
 
-files=$(git ls-files) || { echo "check-leaks: git ls-files failed" >&2; exit 2; }
-traces=$(printf '%s\n' "$files" | grep -iE '(^|/)traces?\.(jsonl?|tar)(\.[a-z0-9]+)*$' || true)
-eol=$(git ls-files --eol) || { echo "check-leaks: git ls-files --eol failed" >&2; exit 2; }
-binaries=$(printf '%s\n' "$eol" | awk '$1 == "i/-text" { sub(/^[^\t]*\t/, ""); print }')
+# The file lists read NUL-separated names, because git quotes a name that holds
+# a tab, a newline or a non-ASCII character. A name prints with its tabs and
+# newlines escaped, so one file is one line of the report.
+files=$(git ls-files -z | tr -cd "\0" | wc -c) || { echo "check-leaks: git ls-files failed" >&2; exit 2; }
+traces=$(git ls-files -z | perl -0ne '
+  chomp; next unless m{(^|/)traces?\.(jsonl?|tar)(\.[a-z0-9]+)*$}i;
+  s/\t/\\t/g; s/\n/\\n/g; print "$_\n";
+') || { echo "check-leaks: the scan for trace files failed" >&2; exit 2; }
+binaries=$(git ls-files -z --eol | perl -0ne '
+  chomp; next unless s{^i/-text\s[^\t]*\t}{};
+  s/\t/\\t/g; s/\n/\\n/g; print "$_\n";
+') || { echo "check-leaks: the scan for binary files failed" >&2; exit 2; }
 
 findings=0
 report() { # report <reason> <lines>: print each line with the reason, add to the count
@@ -83,4 +91,4 @@ if (( findings > 0 )); then
   echo "check-leaks: $findings finding(s); remove the data, or replace a path with a placeholder"
   exit 1
 fi
-echo "check-leaks: OK ($(printf '%s\n' "$files" | grep -c .) tracked files)"
+echo "check-leaks: OK ($(( files )) tracked files)"

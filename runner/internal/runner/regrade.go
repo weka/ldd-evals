@@ -127,10 +127,17 @@ func executionOutcome(tr trace.Trace) grade.Outcome {
 	return grade.Outcome{Name: "execution", Type: "execution", Detail: "claude reported is_error (" + tr.Subtype() + ")"}
 }
 
+// tempDirPlaceholder stands for the system temp folder in a promoted baseline:
+// on macOS that path is per user, so scripts/promote-baseline.sh writes this instead.
+const tempDirPlaceholder = "$TMPDIR"
+
 // keptScaffold returns the scaffold path when it still exists, else "".
 func keptScaffold(path string) string {
 	if path == "" {
 		return ""
+	}
+	if rest, ok := strings.CutPrefix(path, tempDirPlaceholder); ok {
+		path = filepath.Join(os.TempDir(), rest)
 	}
 	if info, err := os.Stat(path); err != nil || !info.IsDir() {
 		return ""
