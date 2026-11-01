@@ -59,8 +59,6 @@
     "node": ">=20.19"
   },
   "overrides": {
-    "eslint-plugin-sonarjs": {
-      "minimatch": "^10.2.6"
-    }
+    "minimatch@10.1.2": "10.2.6"
   }
 }
