@@ -33,7 +33,8 @@ func CheckWebhook(ctx context.Context, cfg WebhookConfig) (Result, error) {
 	if env == nil {
 		env = os.LookupEnv
 	}
-	endpoint := trimSlash(expandEnv(strings.TrimSpace(string(raw)), env))
+	expanded := expandEnv(strings.TrimSpace(string(raw)), env)
+	endpoint := trimSlash(expanded)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, http.NoBody)
 	if err != nil {

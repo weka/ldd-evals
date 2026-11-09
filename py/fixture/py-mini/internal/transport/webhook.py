@@ -24,7 +24,8 @@ def check_webhook(path: Path, env: Callable[[str], str | None] = os.environ.get)
 
     A non-2xx answer raises OSError.
     """
-    endpoint = _trim_slash(_expand_env(path.read_text().strip(), env))
+    expanded = _expand_env(path.read_text().strip(), env)
+    endpoint = _trim_slash(expanded)
     req = urllib.request.Request(endpoint, data=b"", method="POST")
     try:
         with urllib.request.urlopen(req, timeout=_HTTP_TIMEOUT) as resp:

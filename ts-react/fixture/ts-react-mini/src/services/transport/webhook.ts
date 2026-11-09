@@ -13,7 +13,8 @@ const DEFAULT_IF_EMPTY = ':-'
  */
 export async function checkWebhook(configUrl: string, env: Lookup): Promise<WebhookResult> {
   const template = await (await fetch(configUrl)).text()
-  const endpoint = trimSlash(expandEnv(template.trim(), env))
+  const expanded = expandEnv(template.trim(), env)
+  const endpoint = trimSlash(expanded)
   const res = await fetch(endpoint, { method: 'POST' })
   if (!res.ok) {
     throw new Error(`transport: post ${endpoint}: status ${res.status}`)
