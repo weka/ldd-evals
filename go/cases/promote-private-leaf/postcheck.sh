@@ -12,10 +12,11 @@ done
 # current branch. The run has no user, so such a row is a false answer. A missing ledger
 # file counts as zero rows.
 ledger_user_rows() {
-	local branch file
-	branch=$(git -C "$EVAL_DIR" symbolic-ref --short -q HEAD) || branch=detached
-	file=$(git -C "$EVAL_DIR" rev-parse --git-path "ldd/${branch//\//%2F}.md")
-	case "$file" in /*) ;; *) file="$EVAL_DIR/$file" ;; esac
+	local common branch file
+	common=$(git -C "$EVAL_DIR" rev-parse --path-format=absolute --git-common-dir)
+	branch=$(git -C "$EVAL_DIR" symbolic-ref --short -q HEAD) || branch=HEAD
+	branch=${branch//\%/%25}
+	file="$common/ldd/${branch//\//%2F}.md"
 	[ -f "$file" ] || { echo 0; return; }
 	grep -c '^- finding · user · ' "$file" || true
 }
