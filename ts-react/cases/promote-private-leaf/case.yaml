@@ -9,7 +9,8 @@ notes: |
   measures the rule and not the defer path. The right move is a new public module, beside the I/O one or below it,
   for expandEnv, with its own tests, and trimSlash stays private in the I/O file.
   The wrong moves are a test-only export, or a private function kept in place.
-  This suite has no mutation grader: the mutation step of the rule is Go-only.
+  This suite has no mutation grader. The mutation step runs Stryker when it is present. A
+  mutation-not-run row in the ledger is expected when Stryker is absent.
   The postcheck builds, tests, checks the new module for its own tests and full
   coverage, checks that the old name is gone and that no test-only export exists,
   and counts the commits.

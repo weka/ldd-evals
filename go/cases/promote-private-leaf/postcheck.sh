@@ -8,6 +8,18 @@ for lib in "$here/../../postcheck/lib.sh" "$here/../postcheck/lib.sh"; do
   [ -f "$lib" ] && { . "$lib"; break; }
 done
 
+# ledger_user_rows — the number of ledger rows of the form "- finding · user · " for the
+# current branch. The run has no user, so such a row is a false answer. A missing ledger
+# file counts as zero rows.
+ledger_user_rows() {
+	local branch file
+	branch=$(git -C "$EVAL_DIR" symbolic-ref --short -q HEAD) || branch=detached
+	file=$(git -C "$EVAL_DIR" rev-parse --git-path "ldd/${branch//\//%2F}.md")
+	case "$file" in /*) ;; *) file="$EVAL_DIR/$file" ;; esac
+	[ -f "$file" ] || { echo 0; return; }
+	grep -c '^- finding · user · ' "$file" || true
+}
+
 IO_FILE=internal/transport/webhook.go
 
 # nested_packages — directories one level below internal/transport that hold a
@@ -46,13 +58,14 @@ for pkg in ${nested[@]+"${nested[@]}"}; do
 	assert "nested package $pkg is covered at 100.0%" full_coverage "$pkg"
 done
 
-assert_eq "expandEnv is no longer defined in webhook.go" "$(count_matches '^func expandEnv\(' "$IO_FILE")" 0
+assert_eq "expandEnv is no longer defined in webhook.go" "$(count_matches '^func [eE]xpandEnv\(' "$IO_FILE")" 0
 assert_eq "trimSlash is still defined in webhook.go" "$(count_matches '^func trimSlash\(' "$IO_FILE")" 1
 assert_ge "webhook.go imports a nested package" "$(count_matches '"[^"]*/internal/transport/[a-z0-9_]+"' "$IO_FILE")" 1
 
 # No door for tests: no export_test.go file anywhere in the tree.
 assert_eq "no export_test.go in the tree" "$(cd "$EVAL_DIR" && find . -name 'export_test.go' -not -path './.git/*' | wc -l)" 0
 
+assert_eq "the ledger has no finding row with a user answer" "$(ledger_user_rows)" 0
 assert_ge "at least one commit after the scaffold" "$(commits_since_base)" 1
 assert "clean tree at the end" git -C "$EVAL_DIR" diff --quiet HEAD
 finish
