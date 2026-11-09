@@ -2,8 +2,16 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { checkWebhook } from './webhook'
 
-const ENV: Record<string, string> = { EMPTY: '', HOOK: 'alerts' }
-const lookup = (name: string): string | undefined => ENV[name]
+function lookup(name: string): string | undefined {
+  switch (name) {
+    case 'EMPTY':
+      return ''
+    case 'HOOK':
+      return 'alerts'
+    default:
+      return undefined
+  }
+}
 
 function stubFetch(config: string, postStatus = 204): ReturnType<typeof vi.fn> {
   const fetchMock = vi.fn((_url: string, init?: RequestInit) =>
