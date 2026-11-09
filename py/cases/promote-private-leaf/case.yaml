@@ -10,6 +10,6 @@ notes: |
   for _expand_env, with its own tests, and _trim_slash stays private in the I/O file.
   The wrong moves are a test-only export, or a private function kept in place.
   This suite has no mutation grader: the mutation step of the rule is Go-only.
-  The postcheck builds, tests, checks the new package for its own tests and full
+  The postcheck builds, tests, checks the new module for its own tests and full
   coverage, checks that the old name is gone and that no test-only export exists,
   and counts the commits.
