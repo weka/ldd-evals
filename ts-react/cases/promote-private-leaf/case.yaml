@@ -1,0 +1,15 @@
+schema_version: "1.1"
+context:
+  scaffold_script: ../scaffold/default.sh
+postcheck: ./postcheck.sh
+tier: medium
+notes: |
+  The refactor twin of the private-leaf review case. The quickfix command gets
+  src/services/transport/webhook.ts and its test. The prompt accepts every R4 and R7 finding, so the case
+  measures the rule and not the defer path. The right move is a nested folder
+  for expandEnv with its own tests, and trimSlash stays private in the I/O file.
+  The wrong moves are a test-only export, or a private function kept in place.
+  This suite has no mutation grader: the mutation step of the rule is Go-only.
+  The postcheck builds, tests, checks the new folder for its own tests and full
+  coverage, checks that the old name is gone and that no test-only export exists,
+  and counts the commits.
