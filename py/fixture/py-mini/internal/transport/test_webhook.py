@@ -73,4 +73,4 @@ def test_check_webhook_reports_a_failure_status(
     conf = tmp_path / "webhook.conf"
     conf.write_text(hook.base)
     with pytest.raises(OSError, match="status 502"):
-        check_webhook(conf, {}.get)
+        check_webhook(conf, lambda _name: None)
