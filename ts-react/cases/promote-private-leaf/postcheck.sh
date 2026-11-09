@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # promote-private-leaf postcheck: expandEnv left the I/O module for a new module
 # with a public export, beside it or below it, with its own test file and full
-# coverage (statements, branches, functions and lines). trimSlash stayed, no
+# coverage of statements, functions and lines (not branches). trimSlash stayed, no
 # test-only export exists, build and tests are green, the work is committed.
 set -uo pipefail
 here="$(dirname "$(readlink -f "$0")")"
