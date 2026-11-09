@@ -1,0 +1,12 @@
+schema_version: "1.1"
+context:
+  scaffold_script: ../scaffold/default.sh
+tier: cheap
+notes: |
+  A private leaf inside an I/O file. The plant is expandEnv in internal/transport/webhook.go: a pure,
+  branchy function with its own contract, tested only through the I/O entry
+  point. The control is trimSlash in the same file: a trivial private helper
+  that must stay private and draw no finding. The fix the graders look for
+  is a nested package below the I/O one, never a door that exports the private
+  name for tests only. Plant id R7.Q4.private-leaf-in-io, control id
+  CTRL.R4.trivial-private-in-io, both in the suite's violations manifest.
