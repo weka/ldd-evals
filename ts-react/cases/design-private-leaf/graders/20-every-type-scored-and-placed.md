@@ -1,6 +1,6 @@
 ---
 type: llm
-criteria: Every type in the DESIGN PLAN has an R1 score and a rung. Each type with a score of 4 or more is on rung 2 or 3, or has a written reason for rung 1. The expansion leaf and the reply-classification leaf are in packages nested under the feature package. The probe stays in the feature package.
+criteria: Every type in the DESIGN PLAN has an R1 score and a rung. Each type with a score of 4 or more is on rung 2 or 3, or has a written reason for rung 1. The expansion leaf and the reply-classification leaf are each in a module or sub-package inside the feature package. The probe stays in the feature package.
 focus: last_message
 ---
 The final message holds a DESIGN PLAN with a placement block. Each line of the block
@@ -12,11 +12,11 @@ Judge the block with these four checks. Score PASS only when all four hold.
 2. Each type with an R1 score of 4 or more is on rung 2 or rung 3, or it is on rung 1
    and the line gives a written reason for that choice. A high score on rung 1 with no
    reason is a FAIL.
-3. The expansion of environment references and the classification of the reply are in
-   packages nested under the feature package. In this suite a folder below the feature
-   one counts, for example `src/services/transport/webhookCheck/expand`. A leaf in the feature package itself, or in a
-   sibling of it, is a FAIL.
-4. The probe, the part that does the HTTP and TLS work, stays in the feature package.
-   A probe in a nested package is a FAIL.
+3. The expansion of environment references and the classification of the reply are each
+   in a module or a sub-package inside the feature package (rung 2 or 3). Both count, for
+   example `src/services/transport/webhookCheck/expand.ts` or a sub-package folder below the feature. A leaf in the feature's own
+   entry module, or outside the feature package, is a FAIL.
+4. The probe, the part that does the HTTP and TLS work, stays in the feature package's
+   entry module. A probe moved to its own module or sub-package is a FAIL.
 
 Quote the line of the block for each check in your answer. Do not reward length.

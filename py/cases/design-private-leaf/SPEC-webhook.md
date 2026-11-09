@@ -43,5 +43,5 @@ Each verdict carries a short reason for the operator.
 ## Packaging
 
 The feature has one public entry: a function that takes the configuration path and the variable lookup, and returns the verdict.
-The feature goes in a new package below the transport package of the service.
+The feature goes in a new package (a folder) below the transport package of the service.
 No product names appear in code or messages.
