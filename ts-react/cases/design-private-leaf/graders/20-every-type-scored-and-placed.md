@@ -14,10 +14,12 @@ Judge the block with these four checks. Score PASS only when all four hold.
 3. The expansion of environment references and the classification of the reply are each
    in a module or a sub-package inside the feature package (rung 2 or 3). Both count, for
    example `src/services/transport/webhookCheck/expand.ts` or a sub-package folder below the feature. A leaf in the feature's own
-   entry module, or outside the feature package, is a FAIL.
+   entry module, or in the module that does the I/O (the probe's module, whatever its name),
+   or outside the feature package, is a FAIL. Example: `webhook_check/probe.py` holds both
+   the probe and `expand_env`; that is a FAIL.
 4. The probe, the part that does the HTTP and TLS work, stays in the feature package.
    It can stay in the entry module, or move to a role module inside the feature package
-   (R5 vertical slice) as rung 2, when the names of that module are public. A probe in a
+   (R5 vertical slice) as rung 2. A probe in a
    sub-package for pure leaves, or in a module outside the feature package, is a FAIL.
 
 Quote the line of the block for each check in your answer. Do not reward length.

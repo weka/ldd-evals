@@ -65,7 +65,7 @@ assert_ge "a new test file exists in the transport folder" "$(grep -c . <<<"$new
 assert "a new module exports a public name" exports_public_name
 assert "the new modules are covered at 100 percent by the new tests" full_coverage
 
-assert_eq "expandEnv is no longer defined in webhook.ts" "$(count_matches '^(export )?function expandEnv\(' "$IO_FILE")" 0
+assert_eq "expandEnv is no longer defined in webhook.ts" "$(count_matches '^(export (const|function) |function )expandEnv\b' "$IO_FILE")" 0
 assert_eq "trimSlash is still defined in webhook.ts" "$(count_matches '^(export )?function trimSlash\(' "$IO_FILE")" 1
 assert_ge "webhook.ts imports a new module" "$(count_matches "^import .* from ['\"]\./[A-Za-z0-9_-]+(/[A-Za-z0-9_.-]+)?['\"]" "$IO_FILE")" 1
 
