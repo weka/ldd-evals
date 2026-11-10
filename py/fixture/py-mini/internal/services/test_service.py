@@ -13,7 +13,7 @@ from internal.models.alert import Alert
 from internal.models.device import Device
 from internal.models.job import Job
 from internal.models.job_kind import Priority
-from internal.models.status import STATUS_READY
+from internal.models.status import STATUS_DEGRADED, STATUS_DOWN, STATUS_READY
 from internal.repository.mem_store import MemStore
 from internal.services.cache import Cache
 from internal.services.device_service import AuditLog, DeviceService, RepositoryError
@@ -199,43 +199,53 @@ def test_device_service_get_caches() -> None:
         assert s.get("acme", "d1").status == STATUS_READY
     st = s.stats()
     assert (st.hits, st.misses, st.cached) == (1, 1, 1)
-
-
-def _fleet() -> DeviceService:
-    repo = MemStore()
-    seen = datetime(2024, 1, 2, tzinfo=UTC)
-    repo.save(Device(id="d1", tenant="acme", status="READY", version="1.0", last_seen=seen))
-    old = datetime(2023, 1, 2, tzinfo=UTC)
-    repo.save(Device(id="d2", tenant="acme", status="DOWN", version="1.0", last_seen=old))
-    repo.save(Device(id="d3", tenant="acme", status="DEGRADED", version="2.0", last_seen=seen))
-    repo.save(Device(id="d4", tenant="other", status="READY", version="3.0", last_seen=seen))
-    return _service(repo)
-
-
-def test_device_service_tenant_queries() -> None:
-    s = _fleet()
-    assert {d.id for d in s.list_tenant("acme")} == {"d1", "d2", "d3"}
-    assert {d.id for d in s.online_devices("acme")} == {"d1", "d3"}
-    assert s.count_online("acme") == 2
-    assert s.version_counts("acme") == {"1.0": 2, "2.0": 1}
-    oldest = s.oldest_device("acme")
-    assert oldest is not None
-    assert oldest.id == "d2"
-    assert s.oldest_device("nobody") is None
-    assert [d.id for d in s.stale_devices("acme", timedelta(days=365 * 100))] == []
-    assert {d.id for d in s.stale_devices("acme", timedelta(seconds=1))} == {"d1", "d2", "d3"}
-
-
-def test_device_service_tags() -> None:
-    s = _fleet()
-    s.add_tag("acme", "d1", "edge")
-    s.add_tag("acme", "d1", "edge")
-    assert s.get("acme", "d1").tags == ["edge"]
-    s.remove_tag("acme", "d1", "edge")
-    s.remove_tag("acme", "d1", "edge")
-    assert s.get("acme", "d1").tags == []
     with pytest.raises(RepositoryError):
         s.get("acme", "missing")
+
+
+def _device(device_id: str, status: str, seen: datetime) -> Device:
+    return Device(id=device_id, tenant="acme", status=status, last_seen=seen)
+
+
+def test_device_service_list_tenant() -> None:
+    repo = MemStore()
+    repo.save(Device(id="d1", tenant="acme", status=STATUS_READY))
+    repo.save(Device(id="d2", tenant="other", status=STATUS_READY))
+    got = _service(repo).list_tenant("acme")
+    assert [d.id for d in got] == ["d1"]
+
+
+def test_device_service_count_online() -> None:
+    seen = datetime(2024, 1, 2, tzinfo=UTC)
+    devices = [
+        _device("d1", STATUS_READY, seen),
+        _device("d2", STATUS_DOWN, seen),
+        _device("d3", STATUS_DEGRADED, seen),
+    ]
+    assert _service().count_online(devices) == 2
+
+
+def test_device_service_is_stale() -> None:
+    now = datetime(2024, 1, 2, tzinfo=UTC)
+    d = _device("d1", STATUS_READY, now - timedelta(hours=2))
+    assert _service().is_stale(d, timedelta(hours=1), now)
+    assert not _service().is_stale(d, timedelta(hours=3), now)
+
+
+def test_device_service_with_tag_copies() -> None:
+    d = Device(id="d1", tenant="acme", status=STATUS_READY, tags=["a"])
+    tagged = _service().with_tag(d, "b")
+    assert tagged.tags == ["a", "b"]
+    assert d.tags == ["a"]
+    assert _service().with_tag(tagged, "b").tags == ["a", "b"]
+
+
+def test_device_service_newest() -> None:
+    old = _device("d1", STATUS_READY, datetime(2023, 1, 2, tzinfo=UTC))
+    new = _device("d2", STATUS_READY, datetime(2024, 1, 2, tzinfo=UTC))
+    assert _service().newest([old, new]).id == "d2"
+    with pytest.raises(ValueError):
+        _service().newest([])
 
 
 def test_snapshot_service_run() -> None:

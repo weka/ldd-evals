@@ -4,7 +4,7 @@ import contextlib
 import logging
 import threading
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
 from typing import Any, TextIO
 
@@ -443,61 +443,44 @@ class DeviceService:
         return flushed
 
     def list_tenant(self, tenant: str) -> list[Device]:
-        """List the devices of one tenant, best score first."""
+        """List the devices of one tenant, best score first.
+
+        The repository has no per-tenant listing, so the filter runs here.
+        """
         return [d for d in self.list_devices() if d.tenant == tenant]
 
-    def online_devices(self, tenant: str) -> list[Device]:
-        """List the online devices of one tenant, best score first."""
-        return [d for d in self.list_tenant(tenant) if d.is_online()]
+    def count_online(self, devices: list[Device]) -> int:
+        """Count the devices in a listing that report READY or DEGRADED.
 
-    def count_online(self, tenant: str) -> int:
-        """Return how many devices of one tenant are online."""
-        return len(self.online_devices(tenant))
+        Takes the devices as an argument, so that a caller that already holds
+        a listing does not read the repository a second time.
+        """
+        return sum(1 for d in devices if d.is_online())
 
-    def oldest_device(self, tenant: str) -> Device | None:
-        """Return the device of one tenant that was seen longest ago, or None."""
-        devices = self.list_tenant(tenant)
-        if not devices:
-            return None
-        return min(devices, key=lambda d: d.last_seen)
+    def is_stale(self, d: Device, older_than: timedelta, now: datetime) -> bool:
+        """Return whether the device was last seen more than `older_than` before `now`.
 
-    def version_counts(self, tenant: str) -> dict[str, int]:
-        """Count the devices of one tenant per firmware version."""
-        counts: dict[str, int] = {}
-        for d in self.list_tenant(tenant):
-            counts[d.version] = counts.get(d.version, 0) + 1
-        return counts
+        The caller passes `now`, so that one sweep judges every device against
+        the same instant.
+        """
+        return now - d.last_seen > older_than
 
-    def add_tag(self, tenant: str, device_id: str, tag: str) -> None:
-        """Add a tag to a device. A tag the device already has is kept once."""
-        d = self.get(tenant, device_id)
-        if tag in d.tags:
-            return
-        d.tags.append(tag)
-        try:
-            self.repo.save(d)
-        except OSError as err:
-            raise RepositoryError(f"add tag {device_id}: {err}") from err
-        with self.mu:
-            self.cache[_cache_key(tenant, device_id)] = d
+    def with_tag(self, d: Device, tag: str) -> Device:
+        """Return a copy of the device that carries the tag.
 
-    def remove_tag(self, tenant: str, device_id: str, tag: str) -> None:
-        """Remove a tag from a device. A tag the device does not have is ignored."""
-        d = self.get(tenant, device_id)
-        if tag not in d.tags:
-            return
-        d.tags.remove(tag)
-        try:
-            self.repo.save(d)
-        except OSError as err:
-            raise RepositoryError(f"remove tag {device_id}: {err}") from err
-        with self.mu:
-            self.cache[_cache_key(tenant, device_id)] = d
+        The copy leaves `d` untouched, because the cache hands the same object
+        to every reader. A tag the device already has appears once, at the end.
+        """
+        others = [t for t in d.tags if t != tag]
+        return replace(d, tags=[*others, tag])
 
-    def stale_devices(self, tenant: str, older_than: timedelta) -> list[Device]:
-        """List the devices of one tenant that were not seen within a period."""
-        cutoff = datetime.now(UTC) - older_than
-        return [d for d in self.list_tenant(tenant) if d.last_seen < cutoff]
+    def newest(self, devices: list[Device]) -> Device:
+        """Return the device with the latest last-seen time; the first one wins a tie.
+
+        Raises ValueError for an empty list: a caller with no devices has no
+        question to ask.
+        """
+        return max(devices, key=lambda d: d.last_seen)
 
     def close(self) -> None:
         """Release the service."""
