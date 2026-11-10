@@ -54,6 +54,17 @@ full_coverage() {
 	return $rc
 }
 
+# leaf_in_subpackage — a new folder with __init__.py below the transport package holds
+# a definition of expand_env, in __init__.py or in a module inside that folder.
+leaf_in_subpackage() {
+	local init dir
+	for init in $(new_files '^internal/transport/[^/]+(/[^/]+)*/__init__\.py$'); do
+		dir=$(dirname "$init")
+		grep -rqE '^def _?expand_env\(' --include='*.py' "$EVAL_DIR/$dir" && return 0
+	done
+	return 1
+}
+
 # exports_public_name — a new module defines a function whose name has no leading underscore.
 exports_public_name() {
 	local f
@@ -63,14 +74,14 @@ exports_public_name() {
 	return 1
 }
 
-new_src=$(new_files '\.py$' | grep -vE '(^|/)test_[^/]*\.py$|/__pycache__/')
+new_src=$(new_files '\.py$' | grep -vE '(^|/)(test_[^/]*|conftest)\.py$|/__pycache__/')
 new_tests=$(new_files '(^|/)test_[^/]*\.py$')
 
 assert "task build green" run_task build
 assert "task test green" run_task test
 
 assert_ge "a new non-test module exists in the transport package" "$(grep -c . <<<"$new_src")" 1
-assert_ge "a new sub-package folder with __init__.py exists below the transport package" "$(new_files '^internal/transport/[^/]+(/[^/]+)*/__init__\.py$' | grep -c .)" 1
+assert "a new sub-package folder with __init__.py holds def expand_env" leaf_in_subpackage
 assert_eq "no new plain module file sits directly in the transport package" "$(grep -cE '^internal/transport/[^/]+\.py$' <<<"$new_src")" 0
 assert_ge "a new test file exists in the transport package" "$(grep -c . <<<"$new_tests")" 1
 assert "a new module exports a public function" exports_public_name
