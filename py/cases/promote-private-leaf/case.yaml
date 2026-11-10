@@ -5,12 +5,12 @@ postcheck: ./postcheck.sh
 tier: medium
 notes: |
   The refactor twin of the private-leaf review case. The quickfix command gets
-  internal/transport/webhook.py and its test. The prompt accepts every R4 and R7 finding, so the case
-  measures the rule and not the defer path. The right move is a new public module, beside the I/O one or below it,
-  for _expand_env, with its own tests, and _trim_slash stays private in the I/O file.
+  internal/transport/webhook.py and its test. The run has no user, so it fixes every finding and defers none. The case
+  measures the rule and not the defer path. The right move is a new sub-package folder with __init__.py below the
+  transport package, for _expand_env, with its own tests, and _trim_slash stays private in the I/O file.
   The wrong moves are a test-only export, or a private function kept in place.
   This suite has no mutation grader. The mutation step runs mutmut when it is present. A
   mutation-not-run row in the ledger is expected when mutmut is absent.
-  The postcheck builds, tests, checks the new module for its own tests and full
+  The postcheck builds, tests, checks the new sub-package for its own tests and full
   coverage, checks that the old name is gone and that no test-only export exists,
   and counts the commits.

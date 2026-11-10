@@ -10,4 +10,4 @@ append_system_prompt: |
 ---
 /{{cmd_prefix}}-quickfix internal/transport/webhook.py internal/transport/test_webhook.py
 
-Accept and fix every R4 and R7 finding. Defer every other finding that needs a decision. Commit the result.
+Fix every finding. The run has no user to answer. Commit the result.

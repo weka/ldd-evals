@@ -8,17 +8,17 @@ for lib in "$here/../../postcheck/lib.sh" "$here/../postcheck/lib.sh"; do
   [ -f "$lib" ] && { . "$lib"; break; }
 done
 
-# ledger_user_rows — the number of ledger rows of the form "- finding · user · " for the
-# current branch. The run has no user, so such a row is a false answer. A missing ledger
-# file counts as zero rows.
-ledger_user_rows() {
+# ledger_finding_rows — the number of ledger rows of the form "- finding · " for the
+# current branch. The run has no user and fixes every finding, so any such row is a
+# deferred finding. A missing ledger file counts as zero rows.
+ledger_finding_rows() {
 	local common branch file
 	common=$(git -C "$EVAL_DIR" rev-parse --path-format=absolute --git-common-dir)
 	branch=$(git -C "$EVAL_DIR" symbolic-ref --short -q HEAD) || branch=HEAD
 	branch=${branch//\%/%25}
 	file="$common/ldd/${branch//\//%2F}.md"
 	[ -f "$file" ] || { echo 0; return; }
-	grep -c '^- finding · user · ' "$file" || true
+	grep -c '^- finding · ' "$file" || true
 }
 
 IO_FILE=internal/transport/webhook.go
@@ -66,7 +66,7 @@ assert_ge "webhook.go imports a nested package" "$(count_matches '"[^"]*/interna
 # No door for tests: no export_test.go file anywhere in the tree.
 assert_eq "no export_test.go in the tree" "$(cd "$EVAL_DIR" && find . -name 'export_test.go' -not -path './.git/*' | wc -l)" 0
 
-assert_eq "the ledger has no finding row with a user answer" "$(ledger_user_rows)" 0
+assert_eq "the ledger has no finding row" "$(ledger_finding_rows)" 0
 assert_ge "at least one commit after the scaffold" "$(commits_since_base)" 1
 assert "clean tree at the end" git -C "$EVAL_DIR" diff --quiet HEAD
 finish

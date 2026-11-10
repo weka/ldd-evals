@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # promote-private-leaf postcheck: _expand_env left the I/O module for a new
-# public module, beside it or below it, with its own test file and full
-# coverage. _trim_slash stayed, no test-only export exists, build and tests are
+# sub-package folder (with __init__.py) below the transport package, with its
+# own test file and full coverage. A plain module file is not a promotion.
+# _trim_slash stayed, no test-only export exists, build and tests are
 # green, the work is committed.
 set -uo pipefail
 here="$(dirname "$(readlink -f "$0")")"
@@ -9,17 +10,17 @@ for lib in "$here/../../postcheck/lib.sh" "$here/../postcheck/lib.sh"; do
   [ -f "$lib" ] && { . "$lib"; break; }
 done
 
-# ledger_user_rows — the number of ledger rows of the form "- finding · user · " for the
-# current branch. The run has no user, so such a row is a false answer. A missing ledger
-# file counts as zero rows.
-ledger_user_rows() {
+# ledger_finding_rows — the number of ledger rows of the form "- finding · " for the
+# current branch. The run has no user and fixes every finding, so any such row is a
+# deferred finding. A missing ledger file counts as zero rows.
+ledger_finding_rows() {
 	local common branch file
 	common=$(git -C "$EVAL_DIR" rev-parse --path-format=absolute --git-common-dir)
 	branch=$(git -C "$EVAL_DIR" symbolic-ref --short -q HEAD) || branch=HEAD
 	branch=${branch//\%/%25}
 	file="$common/ldd/${branch//\//%2F}.md"
 	[ -f "$file" ] || { echo 0; return; }
-	grep -c '^- finding · user · ' "$file" || true
+	grep -c '^- finding · ' "$file" || true
 }
 
 IO_FILE=internal/transport/webhook.py
@@ -69,6 +70,8 @@ assert "task build green" run_task build
 assert "task test green" run_task test
 
 assert_ge "a new non-test module exists in the transport package" "$(grep -c . <<<"$new_src")" 1
+assert_ge "a new sub-package folder with __init__.py exists below the transport package" "$(new_files '^internal/transport/[^/]+(/[^/]+)*/__init__\.py$' | grep -c .)" 1
+assert_eq "no new plain module file sits directly in the transport package" "$(grep -cE '^internal/transport/[^/]+\.py$' <<<"$new_src")" 0
 assert_ge "a new test file exists in the transport package" "$(grep -c . <<<"$new_tests")" 1
 assert "a new module exports a public function" exports_public_name
 assert "the new modules are covered at 100 percent by the new tests" full_coverage
@@ -80,7 +83,7 @@ assert_ge "webhook.py imports a new module" "$(count_matches '^(from|import) +(\
 # No door for tests: no __testing hook and no test-only export module.
 assert_eq "no test-only export in the tree" "$(count_matches '__testing|testing_exports' 'internal/**/*.py' 'svc/**/*.py')" 0
 
-assert_eq "the ledger has no finding row with a user answer" "$(ledger_user_rows)" 0
+assert_eq "the ledger has no finding row" "$(ledger_finding_rows)" 0
 assert_ge "at least one commit after the scaffold" "$(commits_since_base)" 1
 assert "clean tree at the end" git -C "$EVAL_DIR" diff --quiet HEAD
 finish

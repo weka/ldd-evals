@@ -5,7 +5,7 @@ postcheck: ./postcheck.sh
 tier: medium
 notes: |
   The refactor twin of the private-leaf review case. The quickfix command gets
-  internal/transport/webhook.go and its test. The prompt accepts every R4 and R7 finding, so the case
+  internal/transport/webhook.go and its test. The run has no user, so it fixes every finding and defers none. The case
   measures the rule and not the defer path. The right move is a nested package
   for expandEnv with its own tests, and trimSlash stays private in the I/O file.
   The wrong moves are a test-only export, or a private function kept in place.
