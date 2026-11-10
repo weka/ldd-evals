@@ -13,7 +13,7 @@ from internal.models.alert import Alert
 from internal.models.device import Device
 from internal.models.job import Job
 from internal.models.job_kind import Priority
-from internal.models.status import STATUS_READY
+from internal.models.status import STATUS_DEGRADED, STATUS_DOWN, STATUS_READY
 from internal.repository.mem_store import MemStore
 from internal.services.cache import Cache
 from internal.services.device_service import AuditLog, DeviceService, RepositoryError
@@ -201,6 +201,45 @@ def test_device_service_get_caches() -> None:
     assert (st.hits, st.misses, st.cached) == (1, 1, 1)
     with pytest.raises(RepositoryError):
         s.get("acme", "missing")
+
+
+def _stored(repo: MemStore, device_id: str, tenant: str, status: str, year: int) -> None:
+    seen = datetime(year, 1, 2, tzinfo=UTC)
+    repo.save(Device(id=device_id, tenant=tenant, status=status, last_seen=seen))
+
+
+def _cached_service() -> DeviceService:
+    repo = MemStore()
+    _stored(repo, "d1", "acme", STATUS_READY, 2023)
+    _stored(repo, "d2", "acme", STATUS_DOWN, 2024)
+    _stored(repo, "d3", "other", STATUS_DEGRADED, 2022)
+    _stored(repo, "d4", "acme", STATUS_READY, 2021)
+    s = _service(repo)
+    for tenant, device_id in [("acme", "d1"), ("acme", "d2"), ("other", "d3")]:
+        s.get(tenant, device_id)
+    return s
+
+
+def test_device_service_list_tenant() -> None:
+    got = _cached_service().list_tenant("acme")
+    assert {d.id for d in got} == {"d1", "d2", "d4"}
+
+
+def test_device_service_cached_online_count() -> None:
+    assert _cached_service().cached_online_count() == 2
+
+
+def test_device_service_newest_cached() -> None:
+    assert _cached_service().newest_cached().id == "d2"
+    with pytest.raises(ValueError):
+        _service().newest_cached()
+
+
+def test_device_service_evict_tenant() -> None:
+    s = _cached_service()
+    assert s.evict_tenant("acme") == 2
+    assert s.stats().cached == 1
+    assert s.evict_tenant("acme") == 0
 
 
 def test_snapshot_service_run() -> None:

@@ -752,9 +752,9 @@
   questions: [Q1]
   files: [internal/services/device_service.py]
   anchor: '^class DeviceService:'
-  recall_own: 'device_service\.py[^\n]*(?i:4[5-9][0-9][ -]?(lines?|loc)\b|god[ -]file|longest)'
+  recall_own: 'device_service\.py[^\n]*(?i:(?:4[5-9][0-9]|5[0-9][0-9])[ -]?(?:code[ -])?(lines?|loc)\b|god[ -]file|longest)'
   expect:
-    review: { category: "🔴", fix: "Rename layer files by role during the move", note: "the longest module in the tree, 19 methods" }
+    review: { category: "🔴", fix: "Rename layer files by role during the move", note: "the longest module in the tree, 23 methods besides __init__, 460 code lines and 523 raw lines, over the 450 code-line limit" }
     lint:   { linter: "-", route: R5, note: "no file-length rule in ruff" }
     prepare: { gate: BOUNDED, spec: sms-channel, verdict: PREP-DEFERRED }
 
