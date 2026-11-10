@@ -60,7 +60,7 @@ leaf_in_subpackage() {
 	local init dir
 	for init in $(new_files '^internal/transport/[^/]+(/[^/]+)*/__init__\.py$'); do
 		dir=$(dirname "$init")
-		grep -rqE '^def _?expand_env\(' --include='*.py' "$EVAL_DIR/$dir" && return 0
+		grep -rqE '^def expand_env\(' --include='*.py' "$EVAL_DIR/$dir" && return 0
 	done
 	return 1
 }
