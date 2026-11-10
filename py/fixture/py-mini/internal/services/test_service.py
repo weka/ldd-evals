@@ -3,7 +3,7 @@ import json
 import threading
 import time
 from collections.abc import Iterator
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import ClassVar
 
@@ -203,49 +203,43 @@ def test_device_service_get_caches() -> None:
         s.get("acme", "missing")
 
 
-def _device(device_id: str, status: str, seen: datetime) -> Device:
-    return Device(id=device_id, tenant="acme", status=status, last_seen=seen)
+def _stored(repo: MemStore, device_id: str, tenant: str, status: str, year: int) -> None:
+    seen = datetime(year, 1, 2, tzinfo=UTC)
+    repo.save(Device(id=device_id, tenant=tenant, status=status, last_seen=seen))
+
+
+def _cached_service() -> DeviceService:
+    repo = MemStore()
+    _stored(repo, "d1", "acme", STATUS_READY, 2023)
+    _stored(repo, "d2", "acme", STATUS_DOWN, 2024)
+    _stored(repo, "d3", "other", STATUS_DEGRADED, 2022)
+    _stored(repo, "d4", "acme", STATUS_READY, 2021)
+    s = _service(repo)
+    for tenant, device_id in [("acme", "d1"), ("acme", "d2"), ("other", "d3")]:
+        s.get(tenant, device_id)
+    return s
 
 
 def test_device_service_list_tenant() -> None:
-    repo = MemStore()
-    repo.save(Device(id="d1", tenant="acme", status=STATUS_READY))
-    repo.save(Device(id="d2", tenant="other", status=STATUS_READY))
-    got = _service(repo).list_tenant("acme")
-    assert [d.id for d in got] == ["d1"]
+    got = _cached_service().list_tenant("acme")
+    assert {d.id for d in got} == {"d1", "d2", "d4"}
 
 
-def test_device_service_count_online() -> None:
-    seen = datetime(2024, 1, 2, tzinfo=UTC)
-    devices = [
-        _device("d1", STATUS_READY, seen),
-        _device("d2", STATUS_DOWN, seen),
-        _device("d3", STATUS_DEGRADED, seen),
-    ]
-    assert _service().count_online(devices) == 2
+def test_device_service_cached_online_count() -> None:
+    assert _cached_service().cached_online_count() == 2
 
 
-def test_device_service_is_stale() -> None:
-    now = datetime(2024, 1, 2, tzinfo=UTC)
-    d = _device("d1", STATUS_READY, now - timedelta(hours=2))
-    assert _service().is_stale(d, timedelta(hours=1), now)
-    assert not _service().is_stale(d, timedelta(hours=3), now)
-
-
-def test_device_service_with_tag_copies() -> None:
-    d = Device(id="d1", tenant="acme", status=STATUS_READY, tags=["a"])
-    tagged = _service().with_tag(d, "b")
-    assert tagged.tags == ["a", "b"]
-    assert d.tags == ["a"]
-    assert _service().with_tag(tagged, "b").tags == ["a", "b"]
-
-
-def test_device_service_newest() -> None:
-    old = _device("d1", STATUS_READY, datetime(2023, 1, 2, tzinfo=UTC))
-    new = _device("d2", STATUS_READY, datetime(2024, 1, 2, tzinfo=UTC))
-    assert _service().newest([old, new]).id == "d2"
+def test_device_service_newest_cached() -> None:
+    assert _cached_service().newest_cached().id == "d2"
     with pytest.raises(ValueError):
-        _service().newest([])
+        _service().newest_cached()
+
+
+def test_device_service_evict_tenant() -> None:
+    s = _cached_service()
+    assert s.evict_tenant("acme") == 2
+    assert s.stats().cached == 1
+    assert s.evict_tenant("acme") == 0
 
 
 def test_snapshot_service_run() -> None:

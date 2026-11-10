@@ -4,7 +4,7 @@ import contextlib
 import logging
 import threading
 import time
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any, TextIO
 
@@ -449,38 +449,32 @@ class DeviceService:
         """
         return [d for d in self.list_devices() if d.tenant == tenant]
 
-    def count_online(self, devices: list[Device]) -> int:
-        """Count the devices in a listing that report READY or DEGRADED.
+    def cached_online_count(self) -> int:
+        """Count the cached devices that are online, without reading the repository.
 
-        Takes the devices as an argument, so that a caller that already holds
-        a listing does not read the repository a second time.
+        A device that was never read through `get` is not counted.
         """
-        return sum(1 for d in devices if d.is_online())
+        with self.mu:
+            return sum(1 for d in self.cache.values() if d.is_online())
 
-    def is_stale(self, d: Device, older_than: timedelta, now: datetime) -> bool:
-        """Return whether the device was last seen more than `older_than` before `now`.
+    def newest_cached(self) -> Device:
+        """Return the cached device with the latest last-seen time; the first one wins a tie.
 
-        The caller passes `now`, so that one sweep judges every device against
-        the same instant.
+        Raises ValueError when the cache is empty.
         """
-        return now - d.last_seen > older_than
+        with self.mu:
+            return max(self.cache.values(), key=lambda d: d.last_seen)
 
-    def with_tag(self, d: Device, tag: str) -> Device:
-        """Return a copy of the device that carries the tag.
+    def evict_tenant(self, tenant: str) -> int:
+        """Drop one tenant's devices from the cache and return how many were dropped.
 
-        The copy leaves `d` untouched, because the cache hands the same object
-        to every reader. A tag the device already has appears once, at the end.
+        The repository is not touched, so the next `get` reads the stored copy again.
         """
-        others = [t for t in d.tags if t != tag]
-        return replace(d, tags=[*others, tag])
-
-    def newest(self, devices: list[Device]) -> Device:
-        """Return the device with the latest last-seen time; the first one wins a tie.
-
-        Raises ValueError for an empty list: a caller with no devices has no
-        question to ask.
-        """
-        return max(devices, key=lambda d: d.last_seen)
+        with self.mu:
+            keys = [key for key, d in self.cache.items() if d.tenant == tenant]
+            for key in keys:
+                del self.cache[key]
+        return len(keys)
 
     def close(self) -> None:
         """Release the service."""
