@@ -442,6 +442,63 @@ class DeviceService:
                 flushed += 1
         return flushed
 
+    def list_tenant(self, tenant: str) -> list[Device]:
+        """List the devices of one tenant, best score first."""
+        return [d for d in self.list_devices() if d.tenant == tenant]
+
+    def online_devices(self, tenant: str) -> list[Device]:
+        """List the online devices of one tenant, best score first."""
+        return [d for d in self.list_tenant(tenant) if d.is_online()]
+
+    def count_online(self, tenant: str) -> int:
+        """Return how many devices of one tenant are online."""
+        return len(self.online_devices(tenant))
+
+    def oldest_device(self, tenant: str) -> Device | None:
+        """Return the device of one tenant that was seen longest ago, or None."""
+        devices = self.list_tenant(tenant)
+        if not devices:
+            return None
+        return min(devices, key=lambda d: d.last_seen)
+
+    def version_counts(self, tenant: str) -> dict[str, int]:
+        """Count the devices of one tenant per firmware version."""
+        counts: dict[str, int] = {}
+        for d in self.list_tenant(tenant):
+            counts[d.version] = counts.get(d.version, 0) + 1
+        return counts
+
+    def add_tag(self, tenant: str, device_id: str, tag: str) -> None:
+        """Add a tag to a device. A tag the device already has is kept once."""
+        d = self.get(tenant, device_id)
+        if tag in d.tags:
+            return
+        d.tags.append(tag)
+        try:
+            self.repo.save(d)
+        except OSError as err:
+            raise RepositoryError(f"add tag {device_id}: {err}") from err
+        with self.mu:
+            self.cache[_cache_key(tenant, device_id)] = d
+
+    def remove_tag(self, tenant: str, device_id: str, tag: str) -> None:
+        """Remove a tag from a device. A tag the device does not have is ignored."""
+        d = self.get(tenant, device_id)
+        if tag not in d.tags:
+            return
+        d.tags.remove(tag)
+        try:
+            self.repo.save(d)
+        except OSError as err:
+            raise RepositoryError(f"remove tag {device_id}: {err}") from err
+        with self.mu:
+            self.cache[_cache_key(tenant, device_id)] = d
+
+    def stale_devices(self, tenant: str, older_than: timedelta) -> list[Device]:
+        """List the devices of one tenant that were not seen within a period."""
+        cutoff = datetime.now(UTC) - older_than
+        return [d for d in self.list_tenant(tenant) if d.last_seen < cutoff]
+
     def close(self) -> None:
         """Release the service."""
         with self.mu:

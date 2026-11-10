@@ -3,7 +3,7 @@ import json
 import threading
 import time
 from collections.abc import Iterator
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import ClassVar
 
@@ -199,6 +199,41 @@ def test_device_service_get_caches() -> None:
         assert s.get("acme", "d1").status == STATUS_READY
     st = s.stats()
     assert (st.hits, st.misses, st.cached) == (1, 1, 1)
+
+
+def _fleet() -> DeviceService:
+    repo = MemStore()
+    seen = datetime(2024, 1, 2, tzinfo=UTC)
+    repo.save(Device(id="d1", tenant="acme", status="READY", version="1.0", last_seen=seen))
+    old = datetime(2023, 1, 2, tzinfo=UTC)
+    repo.save(Device(id="d2", tenant="acme", status="DOWN", version="1.0", last_seen=old))
+    repo.save(Device(id="d3", tenant="acme", status="DEGRADED", version="2.0", last_seen=seen))
+    repo.save(Device(id="d4", tenant="other", status="READY", version="3.0", last_seen=seen))
+    return _service(repo)
+
+
+def test_device_service_tenant_queries() -> None:
+    s = _fleet()
+    assert {d.id for d in s.list_tenant("acme")} == {"d1", "d2", "d3"}
+    assert {d.id for d in s.online_devices("acme")} == {"d1", "d3"}
+    assert s.count_online("acme") == 2
+    assert s.version_counts("acme") == {"1.0": 2, "2.0": 1}
+    oldest = s.oldest_device("acme")
+    assert oldest is not None
+    assert oldest.id == "d2"
+    assert s.oldest_device("nobody") is None
+    assert [d.id for d in s.stale_devices("acme", timedelta(days=365 * 100))] == []
+    assert {d.id for d in s.stale_devices("acme", timedelta(seconds=1))} == {"d1", "d2", "d3"}
+
+
+def test_device_service_tags() -> None:
+    s = _fleet()
+    s.add_tag("acme", "d1", "edge")
+    s.add_tag("acme", "d1", "edge")
+    assert s.get("acme", "d1").tags == ["edge"]
+    s.remove_tag("acme", "d1", "edge")
+    s.remove_tag("acme", "d1", "edge")
+    assert s.get("acme", "d1").tags == []
     with pytest.raises(RepositoryError):
         s.get("acme", "missing")
 
