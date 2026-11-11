@@ -15,24 +15,13 @@ type Result struct {
 	Status int
 }
 
-// WebhookConfig tells CheckWebhook where to read the endpoint template and how
-// to look up environment variables. A nil Env reads the process environment.
-type WebhookConfig struct {
-	Path string
-	Env  func(string) (string, bool)
-}
-
 // CheckWebhook reads the endpoint template from the config file, expands the
-// environment references in it and POSTs to the result. A non-2xx answer is an
-// error.
-func CheckWebhook(ctx context.Context, cfg WebhookConfig) (Result, error) {
-	raw, err := os.ReadFile(cfg.Path)
+// environment references in it with env and POSTs to the result. A non-2xx
+// answer is an error.
+func CheckWebhook(ctx context.Context, path string, env func(string) (string, bool)) (Result, error) {
+	raw, err := os.ReadFile(path)
 	if err != nil {
 		return Result{}, fmt.Errorf("transport: read webhook config: %w", err)
-	}
-	env := cfg.Env
-	if env == nil {
-		env = os.LookupEnv
 	}
 	expanded := expandEnv(strings.TrimSpace(string(raw)), env)
 	endpoint := trimSlash(expanded)

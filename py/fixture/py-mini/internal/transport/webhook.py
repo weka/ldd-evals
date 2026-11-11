@@ -1,6 +1,5 @@
 """Check a webhook endpoint named in a config file."""
 
-import os
 import re
 import urllib.error
 import urllib.request
@@ -19,8 +18,8 @@ class Result:
     status: int
 
 
-def check_webhook(path: Path, env: Callable[[str], str | None] = os.environ.get) -> Result:
-    """Read the endpoint template from the config file and POST to the expanded URL.
+def check_webhook(path: Path, env: Callable[[str], str | None]) -> Result:
+    """Read the endpoint template from the config file, expand it with env and POST to it.
 
     A non-2xx answer raises OSError.
     """

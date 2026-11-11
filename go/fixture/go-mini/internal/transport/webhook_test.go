@@ -45,8 +45,8 @@ func TestCheckWebhook_ExpandsTheEndpointTemplate(t *testing.T) {
 			}))
 			defer srv.Close()
 
-			cfg := transport.WebhookConfig{Path: writeConfig(t, srv.URL+"/"+tc.template+"/"), Env: lookup}
-			res, err := transport.CheckWebhook(context.Background(), cfg)
+			path := writeConfig(t, srv.URL+"/"+tc.template+"/")
+			res, err := transport.CheckWebhook(context.Background(), path, lookup)
 			if err != nil {
 				t.Fatalf("CheckWebhook() error = %v", err)
 			}
@@ -66,13 +66,17 @@ func TestCheckWebhook_ReportsAFailureStatus(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	res, err := transport.CheckWebhook(context.Background(), transport.WebhookConfig{Path: writeConfig(t, srv.URL)})
+	res, err := transport.CheckWebhook(context.Background(), writeConfig(t, srv.URL), noVariables)
 	if err == nil {
 		t.Fatal("CheckWebhook() error = nil, want a status error")
 	}
 	if res.Status != http.StatusBadGateway {
 		t.Errorf("Status = %d, want %d", res.Status, http.StatusBadGateway)
 	}
+}
+
+func noVariables(string) (string, bool) {
+	return "", false
 }
 
 func writeConfig(t *testing.T, text string) string {

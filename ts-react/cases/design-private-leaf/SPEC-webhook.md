@@ -17,7 +17,7 @@ These forms are valid:
 
 A reference to an unset variable without a fallback expands to the empty string.
 A trailing slash on the expanded endpoint is removed.
-The caller can give its own lookup function for variables. The default reads the process environment.
+The caller gives the lookup function for variables. The check has no default and does not read the process environment.
 
 ## The request
 
