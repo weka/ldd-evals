@@ -9,7 +9,8 @@ import (
 	"strings"
 )
 
-// Result is the outcome of one webhook check.
+// Result holds the status code of the POST. CheckWebhook also returns it with
+// the error for a non-2xx status.
 type Result struct {
 	Status int
 }

@@ -1,33 +1,30 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { http, HttpResponse } from 'msw'
+import { describe, expect, it } from 'vitest'
 
+import { server } from '../../test-utils/mocks/server'
 import { checkWebhook } from './webhook'
 
+const CONFIG_URL = 'http://config.local/webhook.conf'
+
+const ENV: Record<string, string> = { EMPTY: '', HOOK: 'alerts' }
+
 function lookup(name: string): string | undefined {
-  switch (name) {
-    case 'EMPTY':
-      return ''
-    case 'HOOK':
-      return 'alerts'
-    default:
-      return undefined
-  }
+  return ENV[name]
 }
 
-function stubFetch(config: string, postStatus = 204): ReturnType<typeof vi.fn> {
-  const fetchMock = vi.fn((_url: string, init?: RequestInit) =>
-    Promise.resolve(
-      init?.method === 'POST' ? new Response(null, { status: postStatus }) : new Response(config)
-    )
+function serveHook(template: string, postStatus: number): string[] {
+  const posted: string[] = []
+  server.use(
+    http.get(CONFIG_URL, () => HttpResponse.text(template)),
+    http.post('https://hooks.test/*', ({ request }) => {
+      posted.push(request.url)
+      return new HttpResponse(null, { status: postStatus })
+    })
   )
-  vi.stubGlobal('fetch', fetchMock)
-  return fetchMock
+  return posted
 }
 
 describe('checkWebhook', () => {
-  afterEach(() => {
-    vi.unstubAllGlobals()
-  })
-
   it.each([
     ['${HOOK}', 'https://hooks.test/alerts'],
     ['$HOOK', 'https://hooks.test/alerts'],
@@ -37,14 +34,14 @@ describe('checkWebhook', () => {
     ['${MISSING-fallback}', 'https://hooks.test/fallback'],
     ['$$HOOK', 'https://hooks.test/$HOOK']
   ])('expands the endpoint template %s', async (template, want) => {
-    const fetchMock = stubFetch(`https://hooks.test/${template}/`)
-    const res = await checkWebhook('/webhook.conf', lookup)
+    const posted = serveHook(`https://hooks.test/${template}/`, 204)
+    const res = await checkWebhook(CONFIG_URL, lookup)
     expect(res.status).toBe(204)
-    expect(fetchMock).toHaveBeenLastCalledWith(want, { method: 'POST' })
+    expect(posted).toEqual([want])
   })
 
   it('throws on a failure status', async () => {
-    stubFetch('https://hooks.test/', 502)
-    await expect(checkWebhook('/webhook.conf', lookup)).rejects.toThrow('status 502')
+    serveHook('https://hooks.test/', 502)
+    await expect(checkWebhook(CONFIG_URL, lookup)).rejects.toThrow('status 502')
   })
 })

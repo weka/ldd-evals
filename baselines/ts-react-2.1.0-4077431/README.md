@@ -84,6 +84,15 @@ and 123 of 128, with a different grader set).
 package-size row that the detection pass writes for R5 question 7. This plugin does not
 write it, so they fail by design: read them as new capability, not as a regression.
 
+The private-leaf graders add two more graders to review-full:
+`recall-R7.Q4.private-leaf-in-io` and the control `precision-CTRL.R4.trivial-private-in-io`.
+The recall grader needs the placement rules for a private leaf in an I/O module. This
+plugin does not have them, so the recall grader fails by design. The control passes.
+The same two graders are in review-full-neutral.
+The three new cases have no trace here, so a regrade does not grade them:
+`case-h-private-leaf-review` (6 graders), `design-private-leaf` (4) and
+`promote-private-leaf` (6).
+
 ## Reading the deltas
 
 | Grader | 2.0.0 fails | 2.1.0 fails | Cause | Evidence |

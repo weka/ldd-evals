@@ -14,7 +14,7 @@ _DEFAULT_IF_EMPTY = ":-"
 
 @dataclass(frozen=True)
 class Result:
-    """The outcome of one webhook check."""
+    """The status code of the POST; check_webhook returns it only for a 2xx answer."""
 
     status: int
 

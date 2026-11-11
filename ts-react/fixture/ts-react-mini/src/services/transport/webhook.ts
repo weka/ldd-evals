@@ -1,4 +1,4 @@
-/** The outcome of one webhook check. */
+/** The status code of the POST; checkWebhook returns it only for a 2xx answer. */
 export interface WebhookResult {
   readonly status: number
 }

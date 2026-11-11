@@ -48,7 +48,7 @@ keeps a plugin clone at about 2 MB.
   baseline task, and `plugin.json` in the baseline records the plugin either way.
 - **Manifest ids.** `<lang>/violations.yaml` lists the planted violations and
   controls. The same id set appears in every language with language-specific
-  anchors: `py/violations.yaml` carries go-mini's 157 ids over py-mini, and
+  anchors: `py/violations.yaml` carries go-mini's 159 ids over py-mini, and
   `ts-react/violations.yaml` carries them over ts-react-mini with a block of
   React-only ids appended and one more R5 plant, `R5.Q7.services-file-count`,
   for a directory only that fixture has over the limit; a comment on an entry
@@ -88,6 +88,18 @@ the detection pass writes for R5 question 7, which the plugins get in
 recorded before that change, `review-full` fails one more grader in the Go and
 Python suites and two more in the TypeScript + React suite, and
 `review-full-neutral` fails the same two.
+
+The private-leaf graders are of this kind too. They need the placement rules for
+a private leaf in an I/O module and the ledger that the plugins get in
+[weka/linter-driven-development#123](https://github.com/weka/linter-driven-development/pull/123).
+Each suite adds two graders to `review-full`: `recall-R7.Q4.private-leaf-in-io`, which
+fails on a baseline recorded before that change, and the control
+`precision-CTRL.R4.trivial-private-in-io`, which passes. The TypeScript + React suite
+adds the same two to `review-full-neutral`. Each suite also adds three cases:
+`case-h-private-leaf-review` with 6 graders and `design-private-leaf` with 4, both in
+the cheap tier, and `promote-private-leaf` in the medium tier, with 7 graders in the Go
+suite and 6 in the Python and TypeScript + React suites. An older baseline has no
+trace for these cases, so a regrade does not grade them.
 
 The mechanism itself, the fixture, how to write a case and how to compare a
 run against a baseline are documented in the plugin repository under
