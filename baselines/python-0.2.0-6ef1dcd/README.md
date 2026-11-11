@@ -50,6 +50,11 @@ Cheap tier (`cheap/`), runs passing every grader:
 | quickfix-clean-tree | 3/3 | 3,3,3 | $0.22 | every grader passed; the #28 postcheck path fix holds |
 | review-full | 0/3 | 55,51,49 | $31.41 | **106, 106, 104 of 110**; the report was the final message in all three runs |
 
+**A regrade with the current graders** counts one more grader in review-full:
+`recall-R5.Q7.models-file-count`. It needs the package-size row that the detection pass
+writes for R5 question 7. This plugin does not write it, so the grader fails by design:
+read it as new capability, not as a regression.
+
 Pass rate 0.72 (21 of 29 runs), average grader score 0.98. The generic plugin on the same
 fixture recorded 0.41 (12 of 29), 0.55 after a regrade with #28 to #30, which this run
 already carries. Nine of the fourteen scoped review runs are at full marks here; the

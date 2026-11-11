@@ -770,9 +770,9 @@
   questions: [Q1]
   files: [internal/services/device_service.py]
   anchor: '^class DeviceService:'
-  recall_own: 'device_service\.py[^\n]*(?i:4[5-9][0-9][ -]?(lines?|loc)\b|god[ -]file|longest)'
+  recall_own: 'device_service\.py[^\n]*(?i:(?:4[5-9][0-9]|5[0-9][0-9])[ -]?(?:code[ -])?(lines?|loc)\b|god[ -]file|longest)'
   expect:
-    review: { category: "🔴", fix: "Rename layer files by role during the move", note: "the longest module in the tree, 19 methods" }
+    review: { category: "🔴", fix: "Rename layer files by role during the move", note: "the longest module in the tree, 23 methods besides __init__, 460 code lines and 523 raw lines, over the 450 code-line limit" }
     lint:   { linter: "-", route: R5, note: "no file-length rule in ruff" }
     prepare: { gate: BOUNDED, spec: sms-channel, verdict: PREP-DEFERRED }
 
@@ -782,7 +782,21 @@
   files: [internal/models/device.py, internal/models/alert.py, internal/models/job.py]
   anchor: '^@dataclass'
   expect:
-    review: { category: "🔴", fix: "Slice out a feature", hook: "check-package-sizes RED (14 modules)" }
+    review: { category: "🔴", fix: "Slice out a feature", note: "the package-size row of the gap linter counts 14 source files, limit 13; R5.Q7.models-file-count grades that row" }
+
+# The directory internal/models, the same one as R5.Q1.models-red-zone: Q1
+# grades the role-layer shape through its files, Q7 grades that the report names
+# the directory with its file count (__init__.py and tests are not counted). The
+# manifest checker reads files only, so the entry lists three files of the
+# directory. The grader needs the package-size row of the detection pass.
+- id: R5.Q7.models-file-count
+  rule: R5
+  questions: [Q7]
+  files: [internal/models/device.py, internal/models/alert.py, internal/models/job.py]
+  anchor: '^@dataclass'
+  recall_own: '(?i:\bmodels\b[^\n]*(?:\b14\b[^\n]{0,20}?\b(?:files|modules)\b|package[ -]size|file[ -]count|limit 13\b)|(?:\b14\b[^\n]{0,20}?\b(?:files|modules)\b|package[ -]size|file[ -]count)[^\n]*\bmodels\b)'
+  expect:
+    review: { category: "🔴", fix: "Decompose into sub-packages", note: "internal/models: 14 source files (limit 13, profile default)" }
 
 - id: CTRL.R5.snapshot-slice
   rule: R5

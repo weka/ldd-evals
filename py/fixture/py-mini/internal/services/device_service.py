@@ -442,6 +442,40 @@ class DeviceService:
                 flushed += 1
         return flushed
 
+    def list_tenant(self, tenant: str) -> list[Device]:
+        """List the devices of one tenant, best score first.
+
+        The repository has no per-tenant listing, so the filter runs here.
+        """
+        return [d for d in self.list_devices() if d.tenant == tenant]
+
+    def cached_online_count(self) -> int:
+        """Count the cached devices that are online, without reading the repository.
+
+        A device that was never read through `get` is not counted.
+        """
+        with self.mu:
+            return sum(1 for d in self.cache.values() if d.is_online())
+
+    def newest_cached(self) -> Device:
+        """Return the cached device with the latest last-seen time; the first one wins a tie.
+
+        Raises ValueError when the cache is empty.
+        """
+        with self.mu:
+            return max(self.cache.values(), key=lambda d: d.last_seen)
+
+    def evict_tenant(self, tenant: str) -> int:
+        """Drop one tenant's devices from the cache and return how many were dropped.
+
+        The repository is not touched, so the next `get` reads the stored copy again.
+        """
+        with self.mu:
+            keys = [key for key, d in self.cache.items() if d.tenant == tenant]
+            for key in keys:
+                del self.cache[key]
+        return len(keys)
+
     def close(self) -> None:
         """Release the service."""
         with self.mu:

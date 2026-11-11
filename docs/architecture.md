@@ -48,10 +48,11 @@ keeps a plugin clone at about 2 MB.
   baseline task, and `plugin.json` in the baseline records the plugin either way.
 - **Manifest ids.** `<lang>/violations.yaml` lists the planted violations and
   controls. The same id set appears in every language with language-specific
-  anchors: `py/violations.yaml` carries go-mini's 156 ids over py-mini, and
+  anchors: `py/violations.yaml` carries go-mini's 157 ids over py-mini, and
   `ts-react/violations.yaml` carries them over ts-react-mini with a block of
-  React-only ids appended; a comment on an entry says where the disease had to
-  change with the language.
+  React-only ids appended and one more R5 plant, `R5.Q7.services-file-count`,
+  for a directory only that fixture has over the limit; a comment on an entry
+  says where the disease had to change with the language.
 - **Suite defaults.** A suite's `cases/suite.yaml` names the source and test
   globs the runner's directory focus filters with; the Go suite names none and
   keeps the runner's Go default, the Python suite names `*.py` and `test_*.py`,
@@ -76,6 +77,17 @@ re-applies the current graders to the recorded traces after the archive is
 unpacked beside the verdicts. Graders that read the scaffold tree
 report "needs the kept scaffold" from a clone, because scaffolds are not
 committed.
+
+Some graders measure a capability that an older plugin does not have, so a
+regrade of an older baseline fails them by design. Read such a grader as new
+capability, not as a regression. The `recall-R5.Q7.*` graders of the
+whole-repository review are of this kind. They need the package-size row that
+the detection pass writes for R5 question 7, which the plugins get in
+[weka/linter-driven-development#122](https://github.com/weka/linter-driven-development/pull/122)
+(the gap linter counts the source files of each directory). On a baseline
+recorded before that change, `review-full` fails one more grader in the Go and
+Python suites and two more in the TypeScript + React suite, and
+`review-full-neutral` fails the same two.
 
 The mechanism itself, the fixture, how to write a case and how to compare a
 run against a baseline are documented in the plugin repository under
