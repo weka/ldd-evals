@@ -1,6 +1,17 @@
 ---
 type: llm
-criteria: Every type in the DESIGN PLAN has an R1 score and a rung. Each type with a score of 4 or more is on rung 2 or 3. The expansion of environment references and the classification of the reply are each
+criteria: Every type in the DESIGN PLAN has an R1 score and a rung. Each type with a score of 4 or more is on rung 2 or 3. The expansion leaf and the reply-classification leaf are each in a leaf sub-package folder (with `__init__.py`) nested in the feature package, or on rung 3 in a top-level package. The probe stays in the feature package.
+focus: last_message
+---
+The final message holds a DESIGN PLAN with a placement block. Each line of the block
+reads: `- <type> — R1 score N → rung K (<package path>) — reason`. The exact words can differ.
+Judge the block with these four checks. Score PASS only when all four hold.
+
+1. Every type or helper the plan names has an R1 score and a rung. A type with no score
+   or no rung is a FAIL.
+2. Each type with an R1 score of 4 or more is on rung 2 or rung 3. A score of 4 or more
+   on rung 1 is a FAIL, with or without a written reason.
+3. The expansion of environment references and the classification of the reply are each
    in a leaf sub-package folder nested in the feature package (rung 2), or on rung 3 in a
    top-level package. The feature package is the new package below `transport` named in the
    spec. A leaf sub-package is a folder with `__init__.py` inside it, for example
