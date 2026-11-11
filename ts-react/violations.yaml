@@ -783,7 +783,7 @@
   files: [src/types/device.ts, src/types/alert.ts, src/types/job.ts]
   anchor: '^export interface (Device|Alert|Job) \{'
   expect:
-    review: { category: "🔴", fix: "Slice out a feature", hook: "src/types/ holds one page's shapes beside the shared ones" }
+    review: { category: "🔴", fix: "Slice out a feature", note: "src/types/ holds one page's shapes beside the shared ones; the package-size row of the gap linter counts 17 source files, limit 13; R5.Q7.models-file-count grades that row" }
 
 # The directory src/types, the same one as R5.Q1.models-red-zone: Q1 grades the
 # role-layer shape through its files, Q7 grades that the report names the

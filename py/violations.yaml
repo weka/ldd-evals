@@ -764,7 +764,7 @@
   files: [internal/models/device.py, internal/models/alert.py, internal/models/job.py]
   anchor: '^@dataclass'
   expect:
-    review: { category: "🔴", fix: "Slice out a feature", hook: "check-package-sizes RED (14 modules)" }
+    review: { category: "🔴", fix: "Slice out a feature", note: "the package-size row of the gap linter counts 14 source files, limit 13; R5.Q7.models-file-count grades that row" }
 
 # The directory internal/models, the same one as R5.Q1.models-red-zone: Q1
 # grades the role-layer shape through its files, Q7 grades that the report names
