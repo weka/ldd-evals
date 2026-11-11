@@ -52,6 +52,10 @@ Exit codes: 0 every case ≥ threshold · 1 some case below · 2 budget exceeded
   for every case, a case's `case.yaml` may override either, and the default is Go's (`*.go` minus `*_test.go`),
   so a suite that names nothing grades exactly as before.
 - `is_error` results get a failing synthetic `execution` grader; timeouts/incomplete traces set `error` and skip grading.
+  On a timeout the runner sends claude SIGINT. claude then writes a result event, so the run keeps its cost,
+  turns and segments, and the cost counts toward `--max-cost-usd`. When claude writes no result event in 10
+  seconds, the runner kills it. The run then keeps the cost up to its last result event, and the `error` says
+  which cost is not counted.
   The agent runs with `IS_SANDBOX=1` because `--permission-mode bypassPermissions` is refused for root without it
   (harmless for other users), and without `CLAUDE_AUTO_BACKGROUND_TASKS`: cloud sessions export that flag, and
   under it claude turns any foreground `Agent` call still running after 120 seconds into a background task
