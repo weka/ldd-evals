@@ -50,6 +50,11 @@ Cheap tier (`cheap/`), runs passing every grader:
 | quickfix-clean-tree | 3/3 | 2,3,2 | $0.20 | scope control: "nothing in scope to fix", no agent, no edit |
 | review-full | 0/3 | 67,61,57 | $30.81 | **108, 104, 106 of 111**; the report was the final message in all three runs |
 
+**A regrade with the current graders** counts one more grader in review-full:
+`recall-R5.Q7.models-file-count`. It needs the package-size row that the detection pass
+writes for R5 question 7. This plugin does not write it, so the grader fails by design:
+read it as new capability, not as a regression.
+
 Pass rate 0.72 (21 of 29 runs), average grader score 0.97.
 
 ## Comparison with go-2.11.0-c78b55f

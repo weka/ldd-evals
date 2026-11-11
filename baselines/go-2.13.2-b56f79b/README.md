@@ -50,6 +50,11 @@ Cheap tier (`cheap/`), graders passed per run:
 | quickfix-clean-tree | 6/6 · 6/6 · 6/6 | 4,2,2 | $0.32 | scope control: "nothing in scope to fix", no agent, no edit |
 | review-full | **109 · 104 · 109 of 114** | 17,17,19 | $18.66 | the report in the message every run; header reconciles every hunter; the same four cluster graders miss (finding 3) |
 
+**A regrade with the current graders** counts one more grader in review-full:
+`recall-R5.Q7.models-file-count`. It needs the package-size row that the detection pass
+writes for R5 question 7. This plugin does not write it, so the grader fails by design:
+read it as new capability, not as a regression.
+
 Medium tier (`medium/`), graders passed:
 
 | Case | Graders | Turns | Cost | Reads as |

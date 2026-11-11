@@ -45,6 +45,11 @@ Cheap tier (`cheap/`), runs passing every grader, verdicts as recorded:
 | quickfix-clean-tree | 0/3 | 3,3,2 | $0.20 | every transcript grader passed; the postcheck failed to find `lib.sh` (#28) |
 | review-full | 0/3 | 62,51,54 | $29.63 | **106, 104, 103 of 111**; the report was the final message in all three runs |
 
+**A regrade with the current graders** counts one more grader in review-full:
+`recall-R5.Q7.models-file-count`. It needs the package-size row that the detection pass
+writes for R5 question 7. This plugin does not write it, so the grader fails by design:
+read it as new capability, not as a regression.
+
 Pass rate 0.41 (12 of 29 runs), average grader score 0.92. A regrade with the three fixes
 gives quickfix-clean-tree 3/3, case D 2/2 and review-full run 1 at 107: pass rate 0.55.
 

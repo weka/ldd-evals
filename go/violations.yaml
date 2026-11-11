@@ -710,6 +710,20 @@
   expect:
     review: { category: "🔴", fix: "Slice out a feature", hook: "check-package-sizes RED (14 files)" }
 
+# The directory internal/models, the same one as R5.Q1.models-red-zone: Q1
+# grades the role-layer shape through its files, Q7 grades that the report names
+# the directory with its file count. The manifest checker reads files only, so
+# the entry lists three files of the directory. The grader needs the
+# package-size row of the detection pass.
+- id: R5.Q7.models-file-count
+  rule: R5
+  questions: [Q7]
+  files: [internal/models/device.go, internal/models/alert.go, internal/models/job.go]
+  anchor: '^package models$'
+  recall_own: '(?i:\bmodels\b[^\n]*(?:\b14\b[^\n]{0,20}?\b(?:files|modules)\b|package[ -]size|file[ -]count|limit 13\b)|(?:\b14\b[^\n]{0,20}?\b(?:files|modules)\b|package[ -]size|file[ -]count)[^\n]*\bmodels\b)'
+  expect:
+    review: { category: "🔴", fix: "Decompose into sub-packages", note: "internal/models: 14 source files (limit 13, profile default)" }
+
 - id: CTRL.R5.snapshot-slice
   rule: R5
   control: true
