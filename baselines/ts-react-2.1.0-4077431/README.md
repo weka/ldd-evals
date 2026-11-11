@@ -79,6 +79,11 @@ Tier pass rate 0.74 (2.0.0: 0.78 over 37 runs).
 **review-full, read on its grader count:** 116, 120 and 120 of 128 (2.0.0: 124, 122
 and 123 of 128, with a different grader set).
 
+**A regrade with the current graders** counts two more graders in review-full:
+`recall-R5.Q7.models-file-count` and `recall-R5.Q7.services-file-count`. They need the
+package-size row that the detection pass writes for R5 question 7. This plugin does not
+write it, so they fail by design: read them as new capability, not as a regression.
+
 ## Reading the deltas
 
 | Grader | 2.0.0 fails | 2.1.0 fails | Cause | Evidence |

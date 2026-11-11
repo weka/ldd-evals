@@ -771,9 +771,9 @@
   questions: [Q1]
   files: [src/pages/Heartbeats/heartbeatFeed.ts]
   anchor: '^export class FeedStore \{'
-  recall_own: 'heartbeatFeed\.ts[^\n]*(?i:[78][0-9]{2}[ -]?(lines?|loc)\b|max-lines|god[ -]file)'
+  recall_own: 'heartbeatFeed\.ts[^\n]*(?i:[78][0-9]{2}[ -]?(lines?|loc)\b|6[0-9]{2}[ -]?code[ -]lines?\b|max-lines|god[ -]file)'
   expect:
-    review: { category: "🔴", fix: "Rename layer files by role during the move", note: "the longest module in the tree: the store, the pipeline, two parsers and the audit log" }
+    review: { category: "🔴", fix: "Rename layer files by role during the move", note: "the longest module in the tree: the store, the pipeline, two parsers and the audit log; 798 raw lines, 619 code lines, over the 600 code-line limit of sonarjs/max-lines" }
     lint:   { linter: sonarjs/max-lines, route: R5, note: "silenced by `/* eslint sonarjs/max-lines: \"off\" -- TODO */` on line 1" }
     prepare: { gate: BOUNDED, spec: sms-channel, verdict: PREP-DEFERRED }
 
@@ -783,7 +783,35 @@
   files: [src/types/device.ts, src/types/alert.ts, src/types/job.ts]
   anchor: '^export interface (Device|Alert|Job) \{'
   expect:
-    review: { category: "🔴", fix: "Slice out a feature", hook: "src/types/ holds one page's shapes beside the shared ones" }
+    review: { category: "🔴", fix: "Slice out a feature", note: "src/types/ holds one page's shapes beside the shared ones; the package-size row of the gap linter counts 17 source files, limit 13; R5.Q7.models-file-count grades that row" }
+
+# The directory src/types, the same one as R5.Q1.models-red-zone: Q1 grades the
+# role-layer shape through its files, Q7 grades that the report names the
+# directory with its file count. The manifest checker reads files only, so the
+# entry lists three files of the directory. The grader needs the package-size
+# row of the detection pass.
+- id: R5.Q7.models-file-count
+  rule: R5
+  questions: [Q7]
+  files: [src/types/device.ts, src/types/alert.ts, src/types/job.ts]
+  anchor: '^export interface (Device|Alert|Job) \{'
+  recall_own: '(?i:(?:src/types\b|\btypes/)[^\n]*(?:\b17\b[^\n]{0,20}?\bfiles\b|package[ -]size|file[ -]count|limit 13\b)|(?:\b17\b[^\n]{0,20}?\bfiles\b|package[ -]size|file[ -]count)[^\n]*(?:src/types\b|\btypes/))'
+  expect:
+    review: { category: "🔴", fix: "Decompose into sub-packages", note: "src/types: 17 source files (limit 13, profile default)" }
+
+# The directory src/services, over the limit in this fixture only: go-mini and
+# py-mini have no twin. No R5 Q1 plant names the directory; R5.Q1.role-layers
+# and R5.Q2.snapshot-spread each list one of its files. The manifest checker
+# reads files only, so the entry lists three files of the directory. The grader
+# needs the package-size row of the detection pass.
+- id: R5.Q7.services-file-count
+  rule: R5
+  questions: [Q7]
+  files: [src/services/devicesApi.ts, src/services/alertsApi.ts, src/services/snapshotsApi.ts]
+  anchor: '^export '
+  recall_own: '(?i:(?:src/services\b|\bservices/)[^\n]*(?:\b15\b[^\n]{0,20}?\bfiles\b|package[ -]size|file[ -]count|limit 13\b)|(?:\b15\b[^\n]{0,20}?\bfiles\b|package[ -]size|file[ -]count)[^\n]*(?:src/services\b|\bservices/))'
+  expect:
+    review: { category: "🔴", fix: "Decompose into sub-packages", note: "src/services: 15 source files (limit 13, profile default)" }
 
 - id: CTRL.R5.snapshot-slice
   rule: R5
