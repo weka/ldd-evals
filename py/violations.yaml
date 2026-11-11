@@ -296,6 +296,24 @@
     review:  { category: "🔴", fix: "Move the behavior down a rung" }
     prepare: { gate: SAFE, spec: sms-channel, note: "characterization tests before any move" }
 
+- id: R7.Q4.private-leaf-in-io
+  rule: R7
+  questions: [Q4]
+  files: [internal/transport/webhook.py]
+  anchor: '^def _expand_env\('
+  symbol: '_expand_env'
+  expect:
+    review:   { category: "🔴", fix: "Split the pure leaf out of an I/O package" }
+    refactor: { gone: '^def _expand_env\(', present: 'internal/transport/*/', scope: transport }
+
+- id: CTRL.R4.trivial-private-in-io
+  rule: R4
+  control: true
+  files: [internal/transport/webhook.py]
+  anchor: '^def _trim_slash\('
+  symbol: '_trim_slash'
+  expect: { review: { findings: 0, note: "a trivial helper stays private" } }
+
 - id: R9.Q4.what-comment-process-heartbeat
   rule: R9
   questions: [Q4]

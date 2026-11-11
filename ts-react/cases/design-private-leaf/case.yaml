@@ -1,0 +1,13 @@
+schema_version: "1.1"
+context:
+  scaffold_script: ./scaffold.sh
+tier: cheap
+notes: |
+  The design twin of the private-leaf review case. The spec has three concepts:
+  expansion of environment references, classification of the reply, and the
+  probe that does the HTTP and TLS work. The expansion and the classification
+  are pure and branchy, so each scores 4 or more on R1 and belongs on rung 2 or 3
+  of the placement ladder: a folder module nested under the feature one. The probe is
+  I/O and stays in the feature folder. The scaffold amends SPEC-webhook.md into the
+  base commit. The release plugin put a score-7 type on rung 1;
+  this case fails on that shape.

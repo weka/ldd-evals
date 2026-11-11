@@ -55,6 +55,14 @@ Cheap tier (`cheap/`), runs passing every grader:
 writes for R5 question 7. This plugin does not write it, so the grader fails by design:
 read it as new capability, not as a regression.
 
+The private-leaf graders add two more graders to review-full:
+`recall-R7.Q4.private-leaf-in-io` and the control `precision-CTRL.R4.trivial-private-in-io`.
+The recall grader needs the placement rules for a private leaf in an I/O module. This
+plugin does not have them, so the recall grader fails by design. The control passes.
+The three new cases have no trace here, so a regrade does not grade them:
+`case-h-private-leaf-review` (6 graders), `design-private-leaf` (4) and
+`promote-private-leaf` (6).
+
 Pass rate 0.72 (21 of 29 runs), average grader score 0.98. The generic plugin on the same
 fixture recorded 0.41 (12 of 29), 0.55 after a regrade with #28 to #30, which this run
 already carries. Nine of the fourteen scoped review runs are at full marks here; the

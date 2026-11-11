@@ -55,6 +55,14 @@ Cheap tier (`cheap/`), graders passed per run:
 writes for R5 question 7. This plugin does not write it, so the grader fails by design:
 read it as new capability, not as a regression.
 
+The private-leaf graders add two more graders to review-full:
+`recall-R7.Q4.private-leaf-in-io` and the control `precision-CTRL.R4.trivial-private-in-io`.
+The recall grader needs the placement rules for a private leaf in an I/O module. This
+plugin does not have them, so the recall grader fails by design. The control passes.
+The three new cases have no trace here, so a regrade does not grade them:
+`case-h-private-leaf-review` (6 graders), `design-private-leaf` (4) and
+`promote-private-leaf` (7).
+
 Medium tier (`medium/`), graders passed:
 
 | Case | Graders | Turns | Cost | Reads as |
