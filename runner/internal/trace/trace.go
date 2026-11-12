@@ -38,6 +38,7 @@ type Trace struct {
 	lastText    string
 	results     []string // one final text per result event
 	complete    bool
+	workAfter   bool // an assistant or user event follows the last result event
 	isError     bool
 	subtype     string
 	costUSD     float64
@@ -112,7 +113,10 @@ func (t *Trace) consume(line []byte) error {
 	t.eventsCount++
 	switch ev.Type {
 	case "assistant":
+		t.workAfter = t.complete
 		return t.consumeAssistant(ev.Message)
+	case "user":
+		t.workAfter = t.complete
 	case "result":
 		t.consumeResult(ev)
 	}
@@ -143,6 +147,7 @@ func (t *Trace) consumeAssistant(message json.RawMessage) error {
 // The last segment's subtype and error flag stand for the run.
 func (t *Trace) consumeResult(ev envelope) {
 	t.complete = true
+	t.workAfter = false
 	t.segments++
 	t.results = append(t.results, ev.Result)
 	t.subtype = ev.Subtype
@@ -191,6 +196,12 @@ func (t Trace) LastMessage() string {
 
 // Complete reports whether a terminal result event was seen.
 func (t Trace) Complete() bool { return t.complete }
+
+// EndsWithResult reports whether a result event closes the work of the trace:
+// no assistant or user event follows the last result event. It is false when a
+// later segment started and wrote no result event, so CostUSD misses that
+// segment's cost.
+func (t Trace) EndsWithResult() bool { return t.complete && !t.workAfter }
 
 // IsError reports the result event's is_error flag.
 func (t Trace) IsError() bool { return t.isError }

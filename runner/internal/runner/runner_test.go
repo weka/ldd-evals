@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -143,12 +144,89 @@ func TestRunner_TimeoutKillsClaude(t *testing.T) {
 	evalsDir := evalsWithCase(t, "mkdir -p \"$1\"\n", map[string]string{"prompt.md": promptWithModel, "graders/g.md": regexGrader})
 	start := time.Now()
 	_, res := runProbe(t, runner.Options{EvalsDir: evalsDir, OutDir: t.TempDir(), Threshold: 1})
-	if elapsed := time.Since(start); elapsed > 15*time.Second {
-		t.Errorf("run took %v; the 1s timeout did not kill the agent", elapsed)
+	if elapsed := time.Since(start); elapsed > 25*time.Second {
+		t.Errorf("run took %v; the 1s timeout and the grace after SIGINT did not kill the agent", elapsed)
 	}
-	if res.Passed || !strings.Contains(res.Error, "timed out") {
-		t.Errorf("result = %+v, want a timeout error", res)
+	if res.Passed || res.CostUSD != 0 || !strings.Contains(res.Error, "timed out") || !strings.Contains(res.Error, "cost is not counted") {
+		t.Errorf("result = %+v, want a timeout error that says the cost is not counted", res)
 	}
+}
+
+// promptWithTimeout3 gives a fake claude time to install its SIGINT trap before
+// the timeout.
+const promptWithTimeout3 = "---\nname: probe\nruns: 1\nmodel: claude-opus-4-1\ntimeout_seconds: 3\n---\nGo.\n"
+
+// interruptibleClaude is a fake claude that starts a tool child, writes its pid
+// to $CHILD_PID_FILE, and on SIGINT writes a result event with a cost and
+// exits, as claude -p does when it is interrupted.
+const interruptibleClaude = `#!/bin/bash
+trap 'echo "{\"type\":\"result\",\"subtype\":\"error_during_execution\",\"is_error\":true,\"total_cost_usd\":0.42,\"duration_ms\":900,\"num_turns\":7}"; exit 130' INT
+echo '{"type":"assistant","message":{"content":[{"type":"text","text":"Findings: R3 | x.go:1 | y"}]}}'
+sleep 30 &
+echo $! > "$CHILD_PID_FILE"
+wait $!
+`
+
+func TestRunner_TimeoutKeepsTheCostOfTheInterruptedRun(t *testing.T) {
+	fakeClaude(t, interruptibleClaude)
+	childPIDFile := filepath.Join(t.TempDir(), "child.pid")
+	t.Setenv("CHILD_PID_FILE", childPIDFile)
+	evalsDir := evalsWithCase(t, "mkdir -p \"$1\"\n", map[string]string{"prompt.md": promptWithTimeout3, "graders/g.md": regexGrader})
+	agg, res := runProbe(t, runner.Options{EvalsDir: evalsDir, OutDir: t.TempDir(), Threshold: 1})
+	if res.Passed || len(res.Graders) != 0 || !strings.Contains(res.Error, "timed out") || strings.Contains(res.Error, "not counted") {
+		t.Errorf("result = %+v, want a timeout error, no graders and a counted cost", res)
+	}
+	if res.CostUSD != 0.42 || res.NumTurns != 7 || res.Segments != 1 || agg.Aggregates.TotalCostUSD != 0.42 {
+		t.Errorf("counters = %+v / %+v, want the interrupted run's cost and turns", res, agg.Aggregates)
+	}
+	if !childGone(t, childPIDFile) {
+		t.Error("the tool child of the timed-out agent is still running")
+	}
+}
+
+// secondSegmentClaude is a fake claude whose first segment ends with a result
+// event and whose second segment is interrupted without one.
+const secondSegmentClaude = `#!/bin/bash
+trap 'exit 130' INT
+echo '{"type":"result","subtype":"success","is_error":false,"result":"later","total_cost_usd":0.3,"duration_ms":500,"num_turns":2}'
+echo '{"type":"assistant","message":{"content":[{"type":"text","text":"woke up"}]}}'
+sleep 30 &
+wait $!
+`
+
+func TestRunner_TimeoutInALaterSegmentSaysItsCostIsNotCounted(t *testing.T) {
+	fakeClaude(t, secondSegmentClaude)
+	evalsDir := evalsWithCase(t, "mkdir -p \"$1\"\n", map[string]string{"prompt.md": promptWithTimeout3, "graders/g.md": regexGrader})
+	_, res := runProbe(t, runner.Options{EvalsDir: evalsDir, OutDir: t.TempDir(), Threshold: 1})
+	if res.Passed || len(res.Graders) != 0 || !strings.Contains(res.Error, "the cost after its last result event is not counted") {
+		t.Errorf("result = %+v, want a timeout error that says the last segment's cost is not counted", res)
+	}
+	if res.CostUSD != 0.3 || res.Segments != 1 {
+		t.Errorf("counters = %+v, want the cost of the finished segment", res)
+	}
+}
+
+// childGone reports whether the process whose pid the fake claude wrote has
+// ended. It polls for up to five seconds, because a killed process stays
+// visible until its new parent reaps it; a zombie counts as ended.
+func childGone(t *testing.T, pidFile string) bool {
+	t.Helper()
+	raw, err := os.ReadFile(pidFile)
+	if err != nil {
+		t.Fatalf("read child pid: %v", err)
+	}
+	pid := strings.TrimSpace(string(raw))
+	deadline := time.Now().Add(5 * time.Second)
+	tick := time.NewTicker(50 * time.Millisecond)
+	defer tick.Stop()
+	for time.Now().Before(deadline) {
+		state, _ := exec.Command("ps", "-o", "stat=", "-p", pid).Output() // exits 1 when the pid is gone
+		if s := strings.TrimSpace(string(state)); s == "" || strings.HasPrefix(s, "Z") {
+			return true
+		}
+		<-tick.C
+	}
+	return false
 }
 
 func TestRunner_CaseGlobAndTagSelect(t *testing.T) {

@@ -1,7 +1,6 @@
 package runner
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -11,6 +10,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -18,8 +18,10 @@ import (
 )
 
 const (
-	filePerm       = 0o644
-	killGrace      = 5 * time.Second
+	filePerm = 0o644
+	// killGrace is the time claude has after SIGINT to write its result event
+	// and exit before it is killed.
+	killGrace      = 10 * time.Second
 	scaffoldBudget = 5 * time.Minute
 )
 
@@ -114,7 +116,8 @@ func agentEnv(environ, caseEnv []string) []string {
 
 // runAgent executes claude inside WorkDir with agentEnv, streaming stdout to
 // <OutDir>/trace.jsonl and stderr to <OutDir>/stderr.txt, then parses the
-// trace.
+// trace. On a timeout it returns the trace of the interrupted run with the
+// error, so the cost up to its last result event still counts.
 func runAgent(ctx context.Context, spec agentSpec) (trace.Trace, error) {
 	ctx, cancel := context.WithTimeout(ctx, spec.Timeout)
 	defer cancel()
@@ -123,27 +126,53 @@ func runAgent(ctx context.Context, spec agentSpec) (trace.Trace, error) {
 	if err != nil {
 		return trace.Trace{}, fmt.Errorf("runner: create trace: %w", err)
 	}
-	var stderr bytes.Buffer
+	// stderr goes to a file, not a pipe: a tool child that outlives claude then
+	// cannot hold the run open until WaitDelay.
+	stderrPath := filepath.Join(spec.OutDir, "stderr.txt")
+	stderrFile, err := os.Create(stderrPath)
+	if err != nil {
+		_ = traceFile.Close() // empty and unused; the create error is the one to report
+		return trace.Trace{}, fmt.Errorf("runner: create stderr file: %w", err)
+	}
 	cmd := exec.CommandContext(ctx, "claude", spec.args()...)
 	cmd.Dir = spec.WorkDir
 	cmd.Env = agentEnv(os.Environ(), spec.Env)
-	cmd.Stdout, cmd.Stderr = traceFile, &stderr
+	cmd.Stdout, cmd.Stderr = traceFile, stderrFile
 	cmd.WaitDelay = killGrace
-	// claude spawns tool subprocesses; on timeout kill its whole process group
-	// so a lingering child cannot hold the stderr pipe open until WaitDelay.
+	// On timeout claude gets SIGINT: it then writes a result event with the
+	// cost so far, which SIGTERM and SIGKILL do not give. interrupted stays false
+	// when claude exited before the signal, so a finished run is not a timeout.
+	var interrupted atomic.Bool
+	cmd.Cancel = func() error {
+		if err := cmd.Process.Signal(os.Interrupt); err != nil {
+			return fmt.Errorf("runner: interrupt claude: %w", err) // os.ErrProcessDone stays visible to Wait
+		}
+		interrupted.Store(true)
+		return nil
+	}
+	// claude spawns tool subprocesses in its own process group; the group is
+	// killed after claude exits, so no tool outlives the run.
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
-	cmd.Cancel = func() error { return syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL) }
 	runErr := cmd.Run()
-	_ = traceFile.Close()                                                                // flushed by the kernel on close; parse below reopens it
-	_ = os.WriteFile(filepath.Join(spec.OutDir, "stderr.txt"), stderr.Bytes(), filePerm) // diagnostic artifact
-	return parseAgentTrace(ctx, tracePath, runErr, stderr.Bytes())
+	if cmd.Process != nil {
+		_ = syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL) // ESRCH when no process of the group is left
+	}
+	_ = traceFile.Close()                // flushed by the kernel on close; parse below reopens it
+	_ = stderrFile.Close()               // diagnostic artifact
+	stderr, _ := os.ReadFile(stderrPath) // an unreadable file only empties the error's tail
+	timedOut := interrupted.Load() && errors.Is(ctx.Err(), context.DeadlineExceeded)
+	return parseAgentTrace(timedOut, tracePath, runErr, stderr)
 }
 
-func parseAgentTrace(ctx context.Context, tracePath string, runErr error, stderr []byte) (trace.Trace, error) {
+func parseAgentTrace(timedOut bool, tracePath string, runErr error, stderr []byte) (trace.Trace, error) {
 	tr, perr := trace.ParseFile(tracePath)
 	switch {
-	case errors.Is(ctx.Err(), context.DeadlineExceeded):
-		return trace.Trace{}, fmt.Errorf("runner: claude timed out: %w", ctx.Err())
+	case timedOut && perr == nil && tr.EndsWithResult():
+		return tr, fmt.Errorf("runner: claude timed out: %w", context.DeadlineExceeded)
+	case timedOut && perr == nil && tr.Complete():
+		return tr, fmt.Errorf("runner: claude timed out; the cost after its last result event is not counted: %w", context.DeadlineExceeded)
+	case timedOut:
+		return trace.Trace{}, fmt.Errorf("runner: claude timed out and wrote no result event, so its cost is not counted: %w", context.DeadlineExceeded)
 	case perr != nil:
 		return trace.Trace{}, fmt.Errorf("runner: %w", perr)
 	case !tr.Complete():

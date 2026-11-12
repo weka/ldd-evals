@@ -355,11 +355,11 @@ func (r *Runner) execute(ctx context.Context, env runEnv, res report.RunResult) 
 		AppendSystemPrompt: env.caseDef.AppendSystemPrompt, AllowedTools: env.caseDef.AllowedTools,
 		WorkDir: env.work, OutDir: env.outDir, Env: env.caseDef.Env,
 	})
+	res.CostUSD, res.DurationMS, res.NumTurns, res.Segments = tr.CostUSD(), tr.DurationMS(), tr.NumTurns(), tr.Segments()
 	if err != nil {
 		res.Error = err.Error()
 		return res
 	}
-	res.CostUSD, res.DurationMS, res.NumTurns, res.Segments = tr.CostUSD(), tr.DurationMS(), tr.NumTurns(), tr.Segments()
 	if tr.IsError() {
 		res.Graders = append(res.Graders, executionOutcome(tr))
 	}

@@ -139,6 +139,40 @@ func TestParse_LastMessageFallsBackToAssistantText(t *testing.T) {
 	}
 }
 
+func TestParse_EndsWithResult(t *testing.T) {
+	t.Parallel()
+	const (
+		work    = `{"type":"assistant","message":{"content":[{"type":"text","text":"working"}]}}`
+		toolOut = `{"type":"user","message":{"content":[{"type":"tool_result","content":"ok"}]}}`
+		result  = `{"type":"result","subtype":"success","result":"DONE","total_cost_usd":0.3,"num_turns":2}`
+		summary = `{"type":"system","subtype":"task_summary"}`
+	)
+	tests := []struct {
+		name   string
+		events []string
+		want   bool
+	}{
+		{name: "one segment", events: []string{work, result}, want: true},
+		{name: "a system event after the result", events: []string{work, result, summary}, want: true},
+		{name: "a second segment with a result", events: []string{work, result, work, result}, want: true},
+		{name: "assistant work after the result", events: []string{work, result, work}, want: false},
+		{name: "a tool result after the result", events: []string{work, result, toolOut}, want: false},
+		{name: "no result", events: []string{work}, want: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			tr, err := trace.Parse(strings.NewReader(strings.Join(tt.events, "\n") + "\n"))
+			if err != nil {
+				t.Fatalf("Parse: %v", err)
+			}
+			if got := tr.EndsWithResult(); got != tt.want {
+				t.Errorf("EndsWithResult() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestParse_IncompleteTraceHasNoResult(t *testing.T) {
 	t.Parallel()
 	input := `{"type":"assistant","message":{"content":[{"type":"tool_use","name":"Read","input":{"file_path":"a.go"}}]}}` + "\n"
