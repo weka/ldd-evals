@@ -1,6 +1,6 @@
 ---
 type: llm
-criteria: Every type in the DESIGN PLAN has an R1 score and a rung, or is marked as feature API. Each helper with a score of 4 or more is on rung 2 or 3; the feature's public API types can stay in the feature package. The expansion leaf and the reply-classification leaf are each in a module or sub-package inside the feature package, or the expansion is on rung 3 and the plan names the existing copy. The probe stays in the feature package.
+criteria: Every type in the DESIGN PLAN has an R1 score and a rung, or is marked as feature API. Each helper with a score of 4 or more is on rung 2 or 3; the feature's public API types can stay in the feature package. The expansion leaf is in a module or sub-package inside the feature package, or on rung 3 when the plan names the existing copy. The reply classification is in such a module, or is the verdict's public constructor beside the verdict. The probe stays in the feature package.
 focus: last_message
 ---
 The final message holds a DESIGN PLAN with a placement block. Each line of the block
@@ -16,9 +16,11 @@ Judge the block with these four checks. Score PASS only when all four hold.
    score of 4 or more on rung 1 is a FAIL, with or without a written reason. The types
    of the feature's public API are not helpers: the public entry, the verdict it
    returns and the verdict's values. They can stay in the feature package at any score.
-   A rung-2 leaf can also define the verdict, and the feature package re-exports it.
+   A function that builds and returns the verdict from the reply is the verdict's
+   constructor. It is part of the API, not a helper. It stays beside the verdict and is
+   public. A private constructor with a score of 4 or more is a FAIL.
 3. The expansion of environment references and the classification of the reply are each
-   in a module or a sub-package inside the feature package (rung 2). Both count, for
+   in a module or a sub-package inside the feature package (rung 2). The classification of the reply can instead be the verdict's public constructor, beside the verdict (check 2). Both count, for
    example `src/services/transport/webhookCheck/expand.ts` or a sub-package folder below the feature. A leaf in the feature's own
    entry module, or in the module that does the I/O (the probe's module, whatever its name),
    or outside the feature package, is a FAIL. Example: `webhookCheck/probe.ts` holds both
