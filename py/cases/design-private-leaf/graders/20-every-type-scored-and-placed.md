@@ -24,9 +24,9 @@ Judge the block with these four checks. Score PASS only when all four hold.
    for example `transport/<feature>/expand_env.py`, is a FAIL. A leaf in the feature's own
    entry module, or in the module that does the I/O (the probe's module, whatever its name),
    is a FAIL. Example: `<feature>/probe.py` holds both the probe and `expand_env`; that is
-   a FAIL. Rung 3, a top-level shared package, also counts for the expansion,
-   but only when the plan names the copy of the same logic in the existing
-   `internal/transport/webhook.py`. Rung 3 for the classification is a FAIL.
+   a FAIL. Rung 3 also counts for the expansion, but only in a package directly under `internal/`, a sibling of `transport`, and
+   only when the plan names the copy of the same logic in the existing
+   `internal/transport/webhook.py` and says that `transport` imports the shared leaf. Rung 3 for the classification is a FAIL.
 4. The probe, the part that does the HTTP and TLS work, is not a helper. It stays in the
    feature package: in the entry module, or in a role module (a `.py` file) inside the
    feature package (R5 vertical slice). A probe in a leaf sub-package for pure leaves, or

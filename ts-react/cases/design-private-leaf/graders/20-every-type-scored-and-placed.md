@@ -21,12 +21,14 @@ Judge the block with these four checks. Score PASS only when all four hold.
    example `src/services/transport/webhookCheck/expand.ts` or a sub-package folder below the feature. A leaf in the feature's own
    entry module, or in the module that does the I/O (the probe's module, whatever its name),
    or outside the feature package, is a FAIL. Example: `webhookCheck/probe.ts` holds both
-   the probe and `expandEnv`; that is a FAIL. Rung 3, a top-level shared package, also counts for the expansion,
-   but only when the plan names the copy of the same logic in the existing
-   `src/services/transport/webhook.ts`. Rung 3 for the classification is a FAIL.
-4. The probe, the part that does the HTTP and TLS work, stays in the feature package.
+   the probe and `expandEnv`; that is a FAIL. A leaf that the feature's `index.ts`
+   re-exports is a FAIL. Rung 3 also counts for the expansion, but only in a shared `src/<domain>/` module, and
+   only when the plan names the copy of the same logic in the existing
+   `src/services/transport/webhook.ts` and says that `transport` imports the shared leaf. Rung 3 for the classification is a FAIL.
+4. The probe, the part that does the HTTP and TLS work, is not a helper. It stays in
+   the feature package.
    It can stay in the entry module, or move to a role module inside the feature package
-   (R5 vertical slice) as rung 2. A probe in a
+   (R5 vertical slice). A probe in a
    sub-package for pure leaves, or in a module outside the feature package, is a FAIL.
 
 Quote the line of the block for each check in your answer. Do not reward length.

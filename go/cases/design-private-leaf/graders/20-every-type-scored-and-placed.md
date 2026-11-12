@@ -15,14 +15,18 @@ Judge the block with these four checks. Score PASS only when all four hold.
    score of 4 or more on rung 1 is a FAIL, with or without a written reason. The types
    of the feature's public API are not helpers: the public entry, the verdict it
    returns and the verdict's values. They can stay in the feature package at any score.
-   A rung-2 leaf can also define the verdict, and the feature package re-exports it.
+   When the classifier is in a nested package, that package defines the verdict and
+   the feature package aliases it, or the classifier returns its own type and the
+   feature package maps it. A nested classifier that returns a type defined in the
+   feature package is a FAIL: Go rejects that import cycle.
 3. The expansion of environment references and the classification of the reply are in
    packages nested under the feature package. In this suite a package below the feature
    one counts, for example `internal/transport/webhookcheck/expand`. A leaf in the feature package itself, or in a
-   sibling of it, is a FAIL. Rung 3, a top-level shared package, also counts for the expansion,
-   but only when the plan names the copy of the same logic in the existing
-   `internal/transport/webhook.go`. Rung 3 for the classification is a FAIL.
-4. The probe, the part that does the HTTP and TLS work, stays in the feature package.
+   sibling of it, is a FAIL. Rung 3 also counts for the expansion, but only in `internal/pkg/<domain>`, and
+   only when the plan names the copy of the same logic in the existing
+   `internal/transport/webhook.go` and says that `transport` imports the shared leaf. Rung 3 for the classification is a FAIL.
+4. The probe, the part that does the HTTP and TLS work, is not a helper. It stays in
+   the feature package.
    A probe in a nested package is a FAIL.
 
 Quote the line of the block for each check in your answer. Do not reward length.
