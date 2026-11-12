@@ -10,7 +10,8 @@ Judge the block with these four checks. Score PASS only when all four hold.
 
 1. Every type or helper the plan names has an R1 score and a rung. A type of the
    feature's public API can read `→ feature API (<package path>)` in place of a rung.
-   A type with no score, or with neither a rung nor `feature API`, is a FAIL.
+   A type with no score, or with neither a rung nor `feature API`, is a FAIL. The
+   public entry function needs no line: the spec makes it the feature's API.
 2. Each helper or helper type with an R1 score of 4 or more is on rung 2 or rung 3. A
    score of 4 or more on rung 1 is a FAIL, with or without a written reason. The types
    of the feature's public API are not helpers: the public entry, the verdict it
