@@ -29,7 +29,7 @@ Judge the block with these four checks. Score PASS only when all four hold.
    the probe and `expandEnv`; that is a FAIL. A leaf that the feature's `index.ts`
    re-exports is a FAIL. Rung 3 also counts for the expansion, but only in a shared `src/<domain>/` module, and
    only when the plan names the copy of the same logic in the existing
-   `src/services/transport/webhook.ts` and says that `transport` imports the shared leaf. Rung 3 for the classification is a FAIL. These FAIL rules do not apply to
+   `src/services/transport/webhook.ts` and says that `transport` imports the shared leaf. Rung 3 also counts in the repository's existing shared layer under `src/services/` when the plan says that it follows the house layout and proposes the path above to the user. A shared module inside the feature package, or in the same folder as the copy, is a FAIL. Rung 3 for the classification is a FAIL. These FAIL rules do not apply to
    the verdict's public constructor.
 4. The probe, the part that does the HTTP and TLS work, is not a helper. It stays in
    the feature package.
