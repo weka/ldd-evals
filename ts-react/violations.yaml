@@ -329,6 +329,24 @@
   symbol: 'trimSlash'
   expect: { review: { findings: 0, note: "a trivial helper stays private" } }
 
+- id: R7.Q4.private-type-no-io
+  rule: R7
+  questions: [Q4]
+  files: [src/tagfilter/tagFilter.ts]
+  anchor: '^class TagFilter \{'
+  symbol: 'TagFilter'
+  expect:
+    review: { category: "🔴", fix: "Promote to feature sub-package (rung 2)" }
+
+- id: CTRL.R7.juicy-private-function
+  rule: R7
+  control: true
+  files: [src/tagfilter/tagText.ts]
+  anchor: '^function splitTag\('
+  symbol: 'splitTag'
+  precision: finding
+  expect: { review: { findings: 0, note: "a private function stays private, juicy or not" } }
+
 - id: R9.Q4.what-comment-process-heartbeat
   rule: R9
   questions: [Q4]

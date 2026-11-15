@@ -51,4 +51,11 @@ describe('DevicesPage', () => {
     expect(screen.getByRole('heading', { name: 'Place replicas for d' })).toBeInTheDocument()
     expect(screen.getByText(/primary/)).toHaveTextContent('primary eu-a, secondary us-a')
   })
+
+  it('filters the fleet by tags', async () => {
+    renderWithProviders(<DevicesPage />, { route: '/devices' })
+    await userEvent.setup().type(screen.getByRole('textbox', { name: 'Tag filter' }), 'region:eu')
+    expect(screen.queryByRole('link', { name: 'a' })).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'd' })).toBeInTheDocument()
+  })
 })

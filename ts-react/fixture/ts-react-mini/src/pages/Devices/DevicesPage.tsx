@@ -5,6 +5,7 @@ import { DeviceTable } from '../../components/DeviceTable/DeviceTable'
 import { RequireWrite } from '../../components/RequireWrite/RequireWrite'
 import { CONFIG } from '../../config/env'
 import { useDevices } from '../../hooks/useDevices'
+import { matchTags } from '../../tagfilter/tagFilter'
 import { type Device } from '../../types/device'
 import { DeviceForm } from './DeviceForm'
 import styles from './DevicesPage.module.scss'
@@ -21,17 +22,32 @@ const NODES: readonly Node[] = [
   { id: 'ap-a', zone: 'ap', capacity: 6 }
 ]
 
+/** Returns the tag test for expr, or undefined when expr is not a valid filter. */
+function tagTest(expr: string): ((tags: readonly string[]) => boolean) | undefined {
+  if (expr.trim() === '') {
+    return () => true
+  }
+  try {
+    matchTags([], expr)
+  } catch {
+    return undefined
+  }
+  return (tags) => matchTags(tags, expr)
+}
+
 /** The fleet table with its URL-driven filters, the registration form and the placement dialog. */
 export function DevicesPage() {
   const filters = useTableFilters()
   const [params] = useSearchParams()
   const devices = useDevices(CONFIG.pollMs, withTrace({}, traceFromSearch(params)))
   const [placing, setPlacing] = useState<Device>()
+  const tagsMatch = tagTest(filters.tags)
 
   const rows = (devices.data ?? []).filter(
     (d) =>
       (!filters.tenant || d.tenant === filters.tenant) &&
-      (!filters.status || d.status === filters.status)
+      (!filters.status || d.status === filters.status) &&
+      (tagsMatch?.(d.tags) ?? false)
   )
 
   return (
@@ -56,7 +72,14 @@ export function DevicesPage() {
           <option value='DOWN'>down</option>
           <option value='BOOTING'>booting</option>
         </select>
+        <label htmlFor='filter-tags'>Tag filter</label>
+        <input
+          id='filter-tags'
+          value={filters.tags}
+          onChange={(e) => filters.setTags(e.target.value)}
+        />
       </div>
+      {tagsMatch === undefined && <p role='status'>bad tag filter</p>}
       {devices.isPending ? <p>loading…</p> : null}
       {devices.isError ? <p role='alert'>store unavailable</p> : null}
       {devices.isSuccess ? (
