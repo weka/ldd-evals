@@ -14,15 +14,20 @@ describe('matchTags', () => {
     ['!zone', true],
     ['region:eu, !retired', false],
     ['region:eu,tier:silver', false],
-    [' region : eu ', true]
+    [' region : eu ', true],
+    ['', true]
   ])('matches %s', (expr, want) => {
     expect(matchTags(TAGS, expr)).toBe(want)
   })
 
-  it.each(['', 'region:eu,', '!', ':eu', 'region:eu:x', 'region:eu,region:us', 'region,!region'])(
+  it.each(['region:eu,', '!', ':eu', 'region:eu:x', 'region:eu,region:us', 'region,!region'])(
     'refuses the filter %s',
     (expr) => {
       expect(() => matchTags([], expr)).toThrow('tag filter')
     }
   )
+
+  it('finds any value of a repeated key', () => {
+    expect(matchTags(['region:eu', 'region:us'], 'region:us')).toBe(true)
+  })
 })

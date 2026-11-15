@@ -1,12 +1,13 @@
 const SEPARATORS = /[:=]/
 
-/** Reads device tags into key → value; a bare key maps to "". An unreadable tag is left out. */
-export function readTags(tags: readonly string[]): ReadonlyMap<string, string> {
-  const read = new Map<string, string>()
+/** Reads device tags as key → values; a bare key has the value "". An unreadable tag is left out. */
+export function readTags(tags: readonly string[]): ReadonlyMap<string, readonly string[]> {
+  const read = new Map<string, string[]>()
   for (const tag of tags) {
     const parsed = splitTag(tag)
     if (parsed) {
-      read.set(parsed[0], parsed[1])
+      const [key, value] = parsed
+      read.set(key, [...(read.get(key) ?? []), value])
     }
   }
   return read

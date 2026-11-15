@@ -21,6 +21,7 @@ func TestMatch(t *testing.T) {
 		{"region:eu, !retired", false},
 		{"region:eu,tier:silver", false},
 		{" region : eu ", true},
+		{"", true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.expr, func(t *testing.T) {
@@ -35,8 +36,15 @@ func TestMatch(t *testing.T) {
 	}
 }
 
+func TestMatch_FindsAnyValueOfARepeatedKey(t *testing.T) {
+	got, err := tagfilter.Match([]string{"region:eu", "region:us"}, "region:us")
+	if err != nil || !got {
+		t.Errorf("Match() = %v, %v; want true, nil", got, err)
+	}
+}
+
 func TestMatch_RefusesABadFilter(t *testing.T) {
-	for _, expr := range []string{"", "region:eu,", "!", ":eu", "region:eu:x", "region:eu,region:us", "region,!region"} {
+	for _, expr := range []string{"region:eu,", "!", ":eu", "region:eu:x", "region:eu,region:us", "region,!region"} {
 		if _, err := tagfilter.Match(nil, expr); err == nil {
 			t.Errorf("Match(%q) error = nil, want an error", expr)
 		}

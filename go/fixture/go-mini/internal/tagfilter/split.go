@@ -2,6 +2,18 @@ package tagfilter
 
 import "strings"
 
+// readTags reads the device tags as key → values. A tag that splitTag
+// refuses is left out.
+func readTags(tags []string) map[string][]string {
+	read := map[string][]string{}
+	for _, tag := range tags {
+		if key, value, ok := splitTag(tag); ok {
+			read[key] = append(read[key], value)
+		}
+	}
+	return read
+}
+
 // splitTag reads "key:value", "key=value" or a bare "key". The key is
 // compared without case; a value with a second separator is refused.
 func splitTag(tag string) (key, value string, ok bool) {

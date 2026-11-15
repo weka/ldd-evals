@@ -1,6 +1,8 @@
 """Match device tags against a filter expression."""
 
-from internal.tagfilter.split import _split_tag
+from internal.tagfilter.split import read_tags
+
+_TERM_SEPARATOR = ":"
 
 
 def match(tags: list[str], expr: str) -> bool:
@@ -8,10 +10,12 @@ def match(tags: list[str], expr: str) -> bool:
 
     expr is a comma-separated list of terms, and every term must hold: "key:value"
     needs a tag with that key and value, "key" needs a tag with that key and any value,
-    and a leading "!" needs no such tag. A key may appear in one term only. A bad
-    filter raises ValueError.
+    and a leading "!" needs no such tag. A key may appear in one term only. An empty
+    expr matches every tag list. A bad filter raises ValueError.
     """
-    return _Filter.parse(expr).matches(tags)
+    if not expr.strip():
+        return True
+    return _Filter.parse(expr).matches(read_tags(tags))
 
 
 class _Filter:
@@ -31,25 +35,21 @@ class _Filter:
             into = want
             if term.startswith("!"):
                 term, into = term[1:], deny
-            parsed = _split_tag(term)
-            if parsed is None:
+            key, _, value = term.partition(_TERM_SEPARATOR)
+            key, value = key.strip().lower(), value.strip()
+            if not key or _TERM_SEPARATOR in value:
                 raise ValueError(f"tag filter: bad term {raw!r}")
-            key, value = parsed
             if key in want or key in deny:
                 raise ValueError(f"tag filter: key {key!r} twice")
             into[key] = value
         return cls(want, deny)
 
-    def matches(self, tags: list[str]) -> bool:
-        """Report whether every wanted tag is present and no denied tag is."""
-        wanted = all(self._has(tags, key, value) for key, value in self._want.items())
-        denied = any(self._has(tags, key, value) for key, value in self._deny.items())
+    def matches(self, tags: dict[str, list[str]]) -> bool:
+        """Report whether every wanted tag is present and no denied tag is; tags is key → values."""
+        wanted = all(_has_value(tags.get(key, []), value) for key, value in self._want.items())
+        denied = any(_has_value(tags.get(key, []), value) for key, value in self._deny.items())
         return wanted and not denied
 
-    @staticmethod
-    def _has(tags: list[str], key: str, value: str) -> bool:
-        for tag in tags:
-            parsed = _split_tag(tag)
-            if parsed is not None and parsed[0] == key and (not value or parsed[1] == value):
-                return True
-        return False
+
+def _has_value(values: list[str], value: str) -> bool:
+    return bool(values) if not value else value in values

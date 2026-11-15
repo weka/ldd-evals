@@ -1,6 +1,16 @@
-"""Read one device tag."""
+"""Read device tags."""
 
 _SEPARATORS = ":="
+
+
+def read_tags(tags: list[str]) -> dict[str, list[str]]:
+    """Read the device tags as key → values. A tag that cannot be read is left out."""
+    read: dict[str, list[str]] = {}
+    for tag in tags:
+        parsed = _split_tag(tag)
+        if parsed is not None:
+            read.setdefault(parsed[0], []).append(parsed[1])
+    return read
 
 
 def _split_tag(tag: str) -> tuple[str, str] | None:

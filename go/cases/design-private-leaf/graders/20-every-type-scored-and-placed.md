@@ -1,6 +1,6 @@
 ---
 type: llm
-criteria: Every type in the DESIGN PLAN has an R1 score and a rung, or is marked as feature API. Each helper type with a score of 4 or more is on rung 2 or 3, and a private function is fine on rung 1; the feature's public API types can stay in the feature package. When the plan models a leaf as a helper type, the expansion leaf is in a package nested under the feature package, or on rung 3 when the plan names the existing copy. The reply classification is in a nested package, or is the verdict's public constructor beside the verdict. The probe stays in the feature package.
+criteria: Every type in the DESIGN PLAN has an R1 score and a rung, or is marked as feature API. Each helper type with a score of 4 or more is on rung 2 or 3, and a private function is fine on rung 1; the feature's public API types can stay in the feature package. When the plan models a leaf as a helper type, the expansion leaf is in a package nested under the feature package, or on rung 3 when the plan names the existing copy. When the plan models it as a helper type, the reply classification is in a nested package, or is the verdict's public constructor beside the verdict. The probe stays in the feature package.
 focus: last_message
 ---
 The final message holds a DESIGN PLAN with a placement block. Each line of the block
@@ -8,14 +8,16 @@ reads: `- <type> — R1 score N → rung K (<package path>) — reason`. The exa
 A type of the feature's public API can read `→ feature API (<package path>)` in place of a rung.
 Judge the block with these four checks. Score PASS only when all four hold.
 
-1. Every type or helper the plan names has an R1 score and a rung. A type of the
+1. Every type the plan names has an R1 score and a rung. A private function needs no
+   line. A type of the
    feature's public API can read `→ feature API (<package path>)` in place of a rung.
    A type with no score, or with neither a rung nor `feature API`, is a FAIL. The
    public entry function needs no line: the spec makes it the feature's API. The
    verdict's constructor can read `→ feature API` too.
 2. Each helper type with an R1 score of 4 or more is on rung 2 or rung 3. A private
    function is fine on rung 1 at any score. A
-   score of 4 or more on rung 1 is a FAIL, with or without a written reason. The types
+   helper type with a score of 4 or more on rung 1 is a FAIL, with or without a written
+   reason. The types
    of the feature's public API are not helpers: the public entry, the verdict it
    returns and the verdict's values. They can stay in the feature package at any score.
    A function that builds and returns the verdict from the reply is the verdict's

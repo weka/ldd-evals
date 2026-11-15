@@ -55,7 +55,8 @@
 2 ./src/services/statusApi.test.ts
 1 ./src/services/transport/client.test.ts
 4 ./src/services/transport/webhook.test.ts
-2 ./src/tagfilter/tagFilter.test.ts
+3 ./src/tagfilter/tagFilter.test.ts
+1 ./src/tagfilter/tagText.test.ts
 3 ./src/types/region.test.ts
 2 ./src/types/tenant.test.ts
 5 ./src/utils/strings.test.ts
