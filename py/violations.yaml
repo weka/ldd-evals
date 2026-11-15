@@ -677,7 +677,7 @@
   files: [internal/services/test_service.py]
   anchor: '^def test_normalize_tags\('
   expect:
-    review: { category: "🔴", fix: "Promote to feature sub-package (rung 2)" }
+    review: { category: "🔴", fix: "Delete private-function tests" }
 
 # Go had `internal/common` and `internal/utils` packages; Python's classic
 # shape of the same smell is a `utils.py` and a `common.py` module. No ruff

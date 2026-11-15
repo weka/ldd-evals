@@ -697,7 +697,7 @@
   files: [src/pages/Heartbeats/heartbeatFeed.ts, src/pages/Heartbeats/heartbeatFeed.test.ts]
   anchor: '_normalizeTags'
   expect:
-    review: { category: "🔴", fix: "Promote to feature sub-package (rung 2)" }
+    review: { category: "🔴", fix: "Delete private-function tests" }
 
 # Go had `internal/common` and `internal/utils` packages; the TypeScript shape
 # of the same smell is a `utils/` directory and a `common/constants.ts`.

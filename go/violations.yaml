@@ -628,7 +628,7 @@
   files: [internal/services/service_test.go]
   anchor: '^func TestNormalizeTags\('
   expect:
-    review: { category: "🔴", fix: "Promote to feature sub-package (rung 2)" }
+    review: { category: "🔴", fix: "Delete private-function tests" }
 
 - id: R4.Q3.role-named-packages
   rule: R4
