@@ -1,6 +1,6 @@
 ---
 type: regex
-pattern: '(own|separate|new|dedicated) module|src/services/transport/\w+/|sub-?package|nested package|\bexpand\w*\.ts'
+pattern: '(own|separate|new|dedicated) module|src/services/transport/\w+/|sub-?package|nested package|\bexpand\w*\.ts|split the pure leaf out of (an|the) I/O (package|module)'
 flags: i
 match: contains
 target: last_message

@@ -1,6 +1,6 @@
 ---
 type: regex
-pattern: 'internal/transport/\w+/|sub-?package|nested package|Split the pure leaf out of an I/O package'
+pattern: 'internal/transport/\w+/|sub-?package|nested package|Split the pure leaf out of (an|the) I/O (package|module)'
 flags: i
 match: contains
 target: last_message
