@@ -23,8 +23,11 @@ func CheckWebhook(ctx context.Context, path string, env func(string) (string, bo
 	if err != nil {
 		return Result{}, fmt.Errorf("transport: read webhook config: %w", err)
 	}
-	expanded := envTemplate{text: strings.TrimSpace(string(raw))}.expand(env)
-	endpoint := trimSlash(expanded)
+	tmpl, err := parseEnvTemplate(strings.TrimSpace(string(raw)))
+	if err != nil {
+		return Result{}, fmt.Errorf("transport: webhook config: %w", err)
+	}
+	endpoint := trimSlash(tmpl.expand(env))
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, http.NoBody)
 	if err != nil {
@@ -46,6 +49,22 @@ func CheckWebhook(ctx context.Context, path string, env func(string) (string, bo
 // default when the variable is empty.
 type envTemplate struct {
 	text string
+}
+
+// parseEnvTemplate refuses a "${" that has no closing "}".
+func parseEnvTemplate(text string) (envTemplate, error) {
+	rest := text
+	for {
+		open := strings.Index(rest, "${")
+		if open < 0 {
+			return envTemplate{text: text}, nil
+		}
+		closing := strings.IndexByte(rest[open:], '}')
+		if closing < 0 {
+			return envTemplate{}, fmt.Errorf("unclosed reference %q", rest[open:])
+		}
+		rest = rest[open+closing+1:]
+	}
 }
 
 // expand replaces each reference with its value from env.

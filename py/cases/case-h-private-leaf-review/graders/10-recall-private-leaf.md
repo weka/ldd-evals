@@ -1,6 +1,6 @@
 ---
 type: regex
-pattern: '_EnvTemplate.{0,300}(R7.{0,6}Q4|\bR4\b)|(R7.{0,6}Q4|\bR4\b).{0,300}_EnvTemplate'
+pattern: '_?EnvTemplate.{0,300}(R7.{0,6}Q4|\bR4\b)|(R7.{0,6}Q4|\bR4\b).{0,300}_?EnvTemplate'
 flags: s
 match: contains
 target: last_message

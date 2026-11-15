@@ -50,7 +50,7 @@ full_coverage() {
 exports_public_name() {
 	local f
 	for f in $new_src; do
-		[ -f "$EVAL_DIR/$f" ] && grep -qE '^export (abstract )?class [A-Z]' "$EVAL_DIR/$f" && return 0
+		[ -f "$EVAL_DIR/$f" ] && grep -qE '^export (default )?(abstract )?class [A-Z]|^export \{[^}]*\b[A-Z][A-Za-z0-9]*\b' "$EVAL_DIR/$f" && return 0
 	done
 	return 1
 }

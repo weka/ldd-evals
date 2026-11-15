@@ -1,5 +1,6 @@
 import { type FormEvent, useState } from 'react'
 
+import { readEnv } from '../../config/env'
 import { checkWebhook } from '../../services/transport/webhook'
 import { deliver, validateAlert } from '../../services/validate'
 import { type Alert } from '../../types/alert'
@@ -8,11 +9,6 @@ import styles from './ChannelsForm.module.scss'
 
 const CHANNELS = [CHANNEL_EMAIL, CHANNEL_SLACK, CHANNEL_PAGERDUTY]
 const WEBHOOK_CONFIG_URL = '/webhook.conf'
-
-function readEnv(name: string): string | undefined {
-  const value: unknown = import.meta.env[`VITE_${name}`]
-  return typeof value === 'string' ? value : undefined
-}
 
 /** Sends a test alert on a channel, so the recipient can be checked before an outage needs it. */
 export function ChannelsForm() {

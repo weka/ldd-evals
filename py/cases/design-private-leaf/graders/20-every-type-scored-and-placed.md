@@ -21,7 +21,8 @@ Judge the block with these four checks. Score PASS only when all four hold.
    constructor. It is part of the API, not a helper. It stays beside the verdict and is
    public. It goes with the verdict type, so it is not a second entry. A private
    constructor with a score of 4 or more is a FAIL.
-3. The expansion of environment references and the classification of the reply are each
+3. The expansion of environment references (a juicy leaf, so a type under R1) and the
+   classification of the reply are each
    in a leaf sub-package folder nested in the feature package (rung 2). The classification of the reply can instead be the verdict's public constructor, beside the verdict (check 2). The feature package is the new package below `transport` named in the
    spec. A leaf sub-package is a folder with `__init__.py` inside it, for example
    `transport/<feature>/expand_env/__init__.py`. A leaf folder outside the feature package,

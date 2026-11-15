@@ -21,10 +21,9 @@ class Result:
 def check_webhook(path: Path, env: Callable[[str], str | None]) -> Result:
     """Read the endpoint template from the config file, expand it with env and POST to it.
 
-    A non-2xx answer raises OSError.
+    A non-2xx answer raises OSError. A template with an unclosed "${" raises ValueError.
     """
-    expanded = _EnvTemplate(path.read_text().strip()).expand(env)
-    endpoint = _trim_slash(expanded)
+    endpoint = _trim_slash(_EnvTemplate.parse(path.read_text().strip()).expand(env))
     req = urllib.request.Request(endpoint, data=b"", method="POST")
     try:
         with urllib.request.urlopen(req, timeout=_HTTP_TIMEOUT) as resp:
@@ -44,6 +43,17 @@ class _EnvTemplate:
     """
 
     text: str
+
+    @classmethod
+    def parse(cls, text: str) -> "_EnvTemplate":
+        """Refuse a "${" that has no closing "}"."""
+        rest = text
+        while (start := rest.find("${")) >= 0:
+            closing = rest.find("}", start)
+            if closing < 0:
+                raise ValueError(f"unclosed reference {rest[start:]!r}")
+            rest = rest[closing + 1 :]
+        return cls(text)
 
     def expand(self, env: Callable[[str], str | None]) -> str:
         """Replace each reference with its value from env."""

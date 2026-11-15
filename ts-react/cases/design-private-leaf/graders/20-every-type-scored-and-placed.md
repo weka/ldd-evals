@@ -21,7 +21,8 @@ Judge the block with these four checks. Score PASS only when all four hold.
    constructor. It is part of the API, not a helper. It stays beside the verdict and is
    public. It goes with the verdict type, so it is not a second entry. A private
    constructor with a score of 4 or more is a FAIL.
-3. The expansion of environment references and the classification of the reply are each
+3. The expansion of environment references (a juicy leaf, so a type under R1) and the
+   classification of the reply are each
    in a module or a sub-package inside the feature package (rung 2). The classification of the reply can instead be the verdict's public constructor, beside the verdict (check 2). Both count, for
    example `src/services/transport/webhookCheck/expand.ts` or a sub-package folder below the feature. A leaf in the feature's own
    entry module, or in the module that does the I/O (the probe's module, whatever its name),

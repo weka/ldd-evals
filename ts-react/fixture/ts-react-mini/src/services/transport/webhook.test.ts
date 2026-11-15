@@ -40,6 +40,11 @@ describe('checkWebhook', () => {
     expect(posted).toEqual([want])
   })
 
+  it('refuses an unclosed reference', async () => {
+    serveHook('https://hooks.test/${HOOK', 204)
+    await expect(checkWebhook(CONFIG_URL, lookup)).rejects.toThrow('unclosed reference')
+  })
+
   it('throws on a failure status', async () => {
     serveHook('https://hooks.test/', 502)
     await expect(checkWebhook(CONFIG_URL, lookup)).rejects.toThrow('status 502')
