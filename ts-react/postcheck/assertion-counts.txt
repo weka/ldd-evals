@@ -40,7 +40,7 @@
 3 ./src/pages/Heartbeats/ResultPanel.test.tsx
 18 ./src/pages/Heartbeats/heartbeatFeed.test.ts
 4 ./src/pages/Heartbeats/simulateRequest.test.ts
-2 ./src/pages/Settings/ChannelsForm.test.tsx
+3 ./src/pages/Settings/ChannelsForm.test.tsx
 1 ./src/pages/Settings/EndpointForm.test.tsx
 3 ./src/pages/Settings/ExportPanel.test.tsx
 2 ./src/pages/Settings/RetentionForm.test.tsx

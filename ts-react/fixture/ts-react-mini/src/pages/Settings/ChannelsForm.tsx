@@ -1,11 +1,18 @@
 import { type FormEvent, useState } from 'react'
 
+import { checkWebhook } from '../../services/transport/webhook'
 import { deliver, validateAlert } from '../../services/validate'
 import { type Alert } from '../../types/alert'
 import { CHANNEL_EMAIL, CHANNEL_PAGERDUTY, CHANNEL_SLACK } from '../../types/channel'
 import styles from './ChannelsForm.module.scss'
 
 const CHANNELS = [CHANNEL_EMAIL, CHANNEL_SLACK, CHANNEL_PAGERDUTY]
+const WEBHOOK_CONFIG_URL = '/webhook.conf'
+
+function readEnv(name: string): string | undefined {
+  const value: unknown = import.meta.env[`VITE_${name}`]
+  return typeof value === 'string' ? value : undefined
+}
 
 /** Sends a test alert on a channel, so the recipient can be checked before an outage needs it. */
 export function ChannelsForm() {
@@ -20,6 +27,15 @@ export function ChannelsForm() {
       validateAlert(alert)
       await deliver(alert)
       setOutcome(`sent on ${channel}`)
+    } catch (err) {
+      setOutcome(err instanceof Error ? err.message : String(err))
+    }
+  }
+
+  async function checkTheWebhook() {
+    try {
+      const res = await checkWebhook(WEBHOOK_CONFIG_URL, readEnv)
+      setOutcome(`webhook answered ${res.status}`)
     } catch (err) {
       setOutcome(err instanceof Error ? err.message : String(err))
     }
@@ -53,6 +69,12 @@ export function ChannelsForm() {
         onChange={(e) => setRecipient(e.target.value)}
       />
       <button type='submit'>Send test alert</button>
+      <button
+        type='button'
+        onClick={() => void checkTheWebhook()}
+      >
+        Check webhook
+      </button>
       {outcome !== '' && <p role='status'>{outcome}</p>}
     </form>
   )
