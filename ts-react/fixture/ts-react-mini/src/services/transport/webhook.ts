@@ -13,7 +13,7 @@ const DEFAULT_IF_EMPTY = ':-'
  */
 export async function checkWebhook(configUrl: string, env: Lookup): Promise<WebhookResult> {
   const template = await (await fetch(configUrl)).text()
-  const expanded = expandEnv(template.trim(), env)
+  const expanded = new EnvTemplate(template.trim()).expand(env)
   const endpoint = trimSlash(expanded)
   const res = await fetch(endpoint, { method: 'POST' })
   if (!res.ok) {
@@ -23,25 +23,35 @@ export async function checkWebhook(configUrl: string, env: Lookup): Promise<Webh
 }
 
 /**
- * Replaces $$, $VAR, ${VAR}, ${VAR:-default} and ${VAR-default}.
- * The ":-" form also applies the default when the variable is empty.
+ * A text with references to environment variables: $$, $VAR, ${VAR},
+ * ${VAR:-default} and ${VAR-default}. The ":-" form also applies the default
+ * when the variable is empty.
  */
-function expandEnv(text: string, env: Lookup): string {
-  const ref = /\$(?:(\$)|\{(\w+)(?:(:?-)([^}]*))?\}|(\w+))/g
-  return text.replace(ref, (_match: string, ...groups: (string | undefined)[]) => {
-    const [escaped, braced, op, fallback, bare] = groups
-    if (escaped) {
-      return '$'
-    }
-    let value = env(braced ?? bare ?? '')
-    if (op === DEFAULT_IF_EMPTY && value === '') {
-      value = undefined
-    }
-    if (value === undefined && op) {
-      return fallback ?? ''
-    }
-    return value ?? ''
-  })
+class EnvTemplate {
+  private readonly text: string
+
+  constructor(text: string) {
+    this.text = text
+  }
+
+  /** Replaces each reference with its value from env. */
+  expand(env: Lookup): string {
+    const ref = /\$(?:(\$)|\{(\w+)(?:(:?-)([^}]*))?\}|(\w+))/g
+    return this.text.replace(ref, (_match: string, ...groups: (string | undefined)[]) => {
+      const [escaped, braced, op, fallback, bare] = groups
+      if (escaped) {
+        return '$'
+      }
+      let value = env(braced ?? bare ?? '')
+      if (op === DEFAULT_IF_EMPTY && value === '') {
+        value = undefined
+      }
+      if (value === undefined && op) {
+        return fallback ?? ''
+      }
+      return value ?? ''
+    })
+  }
 }
 
 function trimSlash(s: string): string {

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# promote-private-leaf postcheck: expandEnv left the I/O file for a nested package
+# promote-private-leaf postcheck: the envTemplate type left the I/O file for a nested package
 # that has its own tests and full coverage, trimSlash stayed, no test-only export
 # exists, the build and the tests are green, the work is committed.
 set -uo pipefail
@@ -58,8 +58,9 @@ for pkg in ${nested[@]+"${nested[@]}"}; do
 	assert "nested package $pkg has its own test file" has_own_test "$pkg"
 	assert "nested package $pkg is covered at 100.0%" full_coverage "$pkg"
 done
+assert_ge "a nested package exports a type" "$(count_matches_prod '^type [A-Z]' 'internal/transport/*/*.go')" 1
 
-assert_eq "expandEnv is no longer defined in webhook.go" "$(count_matches '^func [eE]xpandEnv\(' "$IO_FILE")" 0
+assert_eq "envTemplate is no longer defined in webhook.go" "$(count_matches '^type [eE]nvTemplate\b' "$IO_FILE")" 0
 assert_eq "trimSlash is still defined in webhook.go" "$(count_matches '^func trimSlash\(' "$IO_FILE")" 1
 assert_ge "webhook.go imports a nested package" "$(count_matches '"[^"]*/internal/transport/[a-z0-9_]+"' "$IO_FILE")" 1
 

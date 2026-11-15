@@ -23,7 +23,7 @@ func CheckWebhook(ctx context.Context, path string, env func(string) (string, bo
 	if err != nil {
 		return Result{}, fmt.Errorf("transport: read webhook config: %w", err)
 	}
-	expanded := expandEnv(strings.TrimSpace(string(raw)), env)
+	expanded := envTemplate{text: strings.TrimSpace(string(raw))}.expand(env)
 	endpoint := trimSlash(expanded)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, http.NoBody)
@@ -41,11 +41,17 @@ func CheckWebhook(ctx context.Context, path string, env func(string) (string, bo
 	return Result{Status: resp.StatusCode}, nil
 }
 
-// expandEnv replaces $$, $VAR, ${VAR}, ${VAR:-default} and ${VAR-default}.
-// The ":-" form also applies the default when the variable is empty.
-func expandEnv(text string, env func(string) (string, bool)) string {
+// envTemplate is a text with references to environment variables: $$, $VAR,
+// ${VAR}, ${VAR:-default} and ${VAR-default}. The ":-" form also applies the
+// default when the variable is empty.
+type envTemplate struct {
+	text string
+}
+
+// expand replaces each reference with its value from env.
+func (t envTemplate) expand(env func(string) (string, bool)) string {
 	ref := regexp.MustCompile(`\$(?:(\$)|\{(\w+)(?:(:?-)([^}]*))?\}|(\w+))`)
-	return ref.ReplaceAllStringFunc(text, func(match string) string {
+	return ref.ReplaceAllStringFunc(t.text, func(match string) string {
 		parts := ref.FindStringSubmatch(match)
 		if parts[1] != "" {
 			return "$"

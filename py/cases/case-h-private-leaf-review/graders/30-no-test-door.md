@@ -1,6 +1,6 @@
 ---
 type: regex
-pattern: 'expand_env = _expand_env|__testing *=|__all__[^\n]{0,40}_expand_env'
+pattern: 'EnvTemplate = _EnvTemplate|__testing *=|__all__[^\n]{0,40}_EnvTemplate'
 flags: i
 match: not_contains
 target: last_message

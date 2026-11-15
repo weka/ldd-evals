@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# promote-private-leaf postcheck: _expand_env left the I/O module for a new
-# sub-package folder, under any public name, (with __init__.py) below the transport package, with its
-# own test file and full coverage. A plain module file is not a promotion.
+# promote-private-leaf postcheck: the _EnvTemplate class left the I/O module for a
+# new sub-package folder (with __init__.py) below the transport package, under any
+# public name, with its own test file and full coverage. A plain module file is not a promotion.
 # _trim_slash stayed, no test-only export exists, build and tests are
 # green, the work is committed.
 set -uo pipefail
@@ -55,24 +55,24 @@ full_coverage() {
 }
 
 # leaf_in_subpackage — a new folder with __init__.py below the transport package holds
-# a public function, in __init__.py or in a module inside that folder, and the I/O
+# a public class, in __init__.py or in a module inside that folder, and the I/O
 # module imports that folder. Any name counts.
 leaf_in_subpackage() {
 	local init dir pkg
 	for init in $(new_files '^internal/transport/[^/]+(/[^/]+)*/__init__\.py$'); do
 		dir=$(dirname "$init")
 		pkg=$(basename "$dir")
-		grep -rqE '^def [A-Za-z]' --include='*.py' "$EVAL_DIR/$dir" || continue
+		grep -rqE '^class [A-Z]' --include='*.py' "$EVAL_DIR/$dir" || continue
 		grep -qE "^(from|import) .*\b${pkg}\b" "$EVAL_DIR/$IO_FILE" && return 0
 	done
 	return 1
 }
 
-# exports_public_name — a new module defines a function whose name has no leading underscore.
+# exports_public_name — a new module defines a class whose name has no leading underscore.
 exports_public_name() {
 	local f
 	for f in $new_src; do
-		[ -f "$EVAL_DIR/$f" ] && grep -qE '^def [A-Za-z]' "$EVAL_DIR/$f" && return 0
+		[ -f "$EVAL_DIR/$f" ] && grep -qE '^class [A-Z]' "$EVAL_DIR/$f" && return 0
 	done
 	return 1
 }
@@ -84,13 +84,13 @@ assert "task build green" run_task build
 assert "task test green" run_task test
 
 assert_ge "a new non-test module exists in the transport package" "$(grep -c . <<<"$new_src")" 1
-assert "a new sub-package folder with __init__.py holds a public function that webhook.py imports" leaf_in_subpackage
+assert "a new sub-package folder with __init__.py holds a public class that webhook.py imports" leaf_in_subpackage
 assert_eq "no new plain module file sits directly in the transport package" "$(grep -cE '^internal/transport/[^/]+\.py$' <<<"$new_src")" 0
 assert_ge "a new test file exists in the transport package" "$(grep -c . <<<"$new_tests")" 1
-assert "a new module exports a public function" exports_public_name
+assert "a new module exports a public class" exports_public_name
 assert "the new modules are covered at 100 percent by the new tests" full_coverage
 
-assert_eq "_expand_env is no longer defined in webhook.py" "$(count_matches '^def _?expand_env\(' "$IO_FILE")" 0
+assert_eq "_EnvTemplate is no longer defined in webhook.py" "$(count_matches '^class _?EnvTemplate\b' "$IO_FILE")" 0
 assert_eq "_trim_slash is still defined in webhook.py" "$(count_matches '^def _trim_slash\(' "$IO_FILE")" 1
 assert_ge "webhook.py imports a new module" "$(count_matches '^(from|import) +(\.|internal\.transport)([a-z0-9_.]*)( +import|$)' "$IO_FILE")" 1
 

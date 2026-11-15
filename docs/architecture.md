@@ -90,7 +90,7 @@ Python suites and two more in the TypeScript + React suite, and
 `review-full-neutral` fails the same two.
 
 The private-leaf graders are of this kind too. They need the placement rules for
-a private leaf in an I/O module and the ledger that the plugins get in
+a private leaf type in an I/O module (`envTemplate` in each fixture) and the ledger that the plugins get in
 [weka/linter-driven-development#123](https://github.com/weka/linter-driven-development/pull/123).
 Each suite adds two graders to `review-full`: `recall-R7.Q4.private-leaf-in-io`, which
 fails on a baseline recorded before that change, and the control

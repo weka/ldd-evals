@@ -264,11 +264,11 @@
   rule: R7
   questions: [Q4]
   files: [internal/transport/webhook.go]
-  anchor: '^func expandEnv\('
-  symbol: 'expandEnv'
+  anchor: '^type envTemplate struct'
+  symbol: 'envTemplate'
   expect:
     review:   { category: "🔴", fix: "Split the pure leaf out of an I/O package" }
-    refactor: { gone: '^func expandEnv\(', present: 'internal/transport/*/', scope: transport }
+    refactor: { gone: '^type envTemplate struct', present: 'internal/transport/*/', scope: transport }
 
 - id: CTRL.R4.trivial-private-in-io
   rule: R4

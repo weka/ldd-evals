@@ -315,11 +315,11 @@
   rule: R7
   questions: [Q4]
   files: [src/services/transport/webhook.ts]
-  anchor: '^function expandEnv\('
-  symbol: 'expandEnv'
+  anchor: '^class EnvTemplate \{'
+  symbol: 'EnvTemplate'
   expect:
     review:   { category: "🔴", fix: "Split the pure leaf out of an I/O package" }
-    refactor: { gone: '^function expandEnv\(', present: 'src/services/transport/*/', scope: transport }
+    refactor: { gone: '^class EnvTemplate \{', present: 'src/services/transport/*/', scope: transport }
 
 - id: CTRL.R4.trivial-private-in-io
   rule: R4

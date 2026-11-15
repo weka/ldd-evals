@@ -300,11 +300,11 @@
   rule: R7
   questions: [Q4]
   files: [internal/transport/webhook.py]
-  anchor: '^def _expand_env\('
-  symbol: '_expand_env'
+  anchor: '^class _EnvTemplate:'
+  symbol: '_EnvTemplate'
   expect:
     review:   { category: "🔴", fix: "Split the pure leaf out of an I/O package" }
-    refactor: { gone: '^def _expand_env\(', present: 'internal/transport/*/', scope: transport }
+    refactor: { gone: '^class _EnvTemplate:', present: 'internal/transport/*/', scope: transport }
 
 - id: CTRL.R4.trivial-private-in-io
   rule: R4
