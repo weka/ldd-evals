@@ -1,6 +1,6 @@
 ---
 type: regex
-pattern: 'sub-?package|nested package|(own|separate|new|dedicated) package|expand\w*/|split the pure leaf out of an I/O package'
+pattern: 'sub-?package|nested package|(own|separate|new|dedicated) package|expand\w*/|split the pure leaf out of (an|the) I/O (package|module)'
 flags: i
 match: contains
 target: last_message

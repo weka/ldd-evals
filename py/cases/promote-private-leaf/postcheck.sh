@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # promote-private-leaf postcheck: _expand_env left the I/O module for a new
-# sub-package folder (with __init__.py) below the transport package, with its
+# sub-package folder, under any public name, (with __init__.py) below the transport package, with its
 # own test file and full coverage. A plain module file is not a promotion.
 # _trim_slash stayed, no test-only export exists, build and tests are
 # green, the work is committed.
@@ -55,12 +55,15 @@ full_coverage() {
 }
 
 # leaf_in_subpackage — a new folder with __init__.py below the transport package holds
-# a definition of expand_env, in __init__.py or in a module inside that folder.
+# a public function, in __init__.py or in a module inside that folder, and the I/O
+# module imports that folder. Any name counts.
 leaf_in_subpackage() {
-	local init dir
+	local init dir pkg
 	for init in $(new_files '^internal/transport/[^/]+(/[^/]+)*/__init__\.py$'); do
 		dir=$(dirname "$init")
-		grep -rqE '^def expand_env\(' --include='*.py' "$EVAL_DIR/$dir" && return 0
+		pkg=$(basename "$dir")
+		grep -rqE '^def [A-Za-z]' --include='*.py' "$EVAL_DIR/$dir" || continue
+		grep -qE "^(from|import) .*\b${pkg}\b" "$EVAL_DIR/$IO_FILE" && return 0
 	done
 	return 1
 }
@@ -81,7 +84,7 @@ assert "task build green" run_task build
 assert "task test green" run_task test
 
 assert_ge "a new non-test module exists in the transport package" "$(grep -c . <<<"$new_src")" 1
-assert "a new sub-package folder with __init__.py holds def expand_env" leaf_in_subpackage
+assert "a new sub-package folder with __init__.py holds a public function that webhook.py imports" leaf_in_subpackage
 assert_eq "no new plain module file sits directly in the transport package" "$(grep -cE '^internal/transport/[^/]+\.py$' <<<"$new_src")" 0
 assert_ge "a new test file exists in the transport package" "$(grep -c . <<<"$new_tests")" 1
 assert "a new module exports a public function" exports_public_name
