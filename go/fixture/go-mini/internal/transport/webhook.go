@@ -23,8 +23,11 @@ func CheckWebhook(ctx context.Context, path string, env func(string) (string, bo
 	if err != nil {
 		return Result{}, fmt.Errorf("transport: read webhook config: %w", err)
 	}
-	expanded := expandEnv(strings.TrimSpace(string(raw)), env)
-	endpoint := trimSlash(expanded)
+	tmpl, err := parseEnvTemplate(strings.TrimSpace(string(raw)))
+	if err != nil {
+		return Result{}, fmt.Errorf("transport: webhook config: %w", err)
+	}
+	endpoint := trimSlash(tmpl.expand(env))
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, http.NoBody)
 	if err != nil {
@@ -41,11 +44,33 @@ func CheckWebhook(ctx context.Context, path string, env func(string) (string, bo
 	return Result{Status: resp.StatusCode}, nil
 }
 
-// expandEnv replaces $$, $VAR, ${VAR}, ${VAR:-default} and ${VAR-default}.
-// The ":-" form also applies the default when the variable is empty.
-func expandEnv(text string, env func(string) (string, bool)) string {
+// envTemplate is a text with references to environment variables: $$, $VAR,
+// ${VAR}, ${VAR:-default} and ${VAR-default}. The ":-" form also applies the
+// default when the variable is empty.
+type envTemplate struct {
+	text string
+}
+
+// parseEnvTemplate refuses a "${" that has no closing "}".
+func parseEnvTemplate(text string) (envTemplate, error) {
+	rest := text
+	for {
+		open := strings.Index(rest, "${")
+		if open < 0 {
+			return envTemplate{text: text}, nil
+		}
+		closing := strings.IndexByte(rest[open:], '}')
+		if closing < 0 {
+			return envTemplate{}, fmt.Errorf("unclosed reference %q", rest[open:])
+		}
+		rest = rest[open+closing+1:]
+	}
+}
+
+// expand replaces each reference with its value from env.
+func (t envTemplate) expand(env func(string) (string, bool)) string {
 	ref := regexp.MustCompile(`\$(?:(\$)|\{(\w+)(?:(:?-)([^}]*))?\}|(\w+))`)
-	return ref.ReplaceAllStringFunc(text, func(match string) string {
+	return ref.ReplaceAllStringFunc(t.text, func(match string) string {
 		parts := ref.FindStringSubmatch(match)
 		if parts[1] != "" {
 			return "$"

@@ -1,6 +1,6 @@
 ---
 type: regex
-pattern: 'var \w+ = expandEnv|export \{ *expandEnv|__testing *='
+pattern: 'type \w+ = envTemplate|export \{ *envTemplate|__testing *='
 flags: i
 match: not_contains
 target: last_message

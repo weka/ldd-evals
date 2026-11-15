@@ -5,8 +5,10 @@ import { useSearchParams } from 'react-router-dom'
 export interface TableFilters {
   readonly tenant: string
   readonly status: string
+  readonly tags: string
   readonly setTenant: (tenant: string) => void
   readonly setStatus: (status: string) => void
+  readonly setTags: (tags: string) => void
 }
 
 export function useTableFilters(): TableFilters {
@@ -28,11 +30,15 @@ export function useTableFilters(): TableFilters {
   return {
     tenant: params.get('tenant') ?? '',
     status: params.get('status') ?? '',
+    tags: params.get('tags') ?? '',
     setTenant: (tenant) => {
       update('tenant', tenant)
     },
     setStatus: (status) => {
       update('status', status)
+    },
+    setTags: (tags) => {
+      update('tags', tags)
     }
   }
 }

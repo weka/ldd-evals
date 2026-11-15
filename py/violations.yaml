@@ -300,11 +300,11 @@
   rule: R7
   questions: [Q4]
   files: [internal/transport/webhook.py]
-  anchor: '^def _expand_env\('
-  symbol: '_expand_env'
+  anchor: '^class _EnvTemplate:'
+  symbol: '_EnvTemplate'
   expect:
     review:   { category: "🔴", fix: "Split the pure leaf out of an I/O package" }
-    refactor: { gone: '^def _expand_env\(', present: 'internal/transport/*/', scope: transport }
+    refactor: { gone: '^class _EnvTemplate:', present: 'internal/transport/*/', scope: transport }
 
 - id: CTRL.R4.trivial-private-in-io
   rule: R4
@@ -313,6 +313,24 @@
   anchor: '^def _trim_slash\('
   symbol: '_trim_slash'
   expect: { review: { findings: 0, note: "a trivial helper stays private" } }
+
+- id: R7.Q4.private-type-no-io
+  rule: R7
+  questions: [Q4]
+  files: [internal/tagfilter/filter.py]
+  anchor: '^class _Filter:'
+  symbol: '_Filter'
+  expect:
+    review: { category: "🔴", fix: "Promote to feature sub-package (rung 2)" }
+
+- id: CTRL.R7.juicy-private-function
+  rule: R7
+  control: true
+  files: [internal/tagfilter/split.py]
+  anchor: '^def _split_tag\('
+  symbol: '_split_tag'
+  precision: finding
+  expect: { review: { findings: 0, note: "a private function stays private, juicy or not" } }
 
 - id: R9.Q4.what-comment-process-heartbeat
   rule: R9
@@ -677,7 +695,7 @@
   files: [internal/services/test_service.py]
   anchor: '^def test_normalize_tags\('
   expect:
-    review: { category: "🔴", fix: "Promote to feature sub-package (rung 2)" }
+    review: { category: "🔴", fix: "Delete private-function tests" }
 
 # Go had `internal/common` and `internal/utils` packages; Python's classic
 # shape of the same smell is a `utils.py` and a `common.py` module. No ruff

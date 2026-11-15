@@ -21,10 +21,9 @@ class Result:
 def check_webhook(path: Path, env: Callable[[str], str | None]) -> Result:
     """Read the endpoint template from the config file, expand it with env and POST to it.
 
-    A non-2xx answer raises OSError.
+    A non-2xx answer raises OSError. A template with an unclosed "${" raises ValueError.
     """
-    expanded = _expand_env(path.read_text().strip(), env)
-    endpoint = _trim_slash(expanded)
+    endpoint = _trim_slash(_EnvTemplate.parse(path.read_text().strip()).expand(env))
     req = urllib.request.Request(endpoint, data=b"", method="POST")
     try:
         with urllib.request.urlopen(req, timeout=_HTTP_TIMEOUT) as resp:
@@ -35,25 +34,43 @@ def check_webhook(path: Path, env: Callable[[str], str | None]) -> Result:
         raise OSError(f"transport: post {endpoint}: {err.reason}") from err
 
 
-def _expand_env(text: str, env: Callable[[str], str | None]) -> str:
-    """Replace $$, $VAR, ${VAR}, ${VAR:-default} and ${VAR-default}.
+@dataclass(frozen=True)
+class _EnvTemplate:
+    """A text with references to environment variables.
 
-    The ":-" form also applies the default when the variable is empty.
+    The forms are $$, $VAR, ${VAR}, ${VAR:-default} and ${VAR-default}. The ":-" form
+    also applies the default when the variable is empty.
     """
-    ref = re.compile(r"\$(?:(\$)|\{(\w+)(?:(:?-)([^}]*))?\}|(\w+))")
 
-    def replace(match: re.Match[str]) -> str:
-        escaped, braced, op, default, bare = match.groups()
-        if escaped:
-            return "$"
-        value = env(braced or bare)
-        if op == _DEFAULT_IF_EMPTY and value == "":
-            value = None
-        if value is None and op:
-            return default
-        return value or ""
+    text: str
 
-    return ref.sub(replace, text)
+    @classmethod
+    def parse(cls, text: str) -> "_EnvTemplate":
+        """Refuse a "${" that has no closing "}"."""
+        rest = text
+        while (start := rest.find("${")) >= 0:
+            closing = rest.find("}", start)
+            if closing < 0:
+                raise ValueError(f"unclosed reference {rest[start:]!r}")
+            rest = rest[closing + 1 :]
+        return cls(text)
+
+    def expand(self, env: Callable[[str], str | None]) -> str:
+        """Replace each reference with its value from env."""
+        ref = re.compile(r"\$(?:(\$)|\{(\w+)(?:(:?-)([^}]*))?\}|(\w+))")
+
+        def replace(match: re.Match[str]) -> str:
+            escaped, braced, op, default, bare = match.groups()
+            if escaped:
+                return "$"
+            value = env(braced or bare)
+            if op == _DEFAULT_IF_EMPTY and value == "":
+                value = None
+            if value is None and op:
+                return default
+            return value or ""
+
+        return ref.sub(replace, self.text)
 
 
 def _trim_slash(s: str) -> str:

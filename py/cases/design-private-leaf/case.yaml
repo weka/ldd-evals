@@ -12,4 +12,6 @@ notes: |
   nested in the feature package. A plain module file on rung 2 fails. The probe is
   I/O and stays in the feature package. The scaffold amends SPEC-webhook.md into the
   base commit. The release plugin put a score-7 type on rung 1;
-  this case fails on that shape.
+  this case fails on that shape. A plan that keeps the expansion and the
+  classification as private functions passes too: a private function is fine
+  where it is, so the case measures the placement of helper types only.

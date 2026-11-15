@@ -42,6 +42,12 @@ export function load(): void {
   }
 }
 
+/** Reads VITE_<name> from the build environment. */
+export function readEnv(name: string): string | undefined {
+  const value: unknown = import.meta.env[`VITE_${name}`]
+  return typeof value === 'string' ? value : undefined
+}
+
 function regionOrDefault(): string {
   if (!region) {
     return DEFAULT_REGION

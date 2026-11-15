@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"example.com/go-mini/internal/transport"
@@ -72,6 +73,13 @@ func TestCheckWebhook_ReportsAFailureStatus(t *testing.T) {
 	}
 	if res.Status != http.StatusBadGateway {
 		t.Errorf("Status = %d, want %d", res.Status, http.StatusBadGateway)
+	}
+}
+
+func TestCheckWebhook_RefusesAnUnclosedReference(t *testing.T) {
+	_, err := transport.CheckWebhook(context.Background(), writeConfig(t, "https://hooks.test/${HOOK"), noVariables)
+	if err == nil || !strings.Contains(err.Error(), "unclosed reference") {
+		t.Fatalf("CheckWebhook() error = %v, want an unclosed reference error", err)
 	}
 }
 

@@ -74,3 +74,10 @@ def test_check_webhook_reports_a_failure_status(
     conf.write_text(hook.base)
     with pytest.raises(OSError, match="status 502"):
         check_webhook(conf, lambda _name: None)
+
+
+def test_check_webhook_refuses_an_unclosed_reference(tmp_path: Path) -> None:
+    conf = tmp_path / "webhook.conf"
+    conf.write_text("https://hooks.test/${HOOK")
+    with pytest.raises(ValueError, match="unclosed reference"):
+        check_webhook(conf, lambda _name: None)

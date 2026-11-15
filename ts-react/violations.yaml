@@ -315,11 +315,11 @@
   rule: R7
   questions: [Q4]
   files: [src/services/transport/webhook.ts]
-  anchor: '^function expandEnv\('
-  symbol: 'expandEnv'
+  anchor: '^class EnvTemplate \{'
+  symbol: 'EnvTemplate'
   expect:
     review:   { category: "🔴", fix: "Split the pure leaf out of an I/O package" }
-    refactor: { gone: '^function expandEnv\(', present: 'src/services/transport/*/', scope: transport }
+    refactor: { gone: '^class EnvTemplate \{', present: 'src/services/transport/*/', scope: transport }
 
 - id: CTRL.R4.trivial-private-in-io
   rule: R4
@@ -328,6 +328,24 @@
   anchor: '^function trimSlash\('
   symbol: 'trimSlash'
   expect: { review: { findings: 0, note: "a trivial helper stays private" } }
+
+- id: R7.Q4.private-type-no-io
+  rule: R7
+  questions: [Q4]
+  files: [src/tagfilter/tagFilter.ts]
+  anchor: '^class TagFilter \{'
+  symbol: 'TagFilter'
+  expect:
+    review: { category: "🔴", fix: "Promote to feature sub-package (rung 2)" }
+
+- id: CTRL.R7.juicy-private-function
+  rule: R7
+  control: true
+  files: [src/tagfilter/tagText.ts]
+  anchor: '^function splitTag\('
+  symbol: 'splitTag'
+  precision: finding
+  expect: { review: { findings: 0, note: "a private function stays private, juicy or not" } }
 
 - id: R9.Q4.what-comment-process-heartbeat
   rule: R9
@@ -697,7 +715,7 @@
   files: [src/pages/Heartbeats/heartbeatFeed.ts, src/pages/Heartbeats/heartbeatFeed.test.ts]
   anchor: '_normalizeTags'
   expect:
-    review: { category: "🔴", fix: "Promote to feature sub-package (rung 2)" }
+    review: { category: "🔴", fix: "Delete private-function tests" }
 
 # Go had `internal/common` and `internal/utils` packages; the TypeScript shape
 # of the same smell is a `utils/` directory and a `common/constants.ts`.

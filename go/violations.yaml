@@ -264,11 +264,11 @@
   rule: R7
   questions: [Q4]
   files: [internal/transport/webhook.go]
-  anchor: '^func expandEnv\('
-  symbol: 'expandEnv'
+  anchor: '^type envTemplate struct'
+  symbol: 'envTemplate'
   expect:
     review:   { category: "🔴", fix: "Split the pure leaf out of an I/O package" }
-    refactor: { gone: '^func expandEnv\(', present: 'internal/transport/*/', scope: transport }
+    refactor: { gone: '^type envTemplate struct', present: 'internal/transport/*/', scope: transport }
 
 - id: CTRL.R4.trivial-private-in-io
   rule: R4
@@ -277,6 +277,24 @@
   anchor: '^func trimSlash\('
   symbol: 'trimSlash'
   expect: { review: { findings: 0, note: "a trivial helper stays private" } }
+
+- id: R7.Q4.private-type-no-io
+  rule: R7
+  questions: [Q4]
+  files: [internal/tagfilter/tagfilter.go]
+  anchor: '^type filter struct'
+  symbol: 'filter'
+  expect:
+    review: { category: "🔴", fix: "Promote to feature sub-package (rung 2)" }
+
+- id: CTRL.R7.juicy-private-function
+  rule: R7
+  control: true
+  files: [internal/tagfilter/split.go]
+  anchor: '^func splitTag\('
+  symbol: 'splitTag'
+  precision: finding
+  expect: { review: { findings: 0, note: "a private function stays private, juicy or not" } }
 
 - id: R9.Q4.what-comment-process-heartbeat
   rule: R9
@@ -628,7 +646,7 @@
   files: [internal/services/service_test.go]
   anchor: '^func TestNormalizeTags\('
   expect:
-    review: { category: "🔴", fix: "Promote to feature sub-package (rung 2)" }
+    review: { category: "🔴", fix: "Delete private-function tests" }
 
 - id: R4.Q3.role-named-packages
   rule: R4

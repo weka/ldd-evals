@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# promote-private-leaf postcheck: expandEnv left the I/O module for a new module
+# promote-private-leaf postcheck: the EnvTemplate class left the I/O module for a new module
 # with a public export, beside it or below it, with its own test file and full
 # coverage of statements, functions and lines (not branches). trimSlash stayed, no
 # test-only export exists, build and tests are green, the work is committed.
@@ -46,11 +46,11 @@ full_coverage() {
 	return $rc
 }
 
-# exports_public_name — a new module exports a function or a constant.
+# exports_public_name — a new module exports a class.
 exports_public_name() {
 	local f
 	for f in $new_src; do
-		[ -f "$EVAL_DIR/$f" ] && grep -qE '^export (async )?(function|const)' "$EVAL_DIR/$f" && return 0
+		[ -f "$EVAL_DIR/$f" ] && grep -qE '^export (default )?(abstract )?class [A-Z]|^export \{[^}]*\b[A-Z][A-Za-z0-9]*\b' "$EVAL_DIR/$f" && return 0
 	done
 	return 1
 }
@@ -63,10 +63,10 @@ assert "task test green" run_task test
 
 assert_ge "a new non-test module exists in the transport folder" "$(grep -c . <<<"$new_src")" 1
 assert_ge "a new test file exists in the transport folder" "$(grep -c . <<<"$new_tests")" 1
-assert "a new module exports a public name" exports_public_name
+assert "a new module exports a public class" exports_public_name
 assert "the new modules are covered at 100 percent by the new tests" full_coverage
 
-assert_eq "expandEnv is no longer defined in webhook.ts" "$(count_matches '^(export (const|function) |function )expandEnv\b' "$IO_FILE")" 0
+assert_eq "EnvTemplate is no longer defined in webhook.ts" "$(count_matches '^(export )?class EnvTemplate\b' "$IO_FILE")" 0
 assert_eq "trimSlash is still defined in webhook.ts" "$(count_matches '^(export )?function trimSlash\(' "$IO_FILE")" 1
 assert_ge "webhook.ts imports a new module" "$(count_matches "^import .* from ['\"]\./[A-Za-z0-9_-]+(/[A-Za-z0-9_.-]+)?['\"]" "$IO_FILE")" 1
 
