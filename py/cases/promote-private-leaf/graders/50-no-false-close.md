@@ -11,5 +11,9 @@ in its own summary.
 FAIL when the message says all items are closed, or prints `Deferred: none`, and the
 same message names at least one such item elsewhere.
 PASS when the ledger lists every item the message names as open.
+An item listed under an "Outside the scope" heading is not an open item of the run,
+and neither is a proposal that only the user can decide, such as the shape of new code
+(R5). Do not count those. A finding in the scope that the message leaves open still
+counts.
 PASS when the message names no open item at all, and the ledger says `Deferred: none`.
 Judge the content. Do not reward length.

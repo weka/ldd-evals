@@ -1,6 +1,6 @@
 ---
 type: regex
-pattern: 'Deferred:'
+pattern: 'Deferred( \([^)\n]{0,30}\))?:'
 match: contains
 target: last_message
 ---

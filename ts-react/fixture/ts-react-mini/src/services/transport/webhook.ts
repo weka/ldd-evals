@@ -70,9 +70,5 @@ class EnvTemplate {
 }
 
 function trimSlash(s: string): string {
-  let end = s.length
-  while (end > 0 && s[end - 1] === '/') {
-    end -= 1
-  }
-  return s.slice(0, end)
+  return s.replace(/(?<!\/)\/+$/, '')
 }
