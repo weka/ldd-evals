@@ -382,9 +382,9 @@ last_message_contains() {
 
 # ── pinned tools ─────────────────────────────────────────────────────────────
 
-# The shared folder for pinned Go tools. go/scaffold/pinned-tools.sh puts the
-# fixture's golangci-lint here too.
-LDD_GO_TOOLS="${TMPDIR:-/tmp}/ldd-evals-go-tools"
+# The per-user folder for pinned Go tools. go/scaffold/pinned-tools.sh puts
+# the fixture's golangci-lint here too.
+LDD_GO_TOOLS="${XDG_CACHE_HOME:-$HOME/.cache}/ldd-evals/go-tools"
 GREMLINS_VERSION=v0.6.0
 
 # gremlins_bin — prints the path of the pinned gremlins. Installs it into
@@ -393,7 +393,7 @@ GREMLINS_VERSION=v0.6.0
 gremlins_bin() {
 	local bin="$LDD_GO_TOOLS/gremlins-$GREMLINS_VERSION" tmp
 	if [[ ! -x "$bin" ]]; then
-		mkdir -p "$LDD_GO_TOOLS"
+		mkdir -p -m 700 "$LDD_GO_TOOLS"
 		tmp=$(mktemp -d "$LDD_GO_TOOLS/.install.XXXXXX") || return 1
 		GOBIN="$tmp" go install "github.com/go-gremlins/gremlins/cmd/gremlins@$GREMLINS_VERSION" >/dev/null 2>&1 &&
 			mv "$tmp/gremlins" "$bin"

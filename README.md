@@ -54,8 +54,9 @@ Each fixture pins its tool versions. The PATH supplies only the runtimes:
 - Go: `go`, `curl`, `task` and `jq`. The go-mini Taskfile pins golangci-lint v2.11.4.
   The `lint` task runs it on the Go toolchain go1.26.10, because v2.11.4 cannot read
   the packages of Go 1.27. The scaffold installs golangci-lint once into
-  `$TMPDIR/ldd-evals-go-tools` and puts a hard link in each scaffold's `.bin/`. The
-  gremlins postcheck installs gremlins v0.6.0 once into the same folder.
+  `~/.cache/ldd-evals/go-tools` (or under `$XDG_CACHE_HOME`) and copies it into each
+  scaffold's `.bin/`. The gremlins postcheck installs gremlins v0.6.0 once into the
+  same folder.
 - Python: `python`, `uvx`, `task` and `jq`. The py-mini Taskfile and the postchecks run
   ruff, mypy and pytest through `uvx` at the versions the Taskfile pins.
 - TypeScript + React: `node` 22, `npm`, `task` and `jq`. `package-lock.json` pins the tools.
