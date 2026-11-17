@@ -1,5 +1,13 @@
 version: '3'
 
+vars:
+  GOLANGCI_LINT_VERSION: v2.11.4
+  # golangci-lint v2.11.4 cannot read the packages of Go 1.27 or later.
+  # The lint tasks run on this Go toolchain. The go command downloads it once.
+  LINT_GOTOOLCHAIN: go1.26.10
+  BIN_DIR: '{{.BIN_DIR | default (printf "%s/.bin" .ROOT_DIR)}}'
+  GOLANGCI_LINT: '{{.BIN_DIR}}/golangci-lint-{{.GOLANGCI_LINT_VERSION}}'
+
 tasks:
   build:
     desc: Compile every package and the svc binary
@@ -17,12 +25,31 @@ tasks:
     cmds:
       - go test -race ./...
 
+  install-golangci-lint:
+    internal: true
+    desc: Install the pinned golangci-lint into BIN_DIR once
+    cmds:
+      - mkdir -p {{.BIN_DIR | shellQuote}}
+      - |
+        tmp=$(mktemp -d {{.BIN_DIR | shellQuote}}/.install.XXXXXX)
+        trap 'rm -rf "$tmp"' EXIT
+        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "$tmp" {{.GOLANGCI_LINT_VERSION}}
+        mv "$tmp/golangci-lint" {{.GOLANGCI_LINT | shellQuote}}
+    status:
+      - test -x {{.GOLANGCI_LINT | shellQuote}}
+
   lint:
     desc: Run golangci-lint
+    deps: [install-golangci-lint]
+    env:
+      GOTOOLCHAIN: '{{.LINT_GOTOOLCHAIN}}'
     cmds:
-      - golangci-lint run ./...
+      - '{{.GOLANGCI_LINT | shellQuote}} run ./...'
 
   lintwithfix:
     desc: Run golangci-lint and apply automatic fixes
+    deps: [install-golangci-lint]
+    env:
+      GOTOOLCHAIN: '{{.LINT_GOTOOLCHAIN}}'
     cmds:
-      - golangci-lint run --fix ./...
+      - '{{.GOLANGCI_LINT | shellQuote}} run --fix ./...'

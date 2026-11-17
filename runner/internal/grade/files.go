@@ -16,8 +16,9 @@ import (
 var ErrBadGlob = errors.New("grade: file_exists path must be a non-empty relative glob")
 
 // countMatchingLines implements `target: files`: the number of lines matching
-// re across every regular file under root, skipping .git and node_modules (an
-// installed dependency tree is never the agent's work).
+// re across every regular file under root, skipping .git, node_modules and
+// .bin. An installed dependency tree and a pinned tool binary are never the
+// agent's work.
 func countMatchingLines(root string, re *regexp.Regexp) (int, error) {
 	total := 0
 	walk := func(path string, d fs.DirEntry, err error) error {
@@ -41,10 +42,12 @@ func countMatchingLines(root string, re *regexp.Regexp) (int, error) {
 }
 
 func skipGit(d fs.DirEntry) error {
-	if d.Name() == ".git" || d.Name() == "node_modules" {
+	switch d.Name() {
+	case ".git", "node_modules", ".bin":
 		return filepath.SkipDir
+	default:
+		return nil
 	}
-	return nil
 }
 
 func countLinesInFile(path string, re *regexp.Regexp) (int, error) {

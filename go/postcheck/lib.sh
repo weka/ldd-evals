@@ -328,12 +328,11 @@ run_blackbox() {
 
 # ── stage 4a: workflow cases (quickfix / prepare / wire-repo-brain) ──────────
 
-# lint_issue_count — number of issues `golangci-lint run ./...` reports on the
-# tree (0 when green). Informational for the quickfix case: escalations may
-# legitimately still be pending when the run ends.
+# lint_issue_count — number of issues `task lint` (the fixture's pinned
+# golangci-lint) reports on the tree (0 when green). Informational for the
+# quickfix case: escalations may legitimately still be pending when the run ends.
 lint_issue_count() {
-	(cd "$EVAL_DIR" && golangci-lint run --output.text.path=stdout \
-		--output.text.print-issued-lines=false --output.text.colors=false ./... 2>&1 || true) |
+	(cd "$EVAL_DIR" && task lint 2>&1 || true) |
 		grep -cE '^[^ ]+\.go:[0-9]+:[0-9]+: '
 }
 
@@ -379,4 +378,26 @@ file_unchanged_since_base() {
 last_message_contains() {
 	[[ -f "$EVAL_OUT/trace.jsonl" ]] || return 1
 	grep '"type":"result"' "$EVAL_OUT/trace.jsonl" | grep -qE -- "$1"
+}
+
+# ── pinned tools ─────────────────────────────────────────────────────────────
+
+# The shared folder for pinned Go tools. go/scaffold/pinned-tools.sh puts the
+# fixture's golangci-lint here too.
+LDD_GO_TOOLS="${TMPDIR:-/tmp}/ldd-evals-go-tools"
+GREMLINS_VERSION=v0.6.0
+
+# gremlins_bin — prints the path of the pinned gremlins. Installs it into
+# LDD_GO_TOOLS once; prints nothing when the install fails. Not `go run
+# pkg@version`: run that way, gremlins times every mutant out.
+gremlins_bin() {
+	local bin="$LDD_GO_TOOLS/gremlins-$GREMLINS_VERSION" tmp
+	if [[ ! -x "$bin" ]]; then
+		mkdir -p "$LDD_GO_TOOLS"
+		tmp=$(mktemp -d "$LDD_GO_TOOLS/.install.XXXXXX") || return 1
+		GOBIN="$tmp" go install "github.com/go-gremlins/gremlins/cmd/gremlins@$GREMLINS_VERSION" >/dev/null 2>&1 &&
+			mv "$tmp/gremlins" "$bin"
+		rm -rf "$tmp"
+	fi
+	[[ -x "$bin" ]] && echo "$bin"
 }

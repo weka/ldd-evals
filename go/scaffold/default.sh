@@ -10,11 +10,14 @@ set -euo pipefail
 dest="${1:?usage: default.sh <dest-dir>}"
 here=$(cd "$(dirname "$0")" && pwd)
 fixture="$here/../fixture/go-mini"
+. "$here/pinned-tools.sh"
 
 mkdir -p "$dest"
 cp -R "$fixture/." "$dest/"
 cd "$dest"
+rm -rf .bin
 git init -q
 git -c user.name=fixture -c user.email=fixture@example.com add -A
 git -c user.name=fixture -c user.email=fixture@example.com commit -q -m "go-mini: initial import"
+seed_pinned_tools "$dest"
 echo "scaffolded go-mini at $dest ($(git rev-parse --short HEAD))"

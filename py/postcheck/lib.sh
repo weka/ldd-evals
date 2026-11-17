@@ -30,6 +30,15 @@ export LDD_POSTCHECK_DIR
 COMPLEXIPY_PKG="complexipy==8.0.1"
 RADON_PKG="radon==6.0.1"
 
+# Pinned ruff, mypy and pytest, read from the fixture's Taskfile, so a
+# postcheck runs the same tools as `task lint` and `task test`. uvx installs
+# each one once into the uv cache.
+_fixture_pin() { sed -n "s/^  $1: *//p" "$LDD_POSTCHECK_DIR/../fixture/py-mini/Taskfile.yaml"; }
+RUFF_PKG="ruff==$(_fixture_pin RUFF_VERSION)"
+MYPY_PKG="mypy==$(_fixture_pin MYPY_VERSION)"
+PYTEST_PKG="pytest==$(_fixture_pin PYTEST_VERSION)"
+PYTEST_COV_PKG="pytest-cov==7.1.0"
+
 _pc_failures=0
 
 # ── assertions ───────────────────────────────────────────────────────────────
@@ -331,7 +340,7 @@ max_pkgs_touched_per_commit() {
 run_blackbox() {
 	local dir="$LDD_POSTCHECK_DIR/heartbeat-blackbox" out rc=0
 	echo "== black-box suite: starts python -m svc from the tree, replays the recorded heartbeats =="
-	out=$(cd "$dir" && EVAL_DIR="$EVAL_DIR" pytest -q -rA -p no:cacheprovider test_blackbox.py 2>&1) || rc=$?
+	out=$(cd "$dir" && EVAL_DIR="$EVAL_DIR" uvx -q --from "$PYTEST_PKG" pytest -q -rA -p no:cacheprovider test_blackbox.py 2>&1) || rc=$?
 	if ((rc != 0)); then
 		echo "$out"
 		echo "black-box: FAIL (exit $rc) — the HTTP behavior of POST /heartbeat changed"
@@ -348,13 +357,13 @@ run_blackbox() {
 
 # ── stage 4a: workflow cases (quickfix / prepare / wire-repo-brain) ──────────
 
-# lint_issue_count — number of issues `ruff check` and `mypy` report on the
+# lint_issue_count — number of issues the pinned `ruff check` and `mypy` report on the
 # tree together (0 when green). Informational for the quickfix case:
 # escalations may legitimately still be pending when the run ends.
 lint_issue_count() {
 	local ruff_n mypy_n
-	ruff_n=$( (cd "$EVAL_DIR" && ruff check --output-format json . 2>/dev/null || true) | jq 'length' 2>/dev/null)
-	mypy_n=$( (cd "$EVAL_DIR" && mypy 2>/dev/null || true) | grep -cE ': error:' || true)
+	ruff_n=$( (cd "$EVAL_DIR" && uvx -q --from "$RUFF_PKG" ruff check --output-format json . 2>/dev/null || true) | jq 'length' 2>/dev/null)
+	mypy_n=$( (cd "$EVAL_DIR" && uvx -q --from "$MYPY_PKG" --with "$PYTEST_PKG" mypy 2>/dev/null || true) | grep -cE ': error:' || true)
 	echo $(( ${ruff_n:-0} + ${mypy_n:-0} ))
 }
 

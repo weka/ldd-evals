@@ -16,8 +16,8 @@ const (
 	TargetLastMessage Target = "last_message"
 	// TargetTrace searches the raw stream-json text.
 	TargetTrace Target = "trace"
-	// TargetFiles searches every file under the scaffold dir (excluding .git),
-	// counting matching lines.
+	// TargetFiles searches every file under the scaffold dir (excluding .git,
+	// node_modules and .bin), counting matching lines.
 	TargetFiles Target = "files"
 )
 

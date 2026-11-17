@@ -78,9 +78,11 @@ done
 
 # ---------------------------------------------------------------- 4 black-box suite
 blackbox="$evals_dir/postcheck/heartbeat-blackbox"
+# The pinned pytest from the fixture's Taskfile, the same one `task test` runs.
+pytest_pkg="pytest==$(sed -n 's/^  PYTEST_VERSION: *//p' "$evals_dir/fixture/py-mini/Taskfile.yaml")"
 if [[ -f "$blackbox/test_blackbox.py" ]]; then
   bb_rc=0
-  (cd "$blackbox" && EVAL_DIR="$EVAL_DIR" timeout 900 pytest -q -rA -p no:cacheprovider test_blackbox.py) > "$EVAL_OUT/postcheck-blackbox.txt" 2>&1 || bb_rc=$?
+  (cd "$blackbox" && EVAL_DIR="$EVAL_DIR" timeout 900 uvx -q --from "$pytest_pkg" pytest -q -rA -p no:cacheprovider test_blackbox.py) > "$EVAL_OUT/postcheck-blackbox.txt" 2>&1 || bb_rc=$?
   if (( bb_rc != 0 )); then
     fail "heartbeat black-box suite failed (exit $bb_rc) — POST /heartbeat behavior changed (see postcheck-blackbox.txt):"
     grep -E '^(FAILED|E  |line [0-9]+)' "$EVAL_OUT/postcheck-blackbox.txt" | head -n 15 | indent

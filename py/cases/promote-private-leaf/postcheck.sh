@@ -48,7 +48,7 @@ full_coverage() {
 	local out rc=0 args=() f
 	[ -n "$new_src" ] && [ -n "$new_tests" ] || return 1
 	for f in $new_src; do args+=("--cov=$(module_name "$f")"); done
-	out=$(cd "$EVAL_DIR" && uvx -q --from pytest --with pytest-cov pytest -q -p no:cacheprovider \
+	out=$(cd "$EVAL_DIR" && uvx -q --from "$PYTEST_PKG" --with "$PYTEST_COV_PKG" pytest -q -p no:cacheprovider \
 		"${args[@]}" --cov-fail-under=100 $new_tests 2>&1) || rc=$?
 	echo "$out" | tail -15
 	return $rc

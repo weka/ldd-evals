@@ -8,16 +8,15 @@ for lib in "$here/../../postcheck/lib.sh" "$here/../postcheck/lib.sh"; do
   [ -f "$lib" ] && { . "$lib"; break; }
 done
 
-# gremlins is expected on PATH like golangci-lint; installed once when missing.
-# Not `go run pkg@version`: run that way gremlins times every mutant out.
-GREMLINS_PKG="github.com/go-gremlins/gremlins/cmd/gremlins@v0.6.0"
-command -v gremlins >/dev/null 2>&1 || go install "$GREMLINS_PKG" >/dev/null 2>&1
+# The pinned gremlins from the shared tools folder (lib.sh installs it once).
+GREMLINS=$(gremlins_bin)
 
 # lived_in <pkg-dir> — count of LIVED lines gremlins reports for one package;
 # a run that fails or times out counts as "everything lived" so it cannot pass.
 lived_in() {
 	local out
-	out=$(cd "$EVAL_DIR" && gremlins unleash "./$1" 2>&1) || { echo 999; return; }
+	[[ -n "$GREMLINS" ]] || { echo 999; return; }
+	out=$(cd "$EVAL_DIR" && "$GREMLINS" unleash "./$1" 2>&1) || { echo 999; return; }
 	grep -qE 'Timed out: [1-9]' <<<"$out" && { echo 999; return; }
 	grep -cE '^\s*LIVED' <<<"$out" || true
 }
