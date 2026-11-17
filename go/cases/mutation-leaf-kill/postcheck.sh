@@ -55,7 +55,7 @@ bash_commands() {
 		"$EVAL_OUT/trace.jsonl"
 }
 if command -v jq >/dev/null 2>&1; then
-	module_wide=$(bash_commands 2>/dev/null | grep -cE 'gremlins unleash([[:space:]][^|;&#`]*)?[[:space:]]\./\.\.\.')
+	module_wide=$(bash_commands 2>/dev/null | grep -cE 'gremlins unleash([[:space:]][^|;&#`)]*)?[[:space:]]\./\.\.\.')
 else
 	module_wide="jq not on PATH"
 fi
