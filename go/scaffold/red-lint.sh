@@ -26,7 +26,7 @@ find . -name '*.red-lint-bak' -not -path './.git/*' -delete
 git init -q
 git -c user.name=fixture -c user.email=fixture@example.com add -A
 git -c user.name=fixture -c user.email=fixture@example.com commit -q -m "go-mini: initial import (lint directives removed)"
-seed_pinned_tools "$dest"
+seed_pinned_tools "$PWD"
 # grep exits 1 when nothing is left, which is the success case here.
 remaining=$({ grep -rn '//nolint' --include='*.go' . || true; } | wc -l)
 echo "scaffolded go-mini (red-lint) at $dest ($(git rev-parse --short HEAD)); nolint directives remaining: $remaining"

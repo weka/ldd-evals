@@ -19,5 +19,5 @@ rm -rf .bin
 git init -q
 git -c user.name=fixture -c user.email=fixture@example.com add -A
 git -c user.name=fixture -c user.email=fixture@example.com commit -q -m "go-mini: initial import"
-seed_pinned_tools "$dest"
+seed_pinned_tools "$PWD"
 echo "scaffolded go-mini at $dest ($(git rev-parse --short HEAD))"
