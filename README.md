@@ -51,12 +51,14 @@ The agent model is pinned to `MODEL` (default `claude-sonnet-5`) and every run
 carries a cost cap `CAP` in USD.
 
 Each fixture pins its tool versions. The PATH supplies only the runtimes:
-- Go: `go`, `curl`, `task` and `jq`. The go-mini Taskfile pins golangci-lint v2.11.4.
-  The `lint` task runs it on the Go toolchain go1.26.10, because v2.11.4 cannot read
-  the packages of Go 1.27. The scaffold installs golangci-lint once into
-  `~/.cache/ldd-evals/go-tools` (or under `$XDG_CACHE_HOME`) and copies it into each
-  scaffold's `.bin/`. The gremlins postcheck installs gremlins v0.6.0 once into the
-  same folder.
+- Go: `go`, `curl`, `task` and `jq`. Every go-mini task and Go postcheck runs on the Go
+  toolchain go1.26.10, which the go command downloads once. The go-mini Taskfile pins
+  golangci-lint v2.11.4, which cannot read the packages of Go 1.27. The scaffold installs
+  golangci-lint once into `~/.cache/ldd-evals/go-tools` (or under `$XDG_CACHE_HOME`) and
+  copies it into each scaffold's `.bin/`. The gremlins postcheck installs gremlins v0.6.0
+  once into the same folder. go-mini's `.gremlins.yaml` sets the gremlins timeout
+  coefficient to 50: with the default of 3, mutants time out at random on a fast host.
+  The root `task lint` runs the same golangci-lint on the same toolchain over the runner.
 - Python: `uv`, `task` and `jq`. The py-mini Taskfile and the postchecks run Python 3.11,
   ruff, mypy and pytest through `uv` at the versions the Taskfile pins. uv downloads
   Python 3.11 when the host has none.

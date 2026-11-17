@@ -17,6 +17,10 @@ export PATH="$PATH:/root/go/bin:$(go env GOPATH 2>/dev/null || echo /root/go)/bi
 LDD_POSTCHECK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export LDD_POSTCHECK_DIR
 
+# Every go command here runs on the Go toolchain the fixture's Taskfile pins.
+GOTOOLCHAIN=$(sed -n 's/^  GO_TOOLCHAIN: *//p' "$LDD_POSTCHECK_DIR/../fixture/go-mini/Taskfile.yaml")
+export GOTOOLCHAIN
+
 # Pinned complexity tools. Both run via `go run pkg@version`, which ignores the
 # fixture's go.mod, and both IGNORE //nolint directives — unlike golangci-lint,
 # which would hide the planted functions behind their suppressions.
@@ -388,8 +392,7 @@ LDD_GO_TOOLS="${XDG_CACHE_HOME:-$HOME/.cache}/ldd-evals/go-tools"
 GREMLINS_VERSION=v0.6.0
 
 # gremlins_bin — prints the path of the pinned gremlins. Installs it into
-# LDD_GO_TOOLS once; prints nothing when the install fails. Not `go run
-# pkg@version`: run that way, gremlins times every mutant out.
+# LDD_GO_TOOLS once; prints nothing when the install fails.
 gremlins_bin() {
 	local bin="$LDD_GO_TOOLS/gremlins-$GREMLINS_VERSION" tmp
 	if [[ ! -x "$bin" ]]; then

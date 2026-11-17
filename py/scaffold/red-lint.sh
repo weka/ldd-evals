@@ -25,11 +25,14 @@ find . -name __pycache__ -type d -prune -exec rm -rf {} +
 rm -rf .mypy_cache .ruff_cache .pytest_cache
 # Remove trailing `# noqa[: CODES] [# reason]`, `# type: ignore[codes] [# reason]` and
 # `# ty: ignore[rules] [# reason]` from every Python line; the code itself is untouched.
+# `sed -i.red-lint-bak` edits in place with GNU sed and with BSD sed (macOS);
+# the backups are deleted right after.
 find . -name '*.py' -not -path './.git/*' -print0 \
-  | xargs -0 sed -i -E \
+  | xargs -0 sed -i.red-lint-bak -E \
       -e 's@[[:space:]]*# noqa(: [A-Za-z0-9, ]+)?([[:space:]]*# .*)?$@@' \
       -e 's@[[:space:]]*# type: ignore(\[[a-z, -]+\])?([[:space:]]*# .*)?$@@' \
       -e 's@[[:space:]]*# ty: ignore(\[[a-z, -]+\])?([[:space:]]*# .*)?$@@'
+find . -name '*.red-lint-bak' -not -path './.git/*' -delete
 git init -q
 git -c user.name=fixture -c user.email=fixture@example.com add -A
 git -c user.name=fixture -c user.email=fixture@example.com commit -q -m "py-mini: initial import (lint directives removed)"

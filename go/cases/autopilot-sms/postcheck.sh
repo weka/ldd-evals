@@ -35,6 +35,9 @@ cd "$EVAL_DIR" || { echo "FAIL  cannot cd to $EVAL_DIR"; exit 1; }
 
 here=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 evals_dir=$(cd "$here/.." && pwd)
+# Every go command here runs on the Go toolchain the fixture's Taskfile pins.
+GOTOOLCHAIN=$(sed -n 's/^  GO_TOOLCHAIN: *//p' "$evals_dir/fixture/go-mini/Taskfile.yaml")
+export GOTOOLCHAIN
 trace="$EVAL_OUT/trace.jsonl"
 
 failures=0

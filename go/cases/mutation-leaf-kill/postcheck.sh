@@ -13,10 +13,14 @@ GREMLINS=$(gremlins_bin)
 
 # lived_in <pkg-dir> — count of LIVED lines gremlins reports for one package;
 # a run that fails or times out counts as "everything lived" so it cannot pass.
+# gremlins gives each mutant three times the coverage run's duration. On a fast
+# host the mutant's own compile takes longer, so mutants time out at random.
+# The coefficient is the fixture's .gremlins.yaml value, given here as a flag
+# so that an edit to that file cannot change the result.
 lived_in() {
 	local out
 	[[ -n "$GREMLINS" ]] || { echo 999; return; }
-	out=$(cd "$EVAL_DIR" && "$GREMLINS" unleash "./$1" 2>&1) || { echo 999; return; }
+	out=$(cd "$EVAL_DIR" && "$GREMLINS" unleash --timeout-coefficient 50 "./$1" 2>&1) || { echo 999; return; }
 	grep -qE 'Timed out: [1-9]' <<<"$out" && { echo 999; return; }
 	grep -cE '^\s*LIVED' <<<"$out" || true
 }

@@ -18,8 +18,11 @@ cd "$dest"
 rm -rf .bin
 # Remove trailing //nolint[:linters] [// reason] from every Go line; the code
 # itself is untouched. Whole-line directives (rare) are deleted.
+# `sed -i.red-lint-bak` edits in place with GNU sed and with BSD sed (macOS);
+# the backups are deleted right after.
 find . -name '*.go' -not -path './.git/*' -print0 \
-  | xargs -0 sed -i -E -e 's@[[:space:]]*//nolint(:[A-Za-z0-9_,-]+)?([[:space:]]*//.*)?$@@' -e '/^[[:space:]]*\/\/nolint/d'
+  | xargs -0 sed -i.red-lint-bak -E -e 's@[[:space:]]*//nolint(:[A-Za-z0-9_,-]+)?([[:space:]]*//.*)?$@@' -e '/^[[:space:]]*\/\/nolint/d'
+find . -name '*.red-lint-bak' -not -path './.git/*' -delete
 git init -q
 git -c user.name=fixture -c user.email=fixture@example.com add -A
 git -c user.name=fixture -c user.email=fixture@example.com commit -q -m "go-mini: initial import (lint directives removed)"

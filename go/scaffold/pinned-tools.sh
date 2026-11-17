@@ -3,7 +3,7 @@
 #
 # seed_pinned_tools <dest> — puts the fixture's pinned golangci-lint in
 # <dest>/.bin. The fixture's `task lint` installs it once into a per-user
-# folder (and fetches the Go toolchain the lint runs on). Each scaffold gets
+# folder (and fetches the Go toolchain the tasks run on). Each scaffold gets
 # its own copy, a copy-on-write clone where the file system can, so an agent
 # that writes to its .bin cannot change the next run's tool. The fixture's
 # .gitignore keeps .bin out of git. The lint result is not checked here: the
@@ -17,8 +17,8 @@ seed_pinned_tools() {
 	if [[ ! -x "$tools/$tool" ]]; then
 		task --dir "$dest" lint BIN_DIR="$tools" >/dev/null 2>&1 || true
 	fi
-	# Fetch the Go toolchain the lint runs on, also when the binary is cached.
-	GOTOOLCHAIN=$(sed -n 's/^  LINT_GOTOOLCHAIN: *//p' "$dest/Taskfile.yaml") go version >/dev/null 2>&1 || true
+	# Fetch the Go toolchain the tasks run on, also when the binary is cached.
+	GOTOOLCHAIN=$(sed -n 's/^  GO_TOOLCHAIN: *//p' "$dest/Taskfile.yaml") go version >/dev/null 2>&1 || true
 	if [[ ! -x "$tools/$tool" ]]; then
 		echo "scaffold: could not install $tool into $tools" >&2
 		return 1
