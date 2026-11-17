@@ -1,7 +1,7 @@
 ---
 type: tool_used
 tool: Bash
-input_match: 'gremlins unleash \./internal/transport/\w+|ldd-ledger\.sh\\?["'']? +add +mutation-not-run'
+input_match: 'gremlins unleash(\s[^|;&#"\\`)]*)?\s(\./)?internal/transport/\w+|ldd-ledger\.sh\\?["'']? +add +mutation-not-run'
 min: 1
 ---
 # R7 runs the mutation tool over the new leaf package, never over the module.

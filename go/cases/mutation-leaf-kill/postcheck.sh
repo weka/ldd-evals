@@ -48,7 +48,17 @@ for f in internal/pkg/deviceid/deviceid.go internal/models/tenant.go internal/ut
 done
 
 # Package-scoped, as R7 says: gremlins never ran over the module root.
-module_wide=$(grep -c 'gremlins unleash \./\.\.\.' "$EVAL_OUT/trace.jsonl" 2>/dev/null)
+# Only the Bash commands count, so a report that quotes a command does not.
+bash_commands() {
+	jq -r 'select(.type == "assistant") | .message.content[]?
+		| select(.type == "tool_use" and .name == "Bash") | .input.command // empty' \
+		"$EVAL_OUT/trace.jsonl"
+}
+if command -v jq >/dev/null 2>&1; then
+	module_wide=$(bash_commands 2>/dev/null | grep -cE 'gremlins unleash([[:space:]][^|;&#`)]*)?[[:space:]]\./\.\.\.')
+else
+	module_wide="jq not on PATH"
+fi
 assert_eq "no module-wide mutation run (gremlins unleash ./... in the trace)" "${module_wide:-0}" 0
 
 assert_eq "no //nolint added to the three packages" "$(nolint_count HEAD)" "$(nolint_count "$(base_commit)")"
