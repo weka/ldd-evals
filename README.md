@@ -57,8 +57,9 @@ Each fixture pins its tool versions. The PATH supplies only the runtimes:
   `~/.cache/ldd-evals/go-tools` (or under `$XDG_CACHE_HOME`) and copies it into each
   scaffold's `.bin/`. The gremlins postcheck installs gremlins v0.6.0 once into the
   same folder.
-- Python: `python`, `uvx`, `task` and `jq`. The py-mini Taskfile and the postchecks run
-  ruff, mypy and pytest through `uvx` at the versions the Taskfile pins.
+- Python: `uv`, `task` and `jq`. The py-mini Taskfile and the postchecks run Python 3.11,
+  ruff, mypy and pytest through `uv` at the versions the Taskfile pins. uv downloads
+  Python 3.11 when the host has none.
 - TypeScript + React: `node` 22, `npm`, `task` and `jq`. `package-lock.json` pins the tools.
   The scaffold installs `node_modules` from a shared npm cache under `$TMPDIR`.
 

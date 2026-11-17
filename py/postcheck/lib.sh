@@ -30,10 +30,11 @@ export LDD_POSTCHECK_DIR
 COMPLEXIPY_PKG="complexipy==8.0.1"
 RADON_PKG="radon==6.0.1"
 
-# Pinned ruff, mypy and pytest, read from the fixture's Taskfile, so a
+# Pinned Python, ruff, mypy and pytest, read from the fixture's Taskfile, so a
 # postcheck runs the same tools as `task lint` and `task test`. uvx installs
 # each one once into the uv cache.
 _fixture_pin() { sed -n "s/^  $1: *//p" "$LDD_POSTCHECK_DIR/../fixture/py-mini/Taskfile.yaml"; }
+PYTHON_PIN="$(_fixture_pin PYTHON_VERSION | tr -d "'")"
 RUFF_PKG="ruff==$(_fixture_pin RUFF_VERSION)"
 MYPY_PKG="mypy==$(_fixture_pin MYPY_VERSION)"
 PYTEST_PKG="pytest==$(_fixture_pin PYTEST_VERSION)"
@@ -340,7 +341,7 @@ max_pkgs_touched_per_commit() {
 run_blackbox() {
 	local dir="$LDD_POSTCHECK_DIR/heartbeat-blackbox" out rc=0
 	echo "== black-box suite: starts python -m svc from the tree, replays the recorded heartbeats =="
-	out=$(cd "$dir" && EVAL_DIR="$EVAL_DIR" uvx -q --from "$PYTEST_PKG" pytest -q -rA -p no:cacheprovider test_blackbox.py 2>&1) || rc=$?
+	out=$(cd "$dir" && EVAL_DIR="$EVAL_DIR" uvx -q --python "$PYTHON_PIN" --from "$PYTEST_PKG" pytest -q -rA -p no:cacheprovider test_blackbox.py 2>&1) || rc=$?
 	if ((rc != 0)); then
 		echo "$out"
 		echo "black-box: FAIL (exit $rc) — the HTTP behavior of POST /heartbeat changed"
@@ -363,7 +364,7 @@ run_blackbox() {
 lint_issue_count() {
 	local ruff_n mypy_n
 	ruff_n=$( (cd "$EVAL_DIR" && uvx -q --from "$RUFF_PKG" ruff check --output-format json . 2>/dev/null || true) | jq 'length' 2>/dev/null)
-	mypy_n=$( (cd "$EVAL_DIR" && uvx -q --from "$MYPY_PKG" --with "$PYTEST_PKG" mypy 2>/dev/null || true) | grep -cE ': error:' || true)
+	mypy_n=$( (cd "$EVAL_DIR" && uvx -q --python "$PYTHON_PIN" --from "$MYPY_PKG" --with "$PYTEST_PKG" mypy 2>/dev/null || true) | grep -cE ': error:' || true)
 	echo $(( ${ruff_n:-0} + ${mypy_n:-0} ))
 }
 
