@@ -10,7 +10,7 @@
 # red-lint scaffold is red on purpose.
 
 seed_pinned_tools() {
-	local dest=$1 tools="${XDG_CACHE_HOME:-$HOME/.cache}/ldd-evals/go-tools" version tool
+	local dest=$1 tools="${XDG_CACHE_HOME:-$HOME/.cache}/ldd-evals/go-tools" version tool toolchain
 	version=$(sed -n 's/^  GOLANGCI_LINT_VERSION: *//p' "$dest/Taskfile.yaml")
 	tool="golangci-lint-$version"
 	mkdir -p -m 700 "$tools" && mkdir -p "$dest/.bin"
@@ -18,7 +18,12 @@ seed_pinned_tools() {
 		task --dir "$dest" lint BIN_DIR="$tools" >/dev/null 2>&1 || true
 	fi
 	# Fetch the Go toolchain the tasks run on, also when the binary is cached.
-	GOTOOLCHAIN=$(sed -n 's/^  GO_TOOLCHAIN: *//p' "$dest/Taskfile.yaml") go version >/dev/null 2>&1 || true
+	# Without it no task can run, so the scaffold fails before the agent starts.
+	toolchain=$(sed -n 's/^  GO_TOOLCHAIN: *//p' "$dest/Taskfile.yaml")
+	if ! GOTOOLCHAIN="$toolchain" go version >/dev/null 2>&1; then
+		echo "scaffold: could not fetch the Go toolchain $toolchain" >&2
+		return 1
+	fi
 	if [[ ! -x "$tools/$tool" ]]; then
 		echo "scaffold: could not install $tool into $tools" >&2
 		return 1
