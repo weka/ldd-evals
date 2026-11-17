@@ -48,7 +48,7 @@ TypeScript + React suite `../linter-driven-development/ts-react-linter-driven-de
 into `<plugin>/evals/`, a path the plugin repository ignores, because the
 built-in `claude plugin eval` gate expects cases below the plugin directory.
 The agent model is pinned to `MODEL` (default `claude-sonnet-5`) and every run
-carries a cost cap `CAP` in USD. The Python suite's postchecks need `ruff`,
+carries a cost cap `CAP` in USD. The Go suite's postchecks need `jq` on PATH beside `task`. The Python suite's postchecks need `ruff`,
 `mypy` (with pytest importable), `pytest`, `uvx` and `jq` on PATH beside `task`. The
 TypeScript + React suite's scaffold and postchecks need `node` 22, `npm` and `jq`; its
 scaffold installs the fixture's `node_modules` from a shared npm cache under `$TMPDIR`.
