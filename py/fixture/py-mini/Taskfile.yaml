@@ -1,26 +1,39 @@
 version: '3'
 
+vars:
+  PYTHON_VERSION: '3.11'
+  RUFF_VERSION: 0.15.22
+  MYPY_VERSION: 2.4.1
+  PYTEST_VERSION: 9.2.0
+  # uv supplies the pinned Python (it downloads it when the host has none).
+  # uvx installs each pinned tool once into the uv cache and reuses it.
+  # mypy checks the tests too, so its environment holds pytest.
+  PYTHON: uv run --quiet --no-project --python {{.PYTHON_VERSION}} python
+  RUFF: uvx --quiet ruff@{{.RUFF_VERSION}}
+  MYPY: uvx --quiet --python {{.PYTHON_VERSION}} --from mypy=={{.MYPY_VERSION}} --with pytest=={{.PYTEST_VERSION}} mypy
+  PYTEST: uvx --quiet --python {{.PYTHON_VERSION}} --from pytest=={{.PYTEST_VERSION}} pytest
+
 tasks:
   build:
     desc: Byte-compile every module and type-check the tree
     cmds:
-      - python -m compileall -q internal svc
-      - mypy
+      - '{{.PYTHON}} -m compileall -q internal svc'
+      - '{{.MYPY}}'
 
   test:
     desc: Run the unit tests
     cmds:
-      - pytest -q
+      - '{{.PYTEST}} -q'
 
   lint:
     desc: Run ruff (lint and format) and mypy
     cmds:
-      - ruff check .
-      - ruff format --check .
-      - mypy
+      - '{{.RUFF}} check .'
+      - '{{.RUFF}} format --check .'
+      - '{{.MYPY}}'
 
   lintwithfix:
     desc: Run ruff and apply automatic fixes, then format
     cmds:
-      - ruff check --fix .
-      - ruff format .
+      - '{{.RUFF}} check --fix .'
+      - '{{.RUFF}} format .'

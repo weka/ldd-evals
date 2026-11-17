@@ -17,6 +17,11 @@ vars:
   GO_PLUGIN: '{{.PLUGIN | default (printf "%s/../linter-driven-development/go-linter-driven-development" .ROOT_DIR)}}'
   # Agent model. Always pinned on the command line so a baseline names it.
   MODEL: '{{.MODEL | default "claude-sonnet-5"}}'
+  # The runner's linter, pinned like the go-mini fixture's: the same version on
+  # the same Go toolchain, installed once into .bin/.
+  GOLANGCI_LINT_VERSION: v2.11.4
+  LINT_GO_TOOLCHAIN: go1.26.10
+  GOLANGCI_LINT: '{{.ROOT_DIR}}/.bin/golangci-lint-{{.GOLANGCI_LINT_VERSION}}'
 
 tasks:
   build:
@@ -35,10 +40,24 @@ tasks:
     cmds:
       - cd runner && go test ./...
 
+  install-golangci-lint:
+    internal: true
+    desc: Install the pinned golangci-lint into .bin once
+    cmds:
+      - mkdir -p .bin
+      - |
+        tmp=$(mktemp -d .bin/.install.XXXXXX)
+        trap 'rm -rf "$tmp"' EXIT
+        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "$tmp" {{.GOLANGCI_LINT_VERSION}}
+        mv "$tmp/golangci-lint" {{.GOLANGCI_LINT | shellQuote}}
+    status:
+      - test -x {{.GOLANGCI_LINT | shellQuote}}
+
   lint:
     desc: Lint the runner
+    deps: [install-golangci-lint]
     cmds:
-      - cd runner && golangci-lint run ./...
+      - cd runner && GOTOOLCHAIN={{.LINT_GO_TOOLCHAIN}} {{.GOLANGCI_LINT | shellQuote}} run ./...
 
   docs:check:
     desc: Run the Go plugin's documentation conformance gate over this repository

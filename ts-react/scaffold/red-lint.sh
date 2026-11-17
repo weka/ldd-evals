@@ -33,15 +33,19 @@ find . -name '*.tsbuildinfo' -not -path './.git/*' -delete
 # sonarjs/max-lines reports at line 0, before any disable directive, so the
 # god file silences it with that form and nothing else (see violations.yaml,
 # R5.Q1.god-file).
+# `sed -i.red-lint-bak` edits in place with GNU sed and with BSD sed (macOS);
+# the backups are deleted right after. BSD sed has no `\b`, so a word end is
+# written as "a character that is not a word character, or the end of the line".
 find . \( -name '*.ts' -o -name '*.tsx' \) -not -path './.git/*' -not -path './node_modules/*' -print0 \
-  | xargs -0 sed -i -E \
-      -e '\#^[[:space:]]*(\{[[:space:]]*)?//[[:space:]]*eslint-disable-next-line\b.*$#d' \
-      -e '\#^[[:space:]]*(\{[[:space:]]*)?/\*[[:space:]]*eslint-(disable(-next-line)?|enable)\b[^*]*\*/[[:space:]]*(\})?[[:space:]]*$#d' \
+  | xargs -0 sed -i.red-lint-bak -E \
+      -e '\#^[[:space:]]*(\{[[:space:]]*)?//[[:space:]]*eslint-disable-next-line([^[:alnum:]_].*)?$#d' \
+      -e '\#^[[:space:]]*(\{[[:space:]]*)?/\*[[:space:]]*eslint-(disable(-next-line)?|enable)([^[:alnum:]_*][^*]*)?\*/[[:space:]]*(\})?[[:space:]]*$#d' \
       -e '\#^[[:space:]]*/\* eslint #d' \
-      -e '\#^[[:space:]]*//[[:space:]]*eslint-(disable|enable)\b.*$#d' \
-      -e '\#^[[:space:]]*//[[:space:]]*@ts-(expect-error|ignore|nocheck)\b.*$#d' \
-      -e 's@[[:space:]]*//[[:space:]]*eslint-disable-line\b.*$@@' \
-      -e 's@[[:space:]]*/\*[[:space:]]*eslint-disable-line\b[^*]*\*/[[:space:]]*$@@'
+      -e '\#^[[:space:]]*//[[:space:]]*eslint-(disable|enable)([^[:alnum:]_].*)?$#d' \
+      -e '\#^[[:space:]]*//[[:space:]]*@ts-(expect-error|ignore|nocheck)([^[:alnum:]_].*)?$#d' \
+      -e 's@[[:space:]]*//[[:space:]]*eslint-disable-line([^[:alnum:]_].*)?$@@' \
+      -e 's@[[:space:]]*/\*[[:space:]]*eslint-disable-line([^[:alnum:]_*][^*]*)?\*/[[:space:]]*$@@'
+find . -name '*.red-lint-bak' -not -path './.git/*' -delete
 
 git init -q
 git -c user.name=fixture -c user.email=fixture@example.com add -A

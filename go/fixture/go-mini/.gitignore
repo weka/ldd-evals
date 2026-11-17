@@ -1,3 +1,4 @@
 bin/
 devices.json
 *.out
+.bin/

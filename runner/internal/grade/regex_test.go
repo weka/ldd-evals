@@ -174,6 +174,7 @@ func TestRegex_Grade_Files(t *testing.T) {
 		".git/description":              "TODO inside git must be skipped\n",
 		"node_modules/dep/index.js":     "// TODO inside an installed dependency must be skipped\n",
 		"sub/node_modules/dep/index.js": "// TODO at any depth\n",
+		".bin/golangci-lint-v2.11.4":    "// TODO inside a pinned tool binary must be skipped\n",
 		"README.md":                     "no markers\n",
 	})
 	cases := []struct {

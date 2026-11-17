@@ -78,9 +78,17 @@ done
 
 # ---------------------------------------------------------------- 4 black-box suite
 blackbox="$evals_dir/postcheck/heartbeat-blackbox"
+# The pinned Python and pytest from the fixture's Taskfile, the same ones
+# `task test` runs.
+fixture_pin() { sed -n "s/^  $1: *//p" "$evals_dir/fixture/py-mini/Taskfile.yaml" | tr -d "'"; }
+python_pin=$(fixture_pin PYTHON_VERSION)
+pytest_pkg="pytest==$(fixture_pin PYTEST_VERSION)"
+python_bin=$(uv python find "$python_pin" 2>/dev/null) ||
+  { uv python install -q "$python_pin" >/dev/null 2>&1 && python_bin=$(uv python find "$python_pin"); } ||
+  python_bin=python3
 if [[ -f "$blackbox/test_blackbox.py" ]]; then
   bb_rc=0
-  (cd "$blackbox" && EVAL_DIR="$EVAL_DIR" timeout 900 pytest -q -rA -p no:cacheprovider test_blackbox.py) > "$EVAL_OUT/postcheck-blackbox.txt" 2>&1 || bb_rc=$?
+  (cd "$blackbox" && EVAL_DIR="$EVAL_DIR" timeout 900 uvx -q --python "$python_pin" --from "$pytest_pkg" pytest -q -rA -p no:cacheprovider test_blackbox.py) > "$EVAL_OUT/postcheck-blackbox.txt" 2>&1 || bb_rc=$?
   if (( bb_rc != 0 )); then
     fail "heartbeat black-box suite failed (exit $bb_rc) — POST /heartbeat behavior changed (see postcheck-blackbox.txt):"
     grep -E '^(FAILED|E  |line [0-9]+)' "$EVAL_OUT/postcheck-blackbox.txt" | head -n 15 | indent
@@ -95,7 +103,7 @@ fi
 
 # ---------------------------------------------------------------- 5 GET /channels smoke
 free_port() {
-  python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1",0)); print(s.getsockname()[1])'
+  "$python_bin" -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1",0)); print(s.getsockname()[1])'
 }
 # http_get <url> → sets HTTP_CODE, HTTP_CTYPE, HTTP_BODY; returns curl's status
 http_get() {
@@ -109,7 +117,7 @@ if ! command -v curl >/dev/null 2>&1; then
   fail "curl not available — cannot smoke GET /channels"
 else
   port=$(free_port) || port=18080
-  PORT="$port" PYTHONDONTWRITEBYTECODE=1 python3 -m svc --dry-run > "$EVAL_OUT/postcheck-svc.log" 2>&1 &
+  PORT="$port" PYTHONDONTWRITEBYTECODE=1 "$python_bin" -m svc --dry-run > "$EVAL_OUT/postcheck-svc.log" 2>&1 &
   svc_pid=$!
   ready=0
   for _ in $(seq 1 100); do

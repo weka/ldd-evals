@@ -35,7 +35,7 @@ tasks:
       # sources do not name, so a plugin that both suites measure (the generic one)
       # would keep the other suite's graders beside this one's. The README stays.
       - find {{.EVALS_DIR}} -mindepth 1 -maxdepth 1 ! -name README.md -exec rm -rf {} +
-      - rsync -a --delete --exclude=/README.md go/cases/ go/scaffold go/postcheck go/fixture {{.EVALS_DIR}}/
+      - rsync -a --delete --exclude=/README.md --exclude=.bin go/cases/ go/scaffold go/postcheck go/fixture {{.EVALS_DIR}}/
       - bash scripts/set-cmd-prefix.sh {{.EVALS_DIR}} {{.CMD_PREFIX}}
 
   manifest:

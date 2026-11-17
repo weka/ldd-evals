@@ -87,7 +87,7 @@ done
 printf '%-6s %7d entries\n\n' TOTAL "$entries"
 
 # Hint scan over the fixture tree. Comments in Go, whole text in Markdown.
-scan() { grep -rnE --exclude-dir=.git --exclude-dir=bin "$@" "$fixture" 2>/dev/null; }
+scan() { grep -rnE --exclude-dir=.git --exclude-dir=bin --exclude-dir=.bin "$@" "$fixture" 2>/dev/null; }
 hints=$(
   scan 'PLANT'
   scan -i 'violation|falsifying|smell'

@@ -17,6 +17,10 @@ export PATH="$PATH:/root/go/bin:$(go env GOPATH 2>/dev/null || echo /root/go)/bi
 LDD_POSTCHECK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export LDD_POSTCHECK_DIR
 
+# Every go command here runs on the Go toolchain the fixture's Taskfile pins.
+GOTOOLCHAIN=$(sed -n 's/^  GO_TOOLCHAIN: *//p' "$LDD_POSTCHECK_DIR/../fixture/go-mini/Taskfile.yaml")
+export GOTOOLCHAIN
+
 # Pinned complexity tools. Both run via `go run pkg@version`, which ignores the
 # fixture's go.mod, and both IGNORE //nolint directives — unlike golangci-lint,
 # which would hide the planted functions behind their suppressions.
@@ -328,12 +332,11 @@ run_blackbox() {
 
 # ── stage 4a: workflow cases (quickfix / prepare / wire-repo-brain) ──────────
 
-# lint_issue_count — number of issues `golangci-lint run ./...` reports on the
-# tree (0 when green). Informational for the quickfix case: escalations may
-# legitimately still be pending when the run ends.
+# lint_issue_count — number of issues `task lint` (the fixture's pinned
+# golangci-lint) reports on the tree (0 when green). Informational for the
+# quickfix case: escalations may legitimately still be pending when the run ends.
 lint_issue_count() {
-	(cd "$EVAL_DIR" && golangci-lint run --output.text.path=stdout \
-		--output.text.print-issued-lines=false --output.text.colors=false ./... 2>&1 || true) |
+	(cd "$EVAL_DIR" && task lint 2>&1 || true) |
 		grep -cE '^[^ ]+\.go:[0-9]+:[0-9]+: '
 }
 
@@ -379,4 +382,25 @@ file_unchanged_since_base() {
 last_message_contains() {
 	[[ -f "$EVAL_OUT/trace.jsonl" ]] || return 1
 	grep '"type":"result"' "$EVAL_OUT/trace.jsonl" | grep -qE -- "$1"
+}
+
+# ── pinned tools ─────────────────────────────────────────────────────────────
+
+# The per-user folder for pinned Go tools. go/scaffold/pinned-tools.sh puts
+# the fixture's golangci-lint here too.
+LDD_GO_TOOLS="${XDG_CACHE_HOME:-$HOME/.cache}/ldd-evals/go-tools"
+GREMLINS_VERSION=v0.6.0
+
+# gremlins_bin — prints the path of the pinned gremlins. Installs it into
+# LDD_GO_TOOLS once; prints nothing when the install fails.
+gremlins_bin() {
+	local bin="$LDD_GO_TOOLS/gremlins-$GREMLINS_VERSION" tmp
+	if [[ ! -x "$bin" ]]; then
+		mkdir -p -m 700 "$LDD_GO_TOOLS"
+		tmp=$(mktemp -d "$LDD_GO_TOOLS/.install.XXXXXX") || return 1
+		GOBIN="$tmp" go install "github.com/go-gremlins/gremlins/cmd/gremlins@$GREMLINS_VERSION" >/dev/null 2>&1 &&
+			mv "$tmp/gremlins" "$bin"
+		rm -rf "$tmp"
+	fi
+	[[ -x "$bin" ]] && echo "$bin"
 }
