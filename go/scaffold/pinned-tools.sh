@@ -17,6 +17,8 @@ seed_pinned_tools() {
 	if [[ ! -x "$tools/$tool" ]]; then
 		task --dir "$dest" lint BIN_DIR="$tools" >/dev/null 2>&1 || true
 	fi
+	# Fetch the Go toolchain the lint runs on, also when the binary is cached.
+	GOTOOLCHAIN=$(sed -n 's/^  LINT_GOTOOLCHAIN: *//p' "$dest/Taskfile.yaml") go version >/dev/null 2>&1 || true
 	if [[ ! -x "$tools/$tool" ]]; then
 		echo "scaffold: could not install $tool into $tools" >&2
 		return 1

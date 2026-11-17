@@ -41,15 +41,11 @@ tasks:
   lint:
     desc: Run golangci-lint
     deps: [install-golangci-lint]
-    env:
-      GOTOOLCHAIN: '{{.LINT_GOTOOLCHAIN}}'
     cmds:
-      - '{{.GOLANGCI_LINT | shellQuote}} run ./...'
+      - 'GOTOOLCHAIN={{.LINT_GOTOOLCHAIN}} {{.GOLANGCI_LINT | shellQuote}} run ./...'
 
   lintwithfix:
     desc: Run golangci-lint and apply automatic fixes
     deps: [install-golangci-lint]
-    env:
-      GOTOOLCHAIN: '{{.LINT_GOTOOLCHAIN}}'
     cmds:
-      - '{{.GOLANGCI_LINT | shellQuote}} run --fix ./...'
+      - 'GOTOOLCHAIN={{.LINT_GOTOOLCHAIN}} {{.GOLANGCI_LINT | shellQuote}} run --fix ./...'
